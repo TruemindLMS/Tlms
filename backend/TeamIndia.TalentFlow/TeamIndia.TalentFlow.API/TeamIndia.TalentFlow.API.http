@@ -1,0 +1,6 @@
+@TeamIndia.TalentFlow.API_HostAddress = http://localhost:5215
+
+GET {{TeamIndia.TalentFlow.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

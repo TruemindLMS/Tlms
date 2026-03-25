@@ -1,0 +1,131 @@
+
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const Topnav = () => {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const pathname = usePathname();
+
+    const allowedRoutes = ['/', '/blog', '/about'];
+    if (!allowedRoutes.includes(pathname)) return null;
+
+    const navLinks = [
+        { href: '/', label: 'Home' },
+        { href: '/about', label: 'About Us' },
+        { href: '/courses', label: 'Course' },
+        { href: '/blog', label: 'Blog' },
+        { href: '/contact', label: 'Contact Us' },
+    ];
+
+    const isActive = (path: string) => {
+        if (path === '/' && pathname === '/') return true;
+        if (path !== '/' && pathname.startsWith(path)) return true;
+        return false;
+    };
+
+    return (
+        <nav className="bg-white shadow-sm sticky top-0 z-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-16">
+                    {/* Logo */}
+                    <Link href="/" className="text-2xl font-bold text-primary">
+                        LMS
+                    </Link>
+
+                    {/* Desktop Navigation Links */}
+                    <div className="hidden md:flex items-center space-x-8">
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className={`${isActive(link.href)
+                                    ? 'text-primary border-b-2 border-primary'
+                                    : 'text-gray-700 hover:text-primary'
+                                    } transition-colors pb-1`}
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
+                    </div>
+
+                    {/* Auth Buttons */}
+                    <div className="hidden md:flex items-center space-x-4">
+                        <Link
+                            href="/Signin"
+                            className="text-gray-700 hover:text-primary transition-colors"
+                        >
+                            Log in
+                        </Link>
+                        <Link
+                            href="/register"
+                            className="bg-primary text-white px-5 py-2 rounded-full hover:bg-primary-600 transition-colors"
+                        >
+                            Register
+                        </Link>
+                    </div>
+
+                    {/* Mobile Menu Button */}
+                    <button
+                        className="md:hidden text-gray-700"
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="w-6 h-6"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+                {/* Mobile Menu */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden py-4 border-t">
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className={`${isActive(link.href)
+                                    ? 'text-blue-600 bg-blue-50'
+                                    : 'text-gray-700'
+                                    } block px-4 py-2 hover:bg-gray-50 transition-colors`}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
+                        <div className="mt-4 pt-4 border-t flex flex-col space-y-2 px-4">
+                            <Link
+                                href="/Signin"
+                                className="text-gray-700 hover:text-primary transition-colors py-2"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Log in
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="bg-primary text-white px-5 py-2 rounded-full hover:bg-primary-600 transition-colors text-center"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Register
+                            </Link>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </nav>
+    );
+};
+
+export default Topnav;
