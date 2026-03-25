@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TeamIndia.TalentFlow.Application\TeamIndia.TalentFlow.Application.csproj" />
+    <ProjectReference Include="..\TeamIndia.TalentFlow.Infrastructure\TeamIndia.TalentFlow.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Application settings\" />
+    <Folder Include="Middle wares\" />
+    <Folder Include="Configurations\" />
+  </ItemGroup>
+
+</Project>

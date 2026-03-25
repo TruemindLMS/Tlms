@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="TeamIndia.TalentFlow.API/TeamIndia.TalentFlow.API.csproj" />
+  <Project Path="TeamIndia.TalentFlow.Application/TeamIndia.TalentFlow.Application.csproj" />
+  <Project Path="TeamIndia.TalentFlow.Domain/TeamIndia.TalentFlow.Domain.csproj" />
+  <Project Path="TeamIndia.TalentFlow.Infrastructure/TeamIndia.TalentFlow.Infrastructure.csproj" />
+</Solution>

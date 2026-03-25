@@ -1,0 +1,60 @@
+# .gitignore for .NET projects
+# Generated with recommended entries
+
+# Build artifacts
+bin/
+obj/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+.packages/
+.nuget/packages/
+
+# Rider
+.idea/
+
+# Logs
+*.log
+TestResults/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# dotnet watch
+.dotnetwatch/
+
+# Temporary files
+*.tmp
+*.temp
+
+# coverage
+coverage.opencover.xml
+
+# JetBrains Rider
+.idea/
+
+# Ignore publish output
+publish/
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# SQLite
+*.db
+
+# Ignore user secrets file
+secrets.json
+
+# DON'T ignore launchSettings.json (development convenience)
+# If you want to ignore it, uncomment the following line
+# TeamIndia.TalentFlow.API/Properties/launchSettings.json
