@@ -1,4 +1,5 @@
 
+import Dashboard from "@/components/dashboard/page"
 import About from "@/components/signin/onboarding/aboutus"
 import Courses from "@/components/signin/onboarding/course"
 import Hero from "@/components/signin/onboarding/hero"
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main>
+      <Dashboard />
       <Hero />
       <Courses />
       <About />
