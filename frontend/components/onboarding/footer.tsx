@@ -69,11 +69,15 @@ const Footer = () => {
 
                     {/* Brand Section */}
                     <div className="space-y-4">
+                        {/* Logo */}
                         <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-primary-500 rounded-xl flex items-center justify-center">
-                                <span className="text-white font-bold text-xl">T</span>
-                            </div>
-                            <h1 className="font-bold text-2xl text-white">Talent Flow</h1>
+                            <img
+                                width={150}
+                                height={42}
+                                src="/img/tlogo.png"
+                                alt="Learning Illustration"
+
+                            />
                         </div>
                         <p className="text-gray-300 text-sm leading-relaxed">
                             Empowering learners worldwide with quality education.

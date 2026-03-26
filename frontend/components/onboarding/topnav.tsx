@@ -14,9 +14,8 @@ const Topnav = () => {
 
     const navLinks = [
         { href: '/', label: 'Home' },
-        { href: '/about', label: 'About Us' },
-        { href: '/courses', label: 'Course' },
-        { href: '/blog', label: 'Blog' },
+        { href: '/about', label: 'Classroom' },
+        { href: '/courses', label: 'Find Courses' },
         { href: '/contact', label: 'Contact Us' },
     ];
 
@@ -32,10 +31,13 @@ const Topnav = () => {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-primary-500 rounded-xl flex items-center justify-center">
-                            <span className="text-white font-bold text-xl">T</span>
-                        </div>
-                        <h1 className="font-bold text-2xl text-primary">Talent Flow</h1>
+                        <img
+                            width={150}
+                            height={42}
+                            src="/img/tlogo.png"
+                            alt="Learning Illustration"
+
+                        />
                     </div>
 
                     {/* Desktop Navigation Links */}
@@ -58,17 +60,21 @@ const Topnav = () => {
                     <div className="hidden md:flex items-center space-x-4">
                         <Link
                             href="/Signin"
-                            className="text-gray-700 hover:text-primary transition-colors"
+                            className="bg-white text-primary  border border-primary   px-8 py-1 rounded-2xl hover:bg-primary-200 transition-colors"
                         >
-                            Log in
+                            Login
                         </Link>
+
                         <Link
-                            href="/register"
-                            className="bg-primary text-white px-5 py-2 rounded-xl hover:bg-primary-600 transition-colors"
+                            href="/Signin"
+                            className="bg-primary text-white px-8 py-1 rounded-2xl hover:bg-primary-600 transition-colors"
                         >
-                            Register
+                            Get started
                         </Link>
                     </div>
+
+
+
 
                     {/* Mobile Menu Button */}
                     <button
@@ -100,7 +106,7 @@ const Topnav = () => {
                                 key={link.href}
                                 href={link.href}
                                 className={`${isActive(link.href)
-                                    ? 'text-blue-600 bg-blue-50'
+                                    ? 'text-primary-600 bg-primary-100'
                                     : 'text-gray-700'
                                     } block px-4 py-2 hover:bg-gray-50 transition-colors`}
                                 onClick={() => setIsMobileMenuOpen(false)}
@@ -109,19 +115,13 @@ const Topnav = () => {
                             </Link>
                         ))}
                         <div className="mt-4 pt-4 border-t flex flex-col space-y-2 px-4">
+
                             <Link
                                 href="/Signin"
-                                className="text-gray-700 hover:text-primary transition-colors py-2"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                Log in
-                            </Link>
-                            <Link
-                                href="/register"
                                 className="bg-primary text-white px-5 py-2 rounded-full hover:bg-primary-600 transition-colors text-center"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
-                                Register
+                                Login
                             </Link>
                         </div>
                     </div>

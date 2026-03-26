@@ -1,3 +1,5 @@
+// components/Hero.tsx
+'use client';
 
 import React from 'react';
 import Image from 'next/image';
@@ -5,95 +7,94 @@ import Link from 'next/link';
 
 const Hero = () => {
     return (
-        <div className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50">
-            {/* Grid Pattern */}
-            <div className="absolute inset-0 opacity-5" style={{
-                backgroundImage: `radial-gradient(circle at 1px 1px, #059669 5px, transparent 0)`,
-                backgroundSize: '40px 40px'
-            }}></div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+        <div
+            className="relative overflow-hidden min-h-full flex items-center"
+            style={{
+                backgroundImage: "url('/img/back.png')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+            }}
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10 w-full">
+                <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
                     {/* Left Content */}
-                    <div className="flex-1 text-center lg:text-left">
-
+                    <div className="flex-1 text-left">
                         {/* Main Heading */}
-                        <h1 className="text-4xl md:text-5xl lg:text-1xl font-bold text-gray-900 leading-tight mb-6">
-                            Build Your Skills on{' '}
-                            <span className="text-primary">the Best Platform</span>
+                        <h1 className="text-5xl md:text-6xl  font-extrabold text-[#111827] leading-[1.1] mb-6 tracking-tight">
+                            Learn. Build.
+                            <br />
+                            Collaborate —
+                            <br />
+                            <span className="text-[#0D6144]">
+                                All in One Platform
+                            </span>
                         </h1>
 
                         {/* Description */}
-                        <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto lg:mx-0 mb-8">
-                            Find Unlimited Courses That Match Your Niche to Hasten the Process
-                            of Developing Your Skills
+                        <p className="text-[#374151] text-lg md:text-xl font-medium max-w-xl mb-10 leading-relaxed opacity-90">
+                            More than just courses—experience a platform where
+                            learning meets teamwork, progress tracking, and real growth.
                         </p>
 
                         {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <div className="flex flex-col sm:flex-row gap-5">
                             <Link
                                 href="/"
-                                className="bg-primary text-white px-8 py-3 rounded-full font-semibold hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl text-center"
+                                className="bg-[#0D6144] text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-[#0A4D36] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-center min-w-[180px]"
                             >
-                                Get Started
+                                Get started
                             </Link>
-                            <button className="flex items-center justify-center gap-2 bg-white text-gray-700 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition-colors border border-gray-200 shadow-md">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="w-5 h-5"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653z"
-                                    />
-                                </svg>
-                                Video Play...
+                            <button className="bg-white text-[#0D6144] px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-all duration-300 border-2 border-[#D1FAE5] shadow-md hover:shadow-lg hover:-translate-y-0.5 min-w-[180px]">
+                                Explore Programs
                             </button>
-                        </div>
-
-                        {/* Active Students Counter */}
-                        <div className="mt-8 flex items-center justify-center lg:justify-start gap-2">
-                            <div className="flex -space-x-2">
-                                {[1, 2, 3, 4].map((i) => (
-                                    <div
-                                        key={i}
-                                        className="w-8 h-8 rounded-full bg-primary-200 border-2 border-white flex items-center justify-center text-xs font-bold text-white"
-                                    >
-                                        {String.fromCharCode(64 + i)}
-                                    </div>
-                                ))}
-                            </div>
-                            <span className="text-gray-700 font-semibold">
-                                100+ Active Students
-                            </span>
                         </div>
                     </div>
 
-                    {/* Right Content - Illustration */}
-                    <div className="flex-1 flex justify-center lg:justify-end">
-                        <div className="relative w-full max-w-md">
-                            <div className="absolute -top-2 -left-2 w-24 h-24 bg-primary rounded-full opacity-50 blur-2xl"></div>
-                            <div className="absolute -bottom-2 -right-2 w-24 h-24 bg-primary rounded-full opacity-50 blur-2xl"></div>
-                            <div className="relative rounded-2xl shadow-2xl overflow-hidden bg-primary p-1">
-                                <div className="bg-white rounded-xl p-1">
-                                    <Image
-                                        src="/img/student.jpg"
-                                        alt="Learning Illustration"
-                                        width={500}
-                                        height={400}
-                                        className="w-full h-auto rounded-2xl"
-                                        priority
-                                    />
-                                </div>
+                    <div className="flex-1 relative flex justify-center lg:justify-end mt-12 lg:mt-0">
+                        <div className="relative w-full max-w-[500px] lg:max-w-[600px] xl:max-w-[700px] 2xl:max-w-[804px]">
+                            {/* Main Image Container */}
+                            <div className="absolute z-10">
+                                <Image
+                                    src="/img/studf.png"
+                                    alt="Smiling woman with books"
+                                    width={804}
+                                    height={944}
+                                    className="w-full h-auto drop-shadow-2xl"
+                                    priority
+                                />
+                            </div>
+                            {/* Main Image Container */}
+                            <div className="relative z-10 -mb-16 md:-mb-24 lg:-mb-32">
+                                <img
+                                    src="/img/stud.png"
+                                    alt="Smiling woman with books"
+                                    className="w-full h-auto drop-shadow-2xl"
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <style>{`
+                h1 {
+                    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                }
+                @keyframes pulse {
+                    0%, 100% {
+                        opacity: 0.15;
+                        transform: scale(1);
+                    }
+                    50% {
+                        opacity: 0.3;
+                        transform: scale(1.05);
+                    }
+                }
+                .animate-pulse {
+                    animation: pulse 3s ease-in-out infinite;
+                }
+            `}</style>
         </div>
     );
 };
