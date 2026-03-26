@@ -38,7 +38,17 @@ export default function Courses() {
     ];
 
     return (
-        <div className="bg-gray-50 min-h-screen py-16">
+        <div className="bg-gradient-to-b from-white to-gray-50 relative min-h-screen py-16">
+            {/* Decorative Elements */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute top-40 -left-20 w-80 h-80 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
+                <div className="absolute bottom-40 -right-20 w-80 h-80 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float animation-delay-2000"></div>
+            </div>
+            {/* Grid Pattern */}
+            <div className="absolute inset-0 opacity-5" style={{
+                backgroundImage: `radial-gradient(circle at 1px 1px, #059669 6px, transparent 0)`,
+                backgroundSize: '40px 40px'
+            }}></div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header Section */}
                 <div className="text-center mb-12">
@@ -121,6 +131,19 @@ export default function Courses() {
                     </Link>
                 </div>
             </div>
+            {/* Custom Animations */}
+            <style >{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+      `}</style>
         </div>
     );
 }

@@ -6,14 +6,15 @@ import Link from 'next/link';
 const Hero = () => {
     return (
         <div className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50">
+            {/* Grid Pattern */}
+            <div className="absolute inset-0 opacity-5" style={{
+                backgroundImage: `radial-gradient(circle at 1px 1px, #059669 5px, transparent 0)`,
+                backgroundSize: '40px 40px'
+            }}></div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
                     {/* Left Content */}
                     <div className="flex-1 text-center lg:text-left">
-                        {/* 30 Days Free Trial Badge */}
-                        <div className="inline-block bg-primary-200 text-primary-600 px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
-                            30 Days free trial
-                        </div>
 
                         {/* Main Heading */}
                         <h1 className="text-4xl md:text-5xl lg:text-1xl font-bold text-gray-900 leading-tight mb-6">

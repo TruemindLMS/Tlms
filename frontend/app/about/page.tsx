@@ -9,7 +9,7 @@ export default function AboutPage() {
                 {/* Header */}
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                        About <span className="text-primary">LMS</span>
+                        About <span className="text-primary">Talent Flow</span>
                     </h1>
                     <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                         Empowering learners worldwide with quality education and skill development
@@ -21,7 +21,7 @@ export default function AboutPage() {
                     <div>
                         <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Mission</h2>
                         <p className="text-gray-600 text-lg mb-4">
-                            At LMS, we believe that education should be accessible to everyone, everywhere.
+                            At Talent Flow, we believe that education should be accessible to everyone, everywhere.
                             Our mission is to provide high-quality, affordable learning opportunities that help
                             individuals build the skills they need to succeed in their careers and personal lives.
                         </p>
@@ -32,7 +32,7 @@ export default function AboutPage() {
                     </div>
                     <div className="relative h-80 rounded-lg overflow-hidden shadow-xl">
                         <Image
-                            src="/img/mission.jpg"
+                            src="/img/stu.jpg"
                             alt="Our Mission"
                             fill
                             className="object-cover"

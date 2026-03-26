@@ -1,10 +1,11 @@
 
-import Dashboard from "@/app/dashboard/page"
-import About from "@/components/onboarding/aboutus"
 import Courses from "@/components/onboarding/course"
+import Footer from "@/components/onboarding/footer"
 import Hero from "@/components/onboarding/hero"
 import Signin from "@/components/signin/signin"
+import Fea from "@/components/onboarding/fe"
 import { Metadata } from "next"
+import InnovationHub from "@/components/onboarding/test"
 
 export const metadata: Metadata = {
   title: "team-india ",
@@ -17,7 +18,9 @@ export default function Home() {
     <main>
       <Hero />
       <Courses />
-      <About />
+      <Fea />
+      <InnovationHub />
+      <Footer />
 
 
     </main>
