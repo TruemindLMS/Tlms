@@ -10,7 +10,7 @@ const Start = () => {
         <div className=" relative  bg-[linear-gradient(to_bottom,#E5E6FF_0%,#FFE3B2_35%,#FFE5FE_65%,#FFCEB3_100%)] overflow-hidden min-h-full flex items-center">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10 w-full">
                 <div className="flex flex-col lg:flex-row items-center  ">
-                    <div className="flex-1 relative flex order-2 md:order-1 justify-center lg:justify-end mt-12 lg:mt-0">
+                    <div className="flex-1 relative flex order-2 ld:order-1 justify-center lg:justify-end mt-12 lg:mt-0">
                         <div className="relative  ">
 
                             {/* Main Image Container */}
@@ -25,7 +25,7 @@ const Start = () => {
                     </div>
 
                     {/* Left Content */}
-                    <div className="flex-1 text-left order-1 md:order-2">
+                    <div className="flex-1 text-left order-1 lg:order-2">
                         {/* Main Heading */}
                         <h1 className="text-5xl md:text-6xl  font-bold text-[#111827] text-center leading-[1.1] mb-6 tracking-tight">
                             Learn. Collaborate.

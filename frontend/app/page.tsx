@@ -7,6 +7,7 @@ import Signin from "@/components/signin/signin"
 import Fea from "@/components/onboarding/fe"
 import { Metadata } from "next"
 import InnovationHub from "@/components/onboarding/test"
+import Every from "@/components/onboarding/every"
 
 export const metadata: Metadata = {
   title: "team-india ",
@@ -19,6 +20,7 @@ export default function Home() {
     <main>
       <Hero />
       <Start />
+      <Every />
       <Courses />
       <Fea />
       <InnovationHub />

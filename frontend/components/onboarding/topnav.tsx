@@ -41,7 +41,7 @@ const Topnav = () => {
                     </div>
 
                     {/* Desktop Navigation Links */}
-                    <div className="hidden md:flex items-center space-x-8">
+                    <div className="hidden lg:flex items-center space-x-8">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.href}
@@ -57,7 +57,7 @@ const Topnav = () => {
                     </div>
 
                     {/* Auth Buttons */}
-                    <div className="hidden md:flex items-center space-x-4">
+                    <div className="hidden lg:flex items-center space-x-4">
                         <Link
                             href="/Signin"
                             className="bg-white text-primary  border border-primary   px-8 py-1 rounded-2xl hover:bg-primary-200 transition-colors"
@@ -67,7 +67,7 @@ const Topnav = () => {
 
                         <Link
                             href="/Signin"
-                            className="bg-primary text-white px-8 py-1 rounded-2xl hover:bg-primary-600 transition-colors"
+                            className="bg-primary-800 text-white px-8 py-1 rounded-2xl hover:bg-primary-600 transition-colors"
                         >
                             Get started
                         </Link>
@@ -78,7 +78,7 @@ const Topnav = () => {
 
                     {/* Mobile Menu Button */}
                     <button
-                        className="md:hidden text-gray-700"
+                        className="lg:hidden text-gray-700"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     >
                         <svg
