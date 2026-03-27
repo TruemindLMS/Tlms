@@ -67,7 +67,7 @@ const Hero = () => {
                             {/* Main Image Container */}
                             <div className="relative z-10 -mb-16 md:-mb-24 lg:-mb-32">
                                 <img
-                                    src="/img/stud.png"
+                                    src="/img/sstud.png"
                                     alt="Smiling woman with books"
                                     className="w-full h-auto drop-shadow-2xl"
                                 />
