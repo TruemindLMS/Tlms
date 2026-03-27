@@ -13,10 +13,10 @@ function SectionCard({
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-800  p-6">
       <div className=" flex items-center gap-2 mb-4">
-        <span className="text-green-700 font-bold">
+        <span className=" font-bold">
           {ICon && <ICon />}
         </span>
-        <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 ">
+        <h3 className="text-lg font-semibold  ">
           {title}
         </h3>
       </div>

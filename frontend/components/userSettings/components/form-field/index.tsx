@@ -16,10 +16,10 @@ const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
   ({ label, error, placeholder, ...props }, ref) => {
     return (
       <div className="flex flex-col gap-2 w-full">
-        <Label className=" text-green-500">{label} </Label>
+        <Label className=" ">{label} </Label>
         <Input
           ref={ref}
-          className=" w-full dark:text-white border border-green-200 h-9 rounded-sm outline-none focus:ring-0 focus:outline-none "
+          className=" w-full dark:text-white border border-slate-200 h-9 rounded-sm outline-none focus:ring-0 focus:outline-none "
           placeholder={placeholder}
           {...props}
         />

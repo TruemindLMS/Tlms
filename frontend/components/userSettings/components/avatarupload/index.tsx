@@ -14,17 +14,16 @@ import { UserProps } from "../..";
 export function AvatarUpload( {user} : {user : UserProps}) {
   return (
     <SectionCard>
-      <div className="flex items-center justify-between gap-5">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
         <div className="flex items-center gap-2">
           <div className="w-14 h-14 rounded-full bg-green-600 flex items-center justify-center ">
             <span className="text-lg font-semibold text-white "> {user.avatarInitials} </span>
           </div>
-
           <div className="flex-1 min-w-0">
-            <p className="text-base font-semibold text-gray-900 truncate">
+            <p className="text-base font-semibold  truncate">
               {user.name}
             </p>
-            <p className="text-sm text-gray-400 truncate">
+            <p className="text-sm  truncate">
               {user.email}
             </p>
           </div>
