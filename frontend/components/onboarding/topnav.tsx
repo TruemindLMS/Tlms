@@ -67,7 +67,7 @@ const Topnav = () => {
 
                         <Link
                             href="/Signin"
-                            className="bg-primary-800 text-white px-8 py-1 rounded-2xl hover:bg-primary-600 transition-colors"
+                            className="bg-primary-500 text-white px-8 py-1 rounded-2xl hover:bg-primary-600 transition-colors"
                         >
                             Get started
                         </Link>
@@ -116,12 +116,21 @@ const Topnav = () => {
                         ))}
                         <div className="mt-4 pt-4 border-t flex flex-col space-y-2 px-4">
 
+
                             <Link
                                 href="/Signin"
-                                className="bg-primary text-white px-5 py-2 rounded-full hover:bg-primary-600 transition-colors text-center"
+                                className="bg-primary-300 text-white px-5 py-2 rounded-full hover:bg-primary-600 transition-colors text-center"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 Login
+                            </Link>
+
+                            <Link
+                                href="/Signin"
+                                className="bg-primary-500 text-white px-5 py-2 rounded-full hover:bg-primary-600 transition-colors text-center"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Register
                             </Link>
                         </div>
                     </div>
