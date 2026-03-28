@@ -126,9 +126,13 @@ export default function Dashboard() {
           md:translate-x-0
           overflow-y-auto`}
         >
-          <h1 className="text-lg text-green-500 font-bold mb-6 ml-10 md:ml-0">
-            LMS
-          </h1>
+          <Image
+            src="/img/tlogo.png" 
+            alt="LMS Logo"
+            width={120}
+            height={40}
+            className="mb-6 ml-10 md:ml-0"
+          />
 
           <div className="space-y-2 pb-10">
             <SidebarItem icon={LayoutDashboard} label="Dashboard" active />
