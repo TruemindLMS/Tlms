@@ -220,7 +220,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 ">
       {/* Main Content */}
-      <main className=" ml-16 md:ml-20 transition-all duration-300">
+      <main className=" ml-16 md:ml-5 lg:ml-20  transition-all duration-300">
         <div className="p-4 md:p-6">
           {/* Welcome */}
           <div className="mb-6">
@@ -287,11 +287,10 @@ export default function Dashboard() {
                   <button
                     key={p}
                     onClick={() => setPeriod(p as "day" | "week" | "month" | "year")}
-                    className={`px-3 py-1 rounded-full text-sm capitalize transition-colors ${
-                      period === p
-                        ? "bg-green-700 text-white hover:bg-green-500"
-                        : "bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-700"
-                    }`}
+                    className={`px-3 py-1 rounded-full text-sm capitalize transition-colors ${period === p
+                      ? "bg-green-700 text-white hover:bg-green-500"
+                      : "bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-700"
+                      }`}
                   >
                     {p}
                   </button>

@@ -72,7 +72,7 @@ const Topnav = () => {
 
                         <Link
                             href="/Signin"
-                            className="bg-primary-500 text-white px-8 py-1 rounded-2xl hover:bg-primary-600 transition-colors"
+                            className="bg-primary-500 text-white px-8 py-2 rounded-2xl hover:bg-primary-600 transition-colors"
                         >
                             Get started
                         </Link>
