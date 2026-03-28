@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Globe, ChevronDown, Bell, Menu, X, User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -14,6 +14,17 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
     const [isLangOpen, setIsLangOpen] = useState(false)
     const [isProfileOpen, setIsProfileOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
+    const [isMobile, setIsMobile] = useState(false)
+
+    // Check if mobile view
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768)
+        }
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     const languages = [
         { code: 'EN', name: 'English (UK)', flag: '🇬🇧' },
@@ -23,28 +34,19 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
         { code: 'JP', name: 'Japanese', flag: '🇯🇵' },
     ]
 
-    const notifications = [
-        { id: 1, title: 'New course available', time: '5 min ago', read: false },
-        { id: 2, title: 'Your certificate is ready', time: '1 hour ago', read: false },
-        { id: 3, title: 'Assignment graded', time: '3 hours ago', read: true },
-    ]
+    // Calculate left spacing based on sidebar state and screen size
+    const getLeftSpacing = () => {
+        if (isMobile) return 'left-0'
+        return sidebarCollapsed ? 'md:left-20' : 'md:left-64'
+    }
 
     return (
-        <nav className="fixed top-0 right-0 left-10 md:left-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-40  transition-all duration-300 ">
-            <div className="flex items-center justify-between px-4 md:px-6 h-16 transition-all duration-300">
-                {/* Left side - Mobile menu button */}
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={onMenuClick}
-                        className="hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    >
-                        <Menu size={20} className="text-gray-600 dark:text-gray-300" />
-                    </button>
-
-                </div>
-
+        <nav
+            className={`fixed top-0 right-0 ${getLeftSpacing()} bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-40 transition-all duration-300`}
+        >
+            <div className="flex items-center justify-between px-4 md:px-6 h-16">
                 {/* Search Bar - Center */}
-                <div className="flex-1 max-w-2xl mx-4">
+                <div className="flex-1 max-w-2xl mx-2 md:mx-4">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
                         <input
@@ -52,18 +54,18 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search Anything"
-                            className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:primary-blue-500 transition-all"
+                            className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                         />
                     </div>
                 </div>
 
                 {/* Right side - Actions */}
-                <div className="flex items-center gap-2 md:gap-4">
+                <div className="flex items-center gap-1 md:gap-4">
                     {/* Language Selector */}
                     <div className="relative">
                         <button
                             onClick={() => setIsLangOpen(!isLangOpen)}
-                            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                         >
                             <Globe size={18} className="text-gray-600 dark:text-gray-300" />
                             <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -110,7 +112,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                     <div className="relative">
                         <button
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            className="flex items-center gap-1 md:gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                         >
                             <Image
                                 src="/img/Profile-img-1.jpg"
