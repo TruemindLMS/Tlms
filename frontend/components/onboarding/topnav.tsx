@@ -64,14 +64,14 @@ const Topnav = () => {
                     {/* Auth Buttons */}
                     <div className="hidden lg:flex items-center space-x-4">
                         <Link
-                            href="/Signin"
+                            href="/signin"
                             className="bg-white text-primary  border border-primary   px-8 py-1 rounded-2xl hover:bg-primary-200 transition-colors"
                         >
                             Login
                         </Link>
 
                         <Link
-                            href="/Signin"
+                            href="/signup"
                             className="bg-primary-500 text-white px-8 py-1 rounded-2xl hover:bg-primary-600 transition-colors"
                         >
                             Get started
@@ -123,7 +123,7 @@ const Topnav = () => {
 
 
                             <Link
-                                href="/Signin"
+                                href="/signin"
                                 className="bg-primary-300 text-white px-5 py-2 rounded-full hover:bg-primary-600 transition-colors text-center"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
@@ -131,7 +131,7 @@ const Topnav = () => {
                             </Link>
 
                             <Link
-                                href="/Signin"
+                                href="/signup"
                                 className="bg-primary-500 text-white px-5 py-2 rounded-full hover:bg-primary-600 transition-colors text-center"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >

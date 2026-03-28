@@ -40,7 +40,7 @@ const Hero = () => {
                         {/* CTA Buttons */}
                         <div className="flex flex-col sm:flex-row gap-5">
                             <Link
-                                href="/"
+                                href="/signup"
                                 className="bg-[#0D6144] text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-[#0A4D36] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-center min-w-[180px]"
                             >
                                 Get started
