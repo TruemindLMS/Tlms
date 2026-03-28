@@ -19,7 +19,7 @@ const Signin = () => {
             {/* Right Sign In Section */}
             <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-8">
                 <div className="w-full max-w-md items-center justify-center">
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2 flex-col space-y-7 text-center">Create Your Trueminds <br /> Account </h1>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2 flex-col space-y-7 text-center">Login Your Trueminds <br /> Account </h1>
                     <p className="text-gray-600 mb-8 text-center flex-col space-y-4 "> Plan, manage, and elevate every moment from first <br /> idea to final applause</p>
 
                     <br />
