@@ -9,13 +9,13 @@ const Topnav = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
 
-    const allowedRoutes = ['/', '/blog', '/about', '/contact'];
+    const allowedRoutes = ['/', '/blog', '/about', '/courses', '/contact'];
     if (!allowedRoutes.includes(pathname)) return null;
 
     const navLinks = [
         { href: '/', label: 'Home' },
         { href: '/about', label: 'Classroom' },
-        { href: '/courses', label: 'Find Courses' },
+        { href: '/courses', label: ' Courses' },
         { href: '/contact', label: 'Contact Us' },
     ];
 
