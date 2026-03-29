@@ -31,7 +31,7 @@ export default function SignupPage() {
             {/* Main Container */}
             <div className="flex flex-col lg:flex-row min-h-screen w-full">
                 {/* Left Side - Brand Section */}
-                <div className="w-full lg:w-[578px] bg-primary-600 min-h-[40vh] lg:min-h-screen flex flex-col  gap-3 md:5 lg:gap-28 p-6 sm:p-8 md:p-10">
+                <div className="w-full lg:w-[578px] relative bg-[#004222] min-h-[40vh] lg:min-h-screen flex flex-col justify-center  gap-3 md:5 lg:gap-28 p-6 sm:p-8 md:p-10">
                     <div className="mb-8 lg:mb-0">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
                             TalentFlow
@@ -97,6 +97,33 @@ export default function SignupPage() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+
+                    <div className="absolute z-10 top-0 right-0 ">
+                        <img
+                            src="/img/gaddd.png"
+                            alt="Smiling woman with books"
+                            className="w-full h-full drop-shadow-2xl"
+                        />
+
+                    </div>
+
+                    <div className="absolute z-10 top-0 right-0 ">
+                        <img
+                            src="/img/gadd.png"
+                            alt="Smiling woman with books"
+                            className="w-full h-full drop-shadow-2xl"
+                        />
+
+                    </div>
+
+                    <div className="absolute z-10 bottom-0 left-0 ">
+                        <img
+                            src="/img/gad.png"
+                            alt="Smiling woman with books"
+                            className="w-[680px] h-56 drop-shadow-2xl"
+                        />
+
                     </div>
                 </div>
 

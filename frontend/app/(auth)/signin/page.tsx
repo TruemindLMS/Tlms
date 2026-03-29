@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image';
 import { Eye, EyeOff, Check, ArrowRight } from 'lucide-react'
 import { Google } from 'iconsax-react'
 
@@ -17,7 +18,7 @@ export default function LoginPage() {
             <div className="flex flex-col lg:flex-row min-h-screen w-full">
 
                 {/* Left Side */}
-                <div className="w-full lg:w-[578px] bg-primary-600 min-h-[40vh] lg:min-h-screen flex flex-col md:justify-between p-6 sm:p-8 md:p-10">
+                <div className="w-full lg:w-[578px] relative bg-[#004222] min-h-[40vh] lg:min-h-screen flex flex-col md:justify-between p-6 sm:p-8 md:p-10">
 
                     {/* Logo */}
                     <div>
@@ -55,8 +56,10 @@ export default function LoginPage() {
                         </div>
                     </div>
 
+
                     {/* Testimonial */}
-                    <div className="hidden lg:block border border-white/30 p-6 rounded-xl bg-white/10 backdrop-blur-sm">
+                    <div className="hidden  lg:block border border-white/30 p-6 rounded-xl bg-white/10 backdrop-blur-sm">
+
                         <p className="text-white/90 italic text-sm mb-4">
                             "TalentFlow transformed how our team approaches growth.
                             The experience is surgical, intuitive, and effective."
@@ -70,6 +73,24 @@ export default function LoginPage() {
                             </p>
                         </div>
                     </div>
+
+                    <div className="absolute z-10 top-0 right-0 ">
+                        <img
+                            src="/img/gaddd.png"
+                            alt="Smiling woman with books"
+                            className="w-full h-full drop-shadow-2xl"
+                        />
+
+                    </div>
+                    <div className="absolute z-10 top-0 right-0 ">
+                        <img
+                            src="/img/gadd.png"
+                            alt="Smiling woman with books"
+                            className="w-full h-full drop-shadow-2xl"
+                        />
+
+                    </div>
+
 
                     {/* Mobile Features */}
                     <div className="md:hidden mt-6 space-y-2">
@@ -87,6 +108,15 @@ export default function LoginPage() {
                                 </span>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="absolute z-10 bottom-0 left-0 ">
+                        <img
+                            src="/img/gad.png"
+                            alt="Smiling woman with books"
+                            className="w-[680px] h-56 drop-shadow-2xl"
+                        />
+
                     </div>
                 </div>
 

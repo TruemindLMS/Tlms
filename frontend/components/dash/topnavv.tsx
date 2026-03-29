@@ -54,7 +54,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search Anything"
-                            className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                         />
                     </div>
                 </div>
@@ -112,16 +112,16 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                     <div className="relative">
                         <button
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            className="flex items-center gap-1 md:gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            className="flex items-center gap-1 md:gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-800 transition-colors"
                         >
                             <Image
                                 src="/img/Profile-img-1.jpg"
                                 width={36}
                                 height={36}
                                 alt="Profile"
-                                className="rounded-full ring-2 ring-gray-200 dark:ring-gray-700"
+                                className="rounded-full ring-2 ring-primary-200 dark:ring-gray-700"
                             />
-                            <ChevronDown size={16} className="hidden sm:inline text-gray-400" />
+                            <ChevronDown size={16} className="hidden sm:inline text-primary-400" />
                         </button>
 
                         {/* Profile Dropdown */}
@@ -149,24 +149,27 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                     </div>
                                     <div className="py-2">
                                         <Link
-                                            href="/dashboard/profile"
-                                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                            href="/dash/userprofile"
+                                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700"
                                         >
                                             <User size={16} />
                                             My Profile
                                         </Link>
                                         <Link
-                                            href="/dashboard/settings"
-                                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                            href="/dash/settings"
+                                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700"
                                         >
                                             <User size={16} />
                                             Settings
                                         </Link>
                                     </div>
                                     <div className="border-t border-gray-200 dark:border-gray-700 py-2">
-                                        <button className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                            Sign Out
-                                        </button>
+                                        <Link
+                                            href="/signin"
+                                            className="flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-gray-700"
+                                        >
+                                            Log out
+                                        </Link>
                                     </div>
                                 </div>
                             </>
