@@ -196,7 +196,7 @@ export default function LoginPage() {
 
                         {/* Google */}
                         <button className="w-full flex items-center justify-center gap-3 px-4 py-2 border rounded-lg hover:bg-gray-100">
-                            <Google size={20} />
+                            <Google color='#283c30ff' size={20} />
                             <span className="text-sm font-medium">
                                 Sign in with Google
                             </span>
