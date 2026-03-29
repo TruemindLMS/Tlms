@@ -292,13 +292,15 @@ export default function SignupPage() {
                                     </label>
 
                                     {/* Sign Up Button */}
-                                    <button
-                                        type="submit"
-                                        className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6"
-                                    >
-                                        Create account
-                                        <ArrowRight size={18} />
-                                    </button>
+                                    <Link href='/onboardingone'>
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6"
+                                        >
+                                            Create account
+                                            <ArrowRight size={18} />
+                                        </button>
+                                    </Link>
                                 </form>
 
                                 {/* Divider */}

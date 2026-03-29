@@ -30,7 +30,7 @@ const Footer = () => {
         { name: 'Terms of Service', href: '/' },
         { name: 'Privacy Policy', href: '/' },
         { name: 'Cookie Policy', href: '/' },
-        { name: 'FAQs', href: '/' },
+        { name: 'FAQs', href: '/faq' },
     ];
 
     const socialLinks = [
