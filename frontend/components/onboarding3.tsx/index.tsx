@@ -52,35 +52,32 @@ const Onboarding3 = () => {
   ];
 
   return (
-    <div className=" mt-26 ">
-      <div className="max-w-5xl w-10/12 mx-auto grid place-content-center">
-        <p className="text-[40px] font-extrabold text-[#1A1F1D]">
-          What are your goals?
-        </p>
-        <p className="text-lg font-normal text-[#404940]">
-          Select the primary outcomes you hope to achieve with TalentFlow.
-        </p>
-        <div className="mt-8 grid gap-3">
-          {goals.map((goal) => {
-            const isSelected = openItems.includes(goal.id);
-            return (
-              <div
-                key={goal.title}
-                onClick={() => toggleItem(goal.id)}
-                className={` px-2 rounded-md cursor-pointer ${openItems.includes(goal.id) ? "bg-primary-500" : ""}`}
-              >
-                <Onboarding3Data
-                  icon={goal.icon}
-                  title={goal.title}
-                  description={goal.description}
-                  isSelected={isSelected}
-                />
-              </div>
-            );
-          })}
-        </div>
+    <div className="max-w-5xl w-10/12 mx-auto grid place-content-center">
+      <p className=" text-3xl md:text-[40px] font-extrabold text-[#1A1F1D] mb-2 ">
+        What are your goals?
+      </p>
+      <p className=" text-base md:text-lg font-normal text-[#404940]">
+        Select the primary outcomes you hope to achieve with TalentFlow.
+      </p>
+      <div className="mt-8 grid gap-3">
+        {goals.map((goal) => {
+          const isSelected = openItems.includes(goal.id);
+          return (
+            <div
+              key={goal.title}
+              onClick={() => toggleItem(goal.id)}
+              className={` p-2 sm:p-4 rounded-md cursor-pointer ${openItems.includes(goal.id) ? "bg-primary-500" : ""}`}
+            >
+              <Onboarding3Data
+                icon={goal.icon}
+                title={goal.title}
+                description={goal.description}
+                isSelected={isSelected}
+              />
+            </div>
+          );
+        })}
       </div>
-      <p className="text-sm font-medium text-center mt-2 text-[#404940] ">Skip for now</p>
     </div>
   );
 };
@@ -99,9 +96,15 @@ const Onboarding3Data = ({
   isSelected: boolean;
 }) => {
   return (
-    <div className="flex items-center gap-4 h-20">
-      <div className={`h-11 w-11 flex items-center justify-center rounded-md bg-[#E7E8E6] ${isSelected ? "bg-white/20" : ""} `}>
-        {Icon && <Icon className={`text-primary-500 ${isSelected ? "text-white" : ""}`} />}
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div
+        className={`h-11 w-11 flex items-center justify-center rounded-md bg-[#E7E8E6] ${isSelected ? "bg-white/20" : ""} `}
+      >
+        {Icon && (
+          <Icon
+            className={`text-primary-500 ${isSelected ? "text-white" : ""}`}
+          />
+        )}
       </div>
       <div>
         <p className={`text-lg font-bold`}>{title}</p>
@@ -131,7 +134,6 @@ const Onboarding3Data = ({
     checked:after:block
   `}
       />
-      {/* <input className="h-6 w-6 border-none rounded-full bg-white cursor-pointer appearance-none" type="checkbox" name="goal" id="goal" /> */}
     </div>
   );
 };

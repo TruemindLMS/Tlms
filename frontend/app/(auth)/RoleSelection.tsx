@@ -8,14 +8,13 @@ interface RoleSelectionProps {
 
 export default function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
   const roles = [
-    { id: "individual", title: "Individual Learner", icon: User },
-    { id: "student", title: "Student", icon: User },
-    { id: "professional", title: "Professional", icon: User },
+    { id: "Intern", title: "Intern", icon: User },
+    { id: "Mentor", title: "Mentor", icon: User },
   ];
 
   return (
     <div className="w-full">
-      <div className="text-center mb-8">
+      <div className="md:text-center text-left mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
           What is your role?
         </h2>

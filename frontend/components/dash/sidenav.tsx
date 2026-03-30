@@ -55,7 +55,7 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
 
     return (
         <aside
-            className={`fixed left-0 top-0 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 z-50 ${collapsed ? 'w-20' : 'w-64'
+            className={`fixed left-0 top-0 h-screen bg-white dark:bg-gray-900 border-r  border-gray-200 dark:border-gray-700 transition-all duration-300 z-50 ${collapsed ? 'w-20' : 'w-64'
                 }`}
         >
             <div className="flex  flex-col h-full">
@@ -79,7 +79,7 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 overflow-y-auto py-6">
+                <nav className="flex-1 py-6">
                     {/* General Section - Header only shown when expanded */}
                     {!collapsed && (
                         <div className="px-3 mb-3">
@@ -138,11 +138,11 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                                         key={item.name}
                                         href={item.href}
                                         className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative ${isActive
-                                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                            ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                                            : 'text-gray-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-primary-800'
                                             } ${collapsed ? 'justify-center' : ''}`}
                                     >
-                                        <Icon size={20} className={isActive ? 'text-blue-600 dark:text-blue-400' : ''} />
+                                        <Icon size={20} className={isActive ? 'text-primary-600 dark:text-primary-400' : ''} />
                                         {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
                                         {collapsed && (
                                             <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
@@ -184,19 +184,20 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                                 </span>
                             )}
                         </button>
-
-                        <button
-                            className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors group relative ${collapsed ? 'justify-center' : ''
-                                }`}
-                        >
-                            <LogOut size={20} />
-                            {!collapsed && <span className="text-sm font-medium">Logout</span>}
-                            {collapsed && (
-                                <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                                    Logout
-                                </span>
-                            )}
-                        </button>
+                        <Link href="/signin">
+                            <button
+                                className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors group relative ${collapsed ? 'justify-center' : ''
+                                    }`}
+                            >
+                                <LogOut size={20} />
+                                {!collapsed && <span className="text-sm font-medium">Logout</span>}
+                                {collapsed && (
+                                    <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                                        Logout
+                                    </span>
+                                )}
+                            </button>
+                        </Link>
                     </div>
                 </div>
             </div>

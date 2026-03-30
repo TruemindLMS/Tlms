@@ -9,7 +9,7 @@ const Topnav = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
 
-    const allowedRoutes = ['/', '/blog', '/about', '/courses', '/contact'];
+    const allowedRoutes = ['/', '/blog', '/about', '/courses', '/contact', '/faq'];
     if (!allowedRoutes.includes(pathname)) return null;
 
     const navLinks = [
