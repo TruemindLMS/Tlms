@@ -199,11 +199,13 @@ export default function LoginPage() {
                                         onChange={(e) => setKeepSignedIn(e.target.checked)}
                                     />
                                     Keep me signed in
+                                    <Link href="/forgotpassword">
+                                        <button type="button" className="text-sm text-primary-600 hover:underline">
+                                            Forgot password?
+                                        </button>
+                                    </Link>
                                 </label>
 
-                                <button type="button" className="text-sm text-primary-600 hover:underline">
-                                    Forgot password?
-                                </button>
                             </div>
 
                             {/* Submit */}
