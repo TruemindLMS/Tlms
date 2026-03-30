@@ -207,12 +207,12 @@ const Fea = () => {
 
                 {/* Featured Courses Section */}
                 <div className="mb-20">
-                    <div className="flex justify-between items-center mb-10">
-                        <div>
-                            <span className="text-sm font-semibold text-emerald-600 tracking-wider uppercase">Popular Courses</span>
+                    <div className="flex flex-col md:flex-row justify-between items-center mb-10">
+                        <div className="text-center md:text-left">
+                            <span className="text-sm font-semibold text-emerald-600  tracking-wider uppercase">Popular Courses</span>
                             <h3 className="text-3xl font-bold text-gray-900 mt-2">Featured Courses</h3>
                         </div>
-                        <Link href="/" className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-semibold group">
+                        <Link href="/" className="flex items-center text-center gap-2 text-emerald-600 hover:text-emerald-700 font-semibold group">
                             View All Courses
                             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                         </Link>

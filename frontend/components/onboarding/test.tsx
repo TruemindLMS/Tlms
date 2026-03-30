@@ -170,7 +170,7 @@ const InnovationHub = () => {
                 {/* CTA */}
                 <div className={`mt-12 text-center transition-all duration-700 delay-400 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                     <Link href="/">
-                        <button className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-all group">
+                        <button className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-all group">
                             Start Your Project
                             <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
                         </button>

@@ -14,9 +14,9 @@ const Topnav = () => {
 
     const navLinks = [
         { href: '/', label: 'Home' },
-        { href: '/about', label: 'Classroom' },
-        { href: '/courses', label: ' Courses' },
-        { href: '/contact', label: 'Contact Us' },
+        { href: '/Explore', label: 'Explore' },
+        { href: '/about', label: 'About Us ' },
+        { href: '/faq', label: 'Help/FAQ' },
     ];
 
     const isActive = (path: string) => {
@@ -54,7 +54,7 @@ const Topnav = () => {
                                 className={`${isActive(link.href)
                                     ? 'text-primary border-b-2 border-primary'
                                     : 'text-gray-700 hover:text-primary'
-                                    } transition-colors pb-1`}
+                                    } transition-colors font-medium pb-1`}
                             >
                                 {link.label}
                             </Link>
