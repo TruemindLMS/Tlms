@@ -18,7 +18,7 @@ const faqs = [
     { q: 'How do I reset my password?', a: 'Click "Forgot Password" on login page or contact support for assistance.' },
     { q: 'Can I get a refund?', a: 'Yes, we offer 30-day money-back guarantee for all courses.' },
     { q: 'Are certificates accredited?', a: 'Yes, all certificates are verifiable and industry-recognized.' },
-    { q: 'How to access offline materials?', a: 'Download our mobile app and save courses for offline viewing.' },
+    { q: 'How to access offline materials?', a: 'Coming soon.' },
 ];
 
 export default function ContactPage() {

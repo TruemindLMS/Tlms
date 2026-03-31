@@ -491,7 +491,7 @@ export default function Home() {
                       </div>
                       <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                         <div>
-                          <span className="text-xl font-bold text-indigo-600">${course.price.toFixed(2)}</span>
+                          <span className="text-xl font-bold text-[#104024]">${course.price.toFixed(2)}</span>
                           {course.origPrice && (
                             <span className="ml-2 text-xs text-gray-400 line-through">${course.origPrice.toFixed(2)}</span>
                           )}
@@ -621,7 +621,7 @@ export default function Home() {
                 <button onClick={() => setIsEnrollModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-300">
                   Cancel
                 </button>
-                <button onClick={handleConfirmEnroll} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-all duration-300 flex items-center gap-2">
+                <button onClick={handleConfirmEnroll} className="px-4 py-2 bg-[#05150c] hover:bg-[#104024] text-white rounded-lg font-semibold transition-all duration-300 flex items-center gap-2">
                   Confirm Enrollment
                   <ArrowRight className="w-4 h-4" />
                 </button>
