@@ -57,12 +57,12 @@ const Onboarding3 = () => {
       <div className="text-center w-full text-sm tracking-widest text-gray-400 mb-6 mt-4">
         STEP 3 OF 4
       </div>
-      <div className="flex flex-1 items-center bg-white justify-center px-4">
+      <div className="flex flex-1 items-center  bg-white justify-center px-4">
         <div className="rounded-2xl w-full max-w-xl p-8">
-          <p className="text-2xl md:text-[30px] font-extrabold text-[#1A1F1D] mb-2">
+          <p className="text-2xl md:text-[30px] md:text-center font-extrabold text-[#1A1F1D] mb-2">
             What are your goals?
           </p>
-          <p className="text-base md:text-lg font-normal text-[#404940]">
+          <p className="text-base md:text-lg md:text-center font-normal text-[#404940]">
             Select the primary outcomes you hope to achieve with TalentFlow.
           </p>
           <div className="mt-8 grid gap-3">
@@ -85,6 +85,17 @@ const Onboarding3 = () => {
               );
             })}
           </div>
+        </div>
+      </div>
+
+      <div className="border-t border-gray-200 justify-between w-full bg-[#f5f5f3] px-8 py-5">
+        <div className="flex items-center justify-center gap-4 max-w-[700px] mx-auto">
+          <button className="flex-1 border-2 border-[#2d6a4f] text-[#2d6a4f] font-semibold text-base py-3 rounded-2xl hover:bg-[#f0f7f3] transition-colors">
+            Back
+          </button>
+          <button className="flex-1 bg-[#2d6a4f] text-white font-semibold text-base py-3 rounded-2xl shadow-md hover:bg-[#245a42] transition-colors">
+            Continue
+          </button>
         </div>
       </div>
     </div>

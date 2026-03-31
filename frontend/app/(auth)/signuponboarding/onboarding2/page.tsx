@@ -103,7 +103,7 @@ export default function RoleSelection() {
         </div>
 
         {/* Content */}
-        <div className="px-5 pt-8 pb-4">
+        <div className="px-5 pt-4 pb-4">
           <h1 className="text-[28px] font-bold text-gray-900 mb-1">What's your role?</h1>
           <p className="text-gray-400 text-sm mb-8">We'll personalise your learning experience.</p>
 
@@ -114,11 +114,10 @@ export default function RoleSelection() {
                 <button
                   key={role.id}
                   onClick={() => setSelected(role.id)}
-                  className={`flex flex-col items-center justify-center gap-2 rounded-2xl py-6 px-3 transition-all duration-150 ${
-                    isSelected
-                      ? "bg-[#2d6a4f] text-white shadow-md"
-                      : "bg-white text-gray-700 border border-gray-100 shadow-sm"
-                  }`}
+                  className={`flex flex-col items-center justify-center gap-2 rounded-2xl py-6 px-3 transition-all duration-150 ${isSelected
+                    ? "bg-[#2d6a4f] text-white shadow-md"
+                    : "bg-white text-gray-700 border border-gray-100 shadow-sm"
+                    }`}
                 >
                   <span className={isSelected ? "text-white" : "text-[#2d6a4f]"}>
                     {role.icon}
@@ -148,9 +147,8 @@ export default function RoleSelection() {
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className={`rounded-full transition-all ${
-                  i === 0 ? "w-3 h-3 bg-[#2d6a4f]" : "w-3 h-3 bg-gray-300"
-                }`}
+                className={`rounded-full transition-all ${i === 0 ? "w-3 h-3 bg-[#2d6a4f]" : "w-3 h-3 bg-gray-300"
+                  }`}
               />
             ))}
           </div>
@@ -192,11 +190,10 @@ export default function RoleSelection() {
                 <button
                   key={role.id}
                   onClick={() => setSelected(role.id)}
-                  className={`flex flex-col items-center justify-center gap-3 rounded-2xl py-10 px-6 transition-all duration-150 ${
-                    isSelected
-                      ? "bg-[#2d6a4f] text-white shadow-lg scale-[1.02]"
-                      : "bg-white text-gray-700 border border-gray-100 shadow-sm hover:shadow-md hover:scale-[1.01]"
-                  }`}
+                  className={`flex flex-col items-center justify-center gap-3 rounded-2xl py-10 px-6 transition-all duration-150 ${isSelected
+                    ? "bg-[#2d6a4f] text-white shadow-lg scale-[1.02]"
+                    : "bg-white text-gray-700 border border-gray-100 shadow-sm hover:shadow-md hover:scale-[1.01]"
+                    }`}
                 >
                   <span className={isSelected ? "text-white" : "text-[#2d6a4f]"}>
                     {role.icon}

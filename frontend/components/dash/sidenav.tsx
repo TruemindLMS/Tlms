@@ -32,9 +32,10 @@ const navigation: NavItem[] = [
     // GENERAL section
     { name: 'Dashboard', href: '/dash', icon: LayoutDashboard, section: 'general' },
     { name: 'Courses', href: '/dash/courses', icon: BookOpen, section: 'general' },
-    { name: 'My Certificates', href: '/dash/Certificate', icon: Award, section: 'general' },
+    { name: 'Task', href: '/dash/task', icon: Award, section: 'general' },
     { name: 'Team', href: '/dash/team', icon: Users, section: 'general' },
     { name: 'Progress', href: '/dash/progess', icon: TrendingUp, section: 'general' },
+    { name: 'My Certificates', href: '/dash/Certificate', icon: Award, section: 'general' },
     // TOOLS section
     { name: 'Account & Settings', href: '/dash/userprofile', icon: Settings, section: 'tools' },
 ]

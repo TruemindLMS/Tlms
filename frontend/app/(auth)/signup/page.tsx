@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Check, ArrowRight, User, Mail, Lock } from 'lucide-react'
 import { Google } from 'iconsax-react'
 import RoleSelection from "@/app/(auth)/RoleSelection"
 
 export default function SignupPage() {
+    const router = useRouter()
     const [step, setStep] = useState(1) // 1: Role Selection, 2: Account Details
     const [selectedRole, setSelectedRole] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -17,6 +19,11 @@ export default function SignupPage() {
     const [confirmPassword, setConfirmPassword] = useState('')
     const [agreeTerms, setAgreeTerms] = useState(false)
 
+    // OTP states
+    const [otpSent, setOtpSent] = useState(false)
+    const [verificationEmail, setVerificationEmail] = useState('')
+    const [loading, setLoading] = useState(false)
+
     const handleRoleSelect = (role: string) => {
         setSelectedRole(role)
         setStep(2)
@@ -26,12 +33,77 @@ export default function SignupPage() {
         setStep(1)
     }
 
+    const handleSignUp = async (e: React.FormEvent) => {
+        e.preventDefault()
+
+        // Basic validation
+        if (!fullName || !email || !password || !confirmPassword) {
+            alert('Please fill in all fields')
+            return
+        }
+
+        if (password !== confirmPassword) {
+            alert('Passwords do not match')
+            return
+        }
+
+        if (!agreeTerms) {
+            alert('Please agree to the Terms of Service and Privacy Policy')
+            return
+        }
+
+        setLoading(true)
+
+        try {
+            //  Replace with  actual API call to send OTP
+            // const response = await fetch('/api/auth/send-otp', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         email,
+            //         fullName,
+            //         password,
+            //         role: selectedRole
+            //     })
+            // })
+            // const data = await response.json()
+            // if (!response.ok) throw new Error(data.message)
+
+            // Simulate API call to send OTP
+            await new Promise(resolve => setTimeout(resolve, 1500))
+
+            // Store user data temporarily
+            localStorage.setItem('pendingUserData', JSON.stringify({
+                fullName,
+                email,
+                password,
+                role: selectedRole
+            }))
+
+            // Show OTP verification screen
+            setVerificationEmail(email)
+            setOtpSent(true)
+
+        } catch (error) {
+            console.error('Signup error:', error)
+            alert('Failed to send OTP. Please try again.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+
+    if (otpSent) {
+        router.push(`/verify-otp?email=${encodeURIComponent(verificationEmail)}`)
+        return null
+    }
+
     return (
         <div className="min-h-screen w-full bg-white">
             {/* Main Container */}
             <div className="flex flex-col lg:flex-row min-h-screen w-full">
                 {/* Left Side - Brand Section */}
-                <div className="w-full lg:w-[578px] relative bg-[#004222] min-h-[40vh] lg:min-h-screen flex flex-col justify-center  gap-3 md:5 lg:gap-28 p-6 sm:p-8 md:p-10">
+                <div className="w-full lg:w-[578px] relative bg-[#004222] min-h-[40vh] lg:min-h-screen flex flex-col justify-center gap-3 md:5 lg:gap-28 p-6 sm:p-8 md:p-10">
                     <div className="mb-8 lg:mb-0">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
                             TalentFlow
@@ -105,7 +177,6 @@ export default function SignupPage() {
                             alt="Smiling woman with books"
                             className="w-full h-full drop-shadow-2xl"
                         />
-
                     </div>
 
                     <div className="absolute z-10 top-0 right-0 ">
@@ -114,7 +185,6 @@ export default function SignupPage() {
                             alt="Smiling woman with books"
                             className="w-full h-full drop-shadow-2xl"
                         />
-
                     </div>
 
                     <div className="absolute z-10 bottom-0 left-0 ">
@@ -123,7 +193,6 @@ export default function SignupPage() {
                             alt="Smiling woman with books"
                             className="w-[680px] h-56 drop-shadow-2xl"
                         />
-
                     </div>
                 </div>
 
@@ -185,7 +254,7 @@ export default function SignupPage() {
                                 </div>
 
                                 {/* Sign Up Form */}
-                                <form className="space-y-4 md:space-y-5" onSubmit={(e) => e.preventDefault()}>
+                                <form className="space-y-4 md:space-y-5" onSubmit={handleSignUp}>
                                     {/* Full Name */}
                                     <div>
                                         <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
@@ -199,6 +268,7 @@ export default function SignupPage() {
                                                 onChange={(e) => setFullName(e.target.value)}
                                                 placeholder="John Doe"
                                                 className="w-full pl-10 pr-3 md:pr-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                                required
                                             />
                                         </div>
                                     </div>
@@ -216,6 +286,7 @@ export default function SignupPage() {
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 placeholder="email@company.com"
                                                 className="w-full pl-10 pr-3 md:pr-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                                required
                                             />
                                         </div>
                                     </div>
@@ -235,6 +306,7 @@ export default function SignupPage() {
                                                     onChange={(e) => setPassword(e.target.value)}
                                                     placeholder="Create a password"
                                                     className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                                    required
                                                 />
                                                 <button
                                                     type="button"
@@ -259,6 +331,7 @@ export default function SignupPage() {
                                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                                     placeholder="Confirm"
                                                     className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                                    required
                                                 />
                                                 <button
                                                     type="button"
@@ -292,15 +365,14 @@ export default function SignupPage() {
                                     </label>
 
                                     {/* Sign Up Button */}
-                                    <Link href='/onboardingone'>
-                                        <button
-                                            type="submit"
-                                            className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6"
-                                        >
-                                            Create account
-                                            <ArrowRight size={18} />
-                                        </button>
-                                    </Link>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {loading ? 'Sending OTP...' : 'Create account'}
+                                        {!loading && <ArrowRight size={18} />}
+                                    </button>
                                 </form>
 
                                 {/* Divider */}
@@ -315,7 +387,7 @@ export default function SignupPage() {
                                     </div>
                                 </div>
 
-                                {/*  Sign Up with others  */}
+                                {/* Sign Up with others */}
                                 <div className='flex gap-4'>
                                     <button className="w-full flex items-center justify-center gap-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors mb-6">
                                         <Google color='#283c30ff' size={20} />
@@ -330,7 +402,6 @@ export default function SignupPage() {
                                             Linkedin
                                         </span>
                                     </button>
-
                                 </div>
 
                                 {/* Sign In Link */}
