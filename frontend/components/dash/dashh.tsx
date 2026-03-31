@@ -1,321 +1,346 @@
 "use client";
-import { useState } from "react";
-import {
-  ClipboardCheck,
-  BookOpen,
-  Brain,
-  Clock,
-  Trophy,
-  Play,
-} from "lucide-react";
+
+import { useState, ReactNode } from "react";
 import Image from "next/image";
 import {
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Line,
-  LineChart,
-} from "recharts";
+  Home,
+  CheckSquare,
+  Users,
+  BarChart2,
+  Award,
+  Settings,
+  HelpCircle,
+  LogOut,
+  Bell,
+  Mail,
+  Image as ImageIcon,
+  CheckCircle,
+  Trophy,
+  Star,
+  Target,
+  BookOpen,
+  Clock,
+  ArrowBigLeftDash,
+  Play,
+  EllipsisVertical,
+  CirclePlus,
+} from "lucide-react";
 
-/* ================= COMPONENTS ================= */
-
-interface StatCardProps {
-  title: string;
-  value: string;
-  icon: React.ComponentType<{ size: number }>;
-  color: string;
-}
-
-const StatCard = ({ title, value, icon: Icon, color }: StatCardProps) => (
-  <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex justify-between items-center hover:shadow-md transition-shadow">
-    <div>
-      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-        {value}
-      </h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
-    </div>
-    <div className={`p-3 rounded-xl ${color}`}>
-      <Icon size={20} />
-    </div>
-  </div>
-);
-
-interface ClassCardProps {
-  instructor: string;
-  course: string;
-  module: string;
-  image: string;
-  buttonText: string;
-  buttonColor: string;
-  buttonBg: string;
-  borderColor?: string;
-}
-
-const ClassCard = ({
-  instructor,
-  course,
-  module,
-  image,
-  buttonText,
-  buttonColor,
-  buttonBg,
-  borderColor = "border-gray-200 dark:border-gray-700",
-}: ClassCardProps) => (
-  <div
-    className={`border ${borderColor} p-4 rounded-xl flex justify-between items-center flex-col sm:flex-row gap-4 sm:gap-0 hover:shadow-md transition-shadow`}
-  >
-    <div className="flex gap-4 items-center">
-      <Image
-        src={image}
-        width={60}
-        height={60}
-        alt={instructor}
-        className="rounded-full object-cover"
-      />
-      <div>
-        <h4 className="font-semibold text-gray-900 dark:text-white">
-          {course}
-        </h4>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{instructor}</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500">{module}</p>
-      </div>
-    </div>
-    <button
-      className={`${buttonBg} ${buttonColor} px-5 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium`}
-    >
-      {buttonText === "Join Now" && <Play size={14} />}
-      {buttonText}
-    </button>
-  </div>
-);
-
-/* ================= MAIN ================= */
-
-export default function Dashboard() {
-  const [period, setPeriod] = useState<"day" | "week" | "month" | "year">(
-    "month",
-  );
-
-  const dataMap = {
-    day: [
-      { name: "12 AM", value: 40 },
-      { name: "6 AM", value: 30 },
-      { name: "12 PM", value: 60 },
-      { name: "6 PM", value: 80 },
-    ],
-    week: [
-      { name: "Mon", value: 40 },
-      { name: "Tue", value: 50 },
-      { name: "Wed", value: 60 },
-      { name: "Thu", value: 70 },
-      { name: "Fri", value: 80 },
-      { name: "Sat", value: 85 },
-      { name: "Sun", value: 90 },
-    ],
-    month: [
-      { name: "Week 1", value: 50 },
-      { name: "Week 2", value: 60 },
-      { name: "Week 3", value: 75 },
-      { name: "Week 4", value: 85 },
-    ],
-    year: [
-      { name: "Jan", value: 40 },
-      { name: "Feb", value: 50 },
-      { name: "Mar", value: 60 },
-      { name: "Apr", value: 55 },
-      { name: "May", value: 70 },
-      { name: "Jun", value: 80 },
-      { name: "Jul", value: 85 },
-      { name: "Aug", value: 90 },
-      { name: "Sep", value: 88 },
-      { name: "Oct", value: 92 },
-      { name: "Nov", value: 95 },
-      { name: "Dec", value: 98 },
-    ],
-  };
-
-  const stats = [
-    {
-      title: "Active Courses",
-      value: "16",
-      icon: BookOpen,
-      color:
-        "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-    },
-    {
-      title: "Attempt Quiz",
-      value: "16",
-      icon: Brain,
-      color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-    },
-    {
-      title: "Assignment",
-      value: "26",
-      icon: ClipboardCheck,
-      color:
-        "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
-    },
-    {
-      title: "Study Hour",
-      value: "24h",
-      icon: Clock,
-      color:
-        "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
-    },
-    {
-      title: "Achievements",
-      value: "4",
-      icon: Trophy,
-      color:
-        "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400",
-    },
-  ];
-
-  const classes = [
-    {
-      instructor: "Kevin Martin",
-      course: "The Complete Cyber Security Course",
-      module: "Module 1: Phishing Attack Simulation",
-      image: "/img/Profile-img-2.jpg",
-      buttonText: "Join Now",
-      buttonColor: "text-white",
-      buttonBg: "bg-red-500 hover:bg-red-600",
-      borderColor: "border-red-200 dark:border-red-800",
-    },
-    {
-      instructor: "Kevin Martin",
-      course: "The Complete Cyber Security Course",
-      module: "Module 1: Phishing Attack Simulation",
-      image: "/img/Profile-img-1.jpg",
-      buttonText: "Join Now",
-      buttonColor: "text-indigo-600 dark:text-indigo-400",
-      buttonBg:
-        "bg-indigo-100 dark:bg-indigo-900/30 hover:bg-indigo-200 dark:hover:bg-indigo-900/50",
-      borderColor: "border-gray-200 dark:border-gray-700",
-    },
-  ];
-
-  const recommendations = [
-    {
-      emoji: "📘",
-      title: "Review Calculus Concepts",
-      description: "Based on your recent quiz performance",
-      color: "bg-blue-50 dark:bg-blue-900/20",
-    },
-    {
-      emoji: "📅",
-      title: "Plan Your Week",
-      description: "You have 3 pending assignments",
-      color: "bg-purple-50 dark:bg-purple-900/20",
-    },
-    {
-      emoji: "📈",
-      title: "Improve Physics Performance",
-      description: "Practice more problems",
-      color: "bg-green-50 dark:bg-green-900/20",
-    },
-  ];
+export default function DashboardPage() {
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 ">
-      {/* Main Content */}
-      <main className=" ml-16 md:ml-5 lg:ml-20  transition-all duration-300">
-        <div className="p-4 md:p-6">
-          {/* Welcome */}
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Welcome back, Jane! 👋
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Here's what's happening with your learning today
-            </p>
+    <div className="flex min-h-screen bg-[#f5f7f9] text-sm overflow-x-hidden">
+      {/* SIDEBAR */}
+      <aside
+        className={`bg-white px-4 py-6 flex flex-col justify-between transition-all duration-300
+        ${isOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full md:translate-x-0 md:w-20"}
+        fixed md:relative z-50 h-screen`}
+      >
+        <div>
+          {/* LOGO + TOGGLE */}
+          <div className="flex items-center justify-between mb-8">
+            {isOpen && (
+              <Image src="/img/tlogo.png" alt="logo" width={120} height={40} />
+            )}
+
+            <button onClick={() => setIsOpen(!isOpen)}>
+              <ArrowBigLeftDash size={30} className="text-gray-600" />
+            </button>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            {stats.map((stat, index) => (
-              <StatCard key={index} {...stat} />
-            ))}
-          </div>
+          <p className="text-gray-400 text-xs mb-3 hidden md:block">
+            OVERVIEW
+          </p>
 
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Upcoming Classes */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-lg">
-                Upcoming Classes
-              </h3>
-              <div className="space-y-4">
-                {classes.map((classItem, index) => (
-                  <ClassCard key={index} {...classItem} />
-                ))}
-              </div>
-            </div>
+          <nav className="space-y-4">
+            <SidebarItem icon={<Home size={18} />} label="Dashboard" show={isOpen} active />
+            <SidebarItem icon={<ImageIcon size={18} />} label="Courses (3)" show={isOpen} />
+            <SidebarItem icon={<CheckSquare size={18} />} label="Task" show={isOpen} />
+            <SidebarItem icon={<Users size={18} />} label="Team" show={isOpen} />
+            <SidebarItem icon={<BarChart2 size={18} />} label="Progress" show={isOpen} />
+            <SidebarItem icon={<Award size={18} />} label="My certificates" show={isOpen} />
+          </nav>
 
-            {/* AI Recommendations */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-lg">
-                AI Recommendations
-              </h3>
-              <div className="space-y-3">
-                {recommendations.map((rec, index) => (
-                  <div
-                    key={index}
-                    className={`p-3 ${rec.color} rounded-lg transition-all hover:scale-[1.02] cursor-pointer`}
-                  >
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {rec.emoji} {rec.title}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {rec.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <p className="text-gray-400 text-xs mt-20 mb-3 hidden md:block">
+            SETTINGS
+          </p>
 
-          {/* Performance Chart */}
-          <div className="mt-6 bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
-                Performance Trend
-              </h3>
-              <div className="flex gap-2">
-                {["day", "week", "month", "year"].map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPeriod(p as "day" | "week" | "month" | "year")}
-                    className={`px-3 py-1 rounded-full text-sm capitalize transition-colors ${period === p
-                      ? "bg-green-700 text-white hover:bg-green-500"
-                      : "bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-700"
-                      }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="w-full h-[300px] min-h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dataMap[period]}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#16a34a"
-                    strokeWidth={3}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <nav className="space-y-4">
+            <SidebarItem icon={<Settings size={18} />} label="Account & Settings" show={isOpen} />
+            <SidebarItem icon={<HelpCircle size={18} />} label="Help" show={isOpen} />
+            <SidebarItem icon={<LogOut size={18} />} label="Logout" show={isOpen} danger />
+          </nav>
         </div>
-      </main>
+      </aside>
+
+      {/* OVERLAY */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* MAIN + RIGHT PANEL */}
+      <div className="flex flex-1">
+        {/* MAIN */}
+        <main className="flex-1 p-4 md:p-6 w-full">
+          {/* TOP BAR */}
+          <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
+            {/* MOBILE MENU BUTTON */}
+            <button className="md:hidden" onClick={() => setIsOpen(true)}>
+              <ArrowBigLeftDash size={28} />
+            </button>
+
+            <input
+              placeholder="Search your course here..."
+              className="w-full sm:flex-1 md:w-80 px-4 py-2 rounded-lg border bg-white text-sm outline-none"
+            />
+
+            <div className="flex items-center gap-4">
+              <Mail className="text-gray-500" />
+              <Bell className="text-gray-500" />
+
+              <div className="flex items-center gap-2">
+                <Image
+                  src="/img/Profile-img-1.jpg"
+                  alt="user"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
+                <span className="text-sm font-medium hidden sm:block">
+                  Majola
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* HERO */}
+          <div className="relative bg-gradient-to-r from-green-900 to-green-700 text-white rounded-2xl p-4 md:p-6 mb-6 overflow-hidden">
+            <p className="text-xs mb-2 opacity-80">ONLINE COURSE</p>
+
+            <h2 className="text-lg md:text-xl font-semibold mb-4 leading-snug">
+              Sharpen Your Skills With <br /> Professional Online Courses
+            </h2>
+
+            <button className="bg-black text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+              Join Now <Play size={16} />
+            </button>
+
+            {/* Stars */}
+            <Star className="absolute top-6 right-6 opacity-50" size={20} />
+            <Star className="absolute bottom-6 right-6 opacity-50" size={20} />
+            <Star className="absolute top-6 right-14 opacity-50" size={20} />
+            <Star className="absolute bottom-6 right-14 opacity-50" size={20} />
+            <Star className="absolute top-1/2 right-10 -translate-y-1/2 opacity-50" size={20} />
+          </div>
+
+          {/* COURSE CARDS */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <CourseCard title="UI/UX Design" />
+            <CourseCard title="Product Management" />
+            <CourseCard title="Graphic Design" />
+          </div>
+
+          <div className="flex justify-center">
+            <button className="bg-green-900 text-white text-2xl px-8 md:px-12 py-3 md:py-4 rounded-xl font-medium">
+              Start Course
+            </button>
+          </div>
+
+          {/* MOBILE PROFILE */}
+          <div className="xl:hidden mt-6 bg-white rounded-2xl p-4">
+            <h3 className="font-semibold mb-4">Your Profile</h3>
+
+            <div className="flex flex-col items-center text-center mb-6">
+              <Image
+                src="/img/Profile-img-1.jpg"
+                alt="user"
+                width={70}
+                height={70}
+                className="rounded-full mb-2"
+              />
+              <p className="font-medium">Good Morning Bankole</p>
+
+              <p className="text-xs text-gray-400 mb-4">
+                Start your journey, achieve your target
+              </p>
+
+              <div className="flex gap-3">
+                <CircleIcon icon={<Target size={16} />} />
+                <CircleIcon icon={<BookOpen size={16} />} />
+                <CircleIcon icon={<Clock size={16} />} />
+              </div>
+            </div>
+
+            {/* SUMMARY */}
+            <div className="mb-6">
+              <p className="text-lg text-black mb-4">Learning Summary</p>
+              <div className="flex gap-2">
+                <div className="h-6 w-full bg-gradient-to-b from-green-300 to-green-900 rounded"></div>
+                <div className="h-6 w-full bg-gradient-to-b from-green-300 to-green-900 rounded"></div>
+                <div className="h-6 w-full bg-gradient-to-b from-green-300 to-green-900 rounded"></div>
+              </div>
+            </div>
+
+            {/* ACHIEVEMENTS */}
+            <div className="mb-6">
+              <p className="text-lg text-black mb-4">Achievements</p>
+
+              <div className="space-y-3 text-sm">
+                <Achievement label="Completed Courses" subText="UI/UX Intermediate" icon={<CheckCircle size={20} />} />
+                <Achievement label="Certificates Earned" subText="UI/UX Track" icon={<Trophy size={20} />} />
+                <Achievement label="Top Performer" subText="Week 1" icon={<Star size={20} />} />
+              </div>
+            </div>
+
+            {/* TEAM */}
+            <div>
+              <p className="text-lg text-black mb-4 flex items-center gap-4">
+                Team Members <CirclePlus size={18} className="cursor-pointer" />
+              </p>
+
+              <div className="space-y-3">
+                <TeamMember name="John Stephen" role="UI Designer" img="/img/Profile-img-1.jpg" />
+                <TeamMember name="Isaac McVinnie" role="Frontend Dev" img="/img/Profile-img-1.jpg" />
+                <TeamMember name="David Underline" role="Backend Dev" img="/img/Profile-img-1.jpg" />
+                <TeamMember name="Tola Afolabi" role="Project Manager" img="/img/Profile-img-1.jpg" />
+              </div>
+
+              <button className="mt-4 w-full bg-green-100 py-2 rounded-lg text-sm text-green-900">
+                See All
+              </button>
+            </div>
+          </div>
+        </main>
+
+        {/* RIGHT PANEL (DESKTOP ONLY) */}
+        <aside className="hidden xl:block w-72 bg-white p-6">
+          <h3 className="font-semibold mb-4">Your Profile</h3>
+
+          <div className="flex flex-col items-center text-center mb-6">
+            <Image src="/img/Profile-img-1.jpg" alt="user" width={70} height={70} className="rounded-full mb-2" />
+            <p className="font-medium">Good Morning Bankole</p>
+            <p className="text-xs text-gray-400 mb-4">Start your journey, achieve your target</p>
+
+            <div className="flex gap-3">
+              <CircleIcon icon={<Target size={16} />} />
+              <CircleIcon icon={<BookOpen size={16} />} />
+              <CircleIcon icon={<Clock size={16} />} />
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-xl text-black mb-8">Learning Summary</p>
+            <div className="flex gap-2">
+              <div className="h-8 w-full bg-gradient-to-b from-green-300 to-green-900 rounded"></div>
+              <div className="h-8 w-full bg-gradient-to-b from-green-300 to-green-900 rounded"></div>
+              <div className="h-8 w-full bg-gradient-to-b from-green-300 to-green-900 rounded"></div>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-xl text-black mb-5">Achievements</p>
+
+            <div className="space-y-3 text-sm">
+              <Achievement label="Completed Courses" subText="UI/UX Intermediate" icon={<CheckCircle size={25} />} />
+              <Achievement label="Certificates Earned" subText="UI/UX Track" icon={<Trophy size={25} />} />
+              <Achievement label="Top Performer" subText="Week 1" icon={<Star size={25} />} />
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xl text-black mb-5 flex items-center gap-4">
+              Team Members <CirclePlus size={20} className="cursor-pointer" />
+            </p>
+
+            <div className="space-y-3">
+              <TeamMember name="John Stephen" role="UI Designer" img="/img/Profile-img-1.jpg" />
+              <TeamMember name="Isaac McVinnie" role="Frontend Dev" img="/img/Profile-img-1.jpg" />
+              <TeamMember name="David Underline" role="Backend Dev" img="/img/Profile-img-1.jpg" />
+              <TeamMember name="Tola Afolabi" role="Project Manager" img="/img/Profile-img-1.jpg" />
+            </div>
+
+            <button className="mt-10 w-full bg-green-100 py-2 rounded-lg text-sm text-green-900">
+              See All
+            </button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+/* COMPONENTS */
+
+function SidebarItem({ icon, label, show, active, danger }: { icon: ReactNode; label: string; show: boolean; active?: boolean; danger?: boolean }) {
+  return (
+    <div className={`flex items-center gap-3 cursor-pointer ${
+      active ? "text-green-700 font-medium" : danger ? "text-red-500" : "text-gray-600"
+    }`}>
+      {icon}
+      {show && <span>{label}</span>}
+    </div>
+  );
+}
+
+function CourseCard({ title }: { title: string }) {
+  return (
+    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="bg-[#1a6b3c40] p-2 rounded-lg">
+          <Bell size={16} />
+        </div>
+
+        <div>
+          <p className="text-xs text-gray-400 mb-1">2/8 Watched</p>
+          <h4 className="font-medium">{title}</h4>
+        </div>
+      </div>
+
+      <div className="bg-gray-100 p-2 rounded-lg">
+        <EllipsisVertical size={16} />
+      </div>
+    </div>
+  );
+}
+
+function Achievement({ label, icon, subText }: { label: string; icon: ReactNode; subText?: string }) {
+  return (
+    <div className="flex justify-between items-center">
+      <div>
+        <span>{label}</span>
+        {subText && <p className="text-xs text-gray-400">{subText}</p>}
+      </div>
+      <div>{icon}</div>
+    </div>
+  );
+}
+
+function TeamMember({ name, role, img }: { name: string; role: string; img: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <Image src={img} alt={name} width={28} height={28} className="rounded-full" />
+        <div className="flex flex-col">
+          <span className="text-sm">{name}</span>
+          <span className="text-xs text-gray-400">{role}</span>
+        </div>
+      </div>
+
+      <span className="text-xs bg-green-800 text-white px-2 py-1 rounded">
+        Active
+      </span>
+    </div>
+  );
+}
+
+function CircleIcon({ icon }: { icon: ReactNode }) {
+  return (
+    <div className="w-9 h-9 flex items-center justify-center rounded-full border bg-gray-50">
+      {icon}
     </div>
   );
 }
