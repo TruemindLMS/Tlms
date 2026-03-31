@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, ReactNode } from "react";
 import Image from "next/image";
 import {
@@ -150,7 +149,7 @@ export default function DashboardPage() {
             </button>
           </div>
 
-          {/* MOBILE PROFILE */}
+          {/* FOR MOBILE PROFILE */}
           <div className="xl:hidden mt-6 bg-white rounded-2xl p-4">
             <h3 className="font-semibold mb-4">Your Profile</h3>
 
