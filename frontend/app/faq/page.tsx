@@ -83,14 +83,14 @@ export default function ViralLinkFAQ() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f5f7] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-[640px]">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-[34px] font-semibold text-green-700 leading-tight">
-            Got questions?
+          <h1 className="text-3xl md:text-5xl font-semibold text-primary-900 leading-tight">
+            Frequently Asked Questions
           </h1>
-          <p className="text-3xl md:text-[34px] font-semibold text-green-700 leading-tight">
+          <p className="text-3xl md:text-[34px] hidden font-semibold text-green-700 leading-tight">
             We’ve got answers
           </p>
         </div>
@@ -106,8 +106,8 @@ export default function ViralLinkFAQ() {
                 layout
                 initial={false}
                 animate={{
-                  rotate: isOpen ? 4 : 0, 
-                  y: isOpen ? -6 : 0, 
+                  rotate: isOpen ? 4 : 0,
+                  y: isOpen ? -6 : 0,
                 }}
                 transition={{
                   type: "spring",
@@ -124,11 +124,10 @@ export default function ViralLinkFAQ() {
                 {/* Card */}
                 <div
                   className={`relative bg-white rounded-2xl px-6 py-5 transition-all duration-300
-                  ${
-                    isOpen
+                  ${isOpen
                       ? "shadow-[0_20px_60px_rgba(124,58,237,0.18)]"
                       : "shadow-[0_8px_25px_rgba(0,0,0,0.06)]"
-                  }`}
+                    }`}
                 >
                   {/* Question */}
                   <button
@@ -153,7 +152,7 @@ export default function ViralLinkFAQ() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.25 }}
-                        className="mt-3 text-[14.5px] text-green-400 leading-relaxed"
+                        className="mt-3 text-[14.5px] text-primary-800 leading-relaxed"
                       >
                         {item.answer}
                       </motion.div>

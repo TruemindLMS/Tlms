@@ -74,7 +74,7 @@ const Footer = () => {
                             <img
                                 width={150}
                                 height={42}
-                                src="/img/tlogo.png"
+                                src="/img/logo.png"
                                 alt="Learning Illustration"
 
                             />

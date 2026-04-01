@@ -35,13 +35,12 @@ const Topnav = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex gap-2">
                         <img
                             width={150}
                             height={42}
-                            src="/img/tlogo.png"
+                            src="/img/logo.png"
                             alt="Learning Illustration"
-
                         />
                     </div>
 

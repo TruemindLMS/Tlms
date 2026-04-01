@@ -4,7 +4,7 @@ import { Suspense } from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle, XCircle, Loader2, ArrowRight, Mail } from 'lucide-react'
+import { CheckCircle, Check, XCircle, Loader2, ArrowRight, Mail } from 'lucide-react'
 
 // Main component wrapped with Suspense
 export default function VerifyOTPPage() {
@@ -153,7 +153,7 @@ function VerifyOTPContent() {
 
                 // Redirect to onboarding after 2 seconds
                 setTimeout(() => {
-                    router.push('/signuponboarding/onboarding1')
+                    router.push('/onboarding')
                 }, 2000)
             } else {
                 throw new Error('Invalid OTP code. Please check and try again.')
@@ -205,7 +205,7 @@ function VerifyOTPContent() {
     }
 
     const handleContinueToOnboarding = () => {
-        router.push('/signuponboarding/onboarding1')
+        router.push('/onboarding')
     }
 
     if (status === 'success') {
@@ -241,8 +241,104 @@ function VerifyOTPContent() {
     }
 
     return (
-        <div className="min-h-screen flex bg-[#004222] items-center justify-center p-4">
-            <div className="max-w-md w-full">
+        <div className="flex flex-col lg:flex-row min-h-screen bg-[#004222] w-full">
+
+            {/* Left Side - Brand Section */}
+            <div className="w-full lg:w-[578px] relative bg-[#004222] min-h-[40vh] lg:min-h-screen hidden  lg:flex lg:flex-col justify-center gap-3 md:5 lg:gap-28 p-6 sm:p-8 md:p-10">
+                <div className="mb-8 lg:mb-0">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
+                        TalentFlow
+                    </h1>
+                    <p className="text-sm sm:text-md text-white/80 mt-1">
+                        TRUEMINDS INNOVATIONS
+                    </p>
+                </div>
+
+                <div className="flex flex-col gap-6 lg:gap-8 my-8 lg:my-0">
+                    <h2 className="text-3xl md:text-4xl font-bold text-white">
+                        Start your journey
+                        <br />
+                        with us today
+                    </h2>
+
+                    <div className="space-y-3 md:space-y-4 hidden md:flex flex-col">
+                        {[
+                            'Access to 500+ courses',
+                            'Personalized learning paths',
+                        ].map((feature, index) => (
+                            <div key={index} className="flex items-center gap-3">
+                                <div className="w-5 h-5 border border-white/80 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <Check size={12} className="text-white/80" />
+                                </div>
+                                <span className="text-white/80 text-sm md:text-[16px]">
+                                    {feature}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="hidden lg:block border border-white/30 p-6 md:p-6 rounded-xl bg-white/10 backdrop-blur-sm mt-8 lg:mt-0">
+                    <p className="text-white/90 italic text-sm md:text-base mb-4">
+                        "Joining TalentFlow was the best decision for my career.
+                        The learning experience is unmatched!"
+                    </p>
+                    <div>
+                        <p className="font-semibold text-white">
+                            Obiajulu
+                        </p>
+                        <p className="text-sm text-white/70">
+                            SENIOR DEVELOPER
+                        </p>
+                    </div>
+                </div>
+
+                <div className="md:hidden mt-6">
+                    <div className="space-y-2">
+                        {[
+                            'Access to 500+ courses',
+                            'Personalized learning paths',
+                            'Industry-recognized certificates'
+                        ].map((feature, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <div className="w-4 h-4 border border-white/80 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <Check size={10} className="text-white/80" />
+                                </div>
+                                <span className="text-white/80 text-xs">
+                                    {feature}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="absolute z-10 top-0 right-0 ">
+                    <img
+                        src="/img/gaddd.png"
+                        alt="Smiling woman with books"
+                        className="w-full h-full drop-shadow-2xl"
+                    />
+                </div>
+
+                <div className="absolute z-10 top-0 right-0 ">
+                    <img
+                        src="/img/gadd.png"
+                        alt="Smiling woman with books"
+                        className="w-full h-full drop-shadow-2xl"
+                    />
+                </div>
+
+                <div className="absolute z-10 bottom-0 left-0 ">
+                    <img
+                        src="/img/gad.png"
+                        alt="Smiling woman with books"
+                        className="w-[680px] h-56 drop-shadow-2xl"
+                    />
+                </div>
+            </div>
+
+
+            <div className="w-full lg:flex-1 min-h-[50vh] lg:bg-white bg-[#004222] flex items-center justify-center py-12 px-4 sm:px-6 md:px-8 lg:px-12">
                 <div className="bg-white rounded-3xl shadow-2xl p-8">
                     <div className="text-center mb-8">
                         <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">

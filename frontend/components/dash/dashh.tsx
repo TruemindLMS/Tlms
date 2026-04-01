@@ -63,7 +63,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex justify-center">
-            <button className="bg-green-900 text-white  px-8 md:px-12 py-3 md:py-4 rounded-xl font-medium">
+            <button className="bg-green-900 text-white   px-8 md:px-12 py-3 md:py-4 rounded-xl font-medium">
               Start Course
             </button>
           </div>

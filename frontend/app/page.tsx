@@ -5,6 +5,8 @@ import { Metadata } from "next"
 import InnovationHub from "@/components/onboarding/test"
 import Every from "@/components/onboarding/every"
 import Fea from "@/components/onboarding/fe"
+import Feat from "@/components/onboarding/feat"
+import ViralLinkFAQ from '@/app/faq/page'
 import Footer from "@/components/onboarding/footer"
 import Start from "@/components/onboarding/start"
 
@@ -19,10 +21,10 @@ export default function Home() {
     <main>
       <Hero />
       <Start />
-      <Every />
       <Courses />
-      <Fea />
-      <InnovationHub />
+      <Feat />
+      <ViralLinkFAQ />
+      <Every />
       <Footer />
 
     </main>
