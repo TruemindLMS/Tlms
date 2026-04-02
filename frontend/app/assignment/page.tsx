@@ -57,8 +57,6 @@ export default function Assignmentpage() {
               </button>
             ))}
           </div>
-
-          {/* ASSIGNMENTS */}
         </div>
 
         {/* ASSIGNMENT DETAILS */}
@@ -75,14 +73,14 @@ export default function Assignmentpage() {
                 <div key={status} className="mb-6">
                   <h2 className="font-semibold mb-3 uppercase">{status}</h2>
 
-                  <div className="flex flex-col gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filtered.map((card, index) => (
                       <div
                         key={index}
                         className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
                       >
                         <div className="flex items-center justify-between">
-                          <h2 className="text-lg font-bold">
+                          <h2 className="text-base md:text-lg font-bold">
                             {card.courseTitle}
                           </h2>
 
