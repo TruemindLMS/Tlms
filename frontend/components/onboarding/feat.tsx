@@ -20,6 +20,7 @@ import {
     Global,
     Card
 } from 'iconsax-react';
+import ScrollAnimatel from '../cards/AnimatedCardl';
 
 const Feat = () => {
     const [activeFeature, setActiveFeature] = useState(0);
@@ -184,137 +185,148 @@ const Feat = () => {
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* Section Header */}
-                <div className="text-center mb-20">
-                    <div className="inline-flex items-center gap-2 bg-primary-100 px-4 py-2 rounded-full mb-6">
-                        <span className="text-sm font-semibold text-primary-700 tracking-wider">
-                            FEATURES
-                        </span>
-                    </div>
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                        <span className="bg-gradient-to-r from-emerald-600 to-primary-600 bg-clip-text text-transparent">
-                            Everything You Need to Learn & Grow
-                        </span>
-                        <br />
-                    </h2>
-                    <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                        Powerful tools designed for modern learners, instructors, and administrators.
-                    </p>
-                </div>
-
-                {/* Features Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-46">
-                    {features.map((feature, index) => (
-                        <div
-                            key={feature.id}
-                            className={`group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer ${activeFeature === feature.id ? 'ring-2 ring-emerald-500' : ''
-                                }`}
-                            onMouseEnter={() => setActiveFeature(feature.id)}
-                        >
-                            {/* Animated Border */}
-                            <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} rounded-2xl blur opacity-0 group-hover:opacity-20 transition duration-500`}></div>
-
-                            <div className="relative">
-                                <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${feature.color} bg-opacity-10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                                    {feature.icon}
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                                <p className="text-gray-600  leading-relaxed">{feature.description}</p>
-                                <div className="flex items-center justify-between">
-                                    <ArrowRight size={18} className="text-gray-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                <div className='mb-20'>
-                    {/* Section Header */}
-                    <div className="text-center mb-16">
+                <ScrollAnimatel delay={200} direction="up">
+                    <div className="text-center mb-20">
                         <div className="inline-flex items-center gap-2 bg-primary-100 px-4 py-2 rounded-full mb-6">
                             <span className="text-sm font-semibold text-primary-700 tracking-wider">
-                                HOW IT WORKS
+                                FEATURES
                             </span>
                         </div>
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                            <span className="text-black">
-                                From Sign Up to Success in 6 Steps
+                            <span className="bg-gradient-to-r from-emerald-600 to-primary-600 bg-clip-text text-transparent">
+                                Everything You Need to Learn & Grow
                             </span>
                             <br />
                         </h2>
                         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Getting started is simple. Here's your path to structured learning.
+                            Powerful tools designed for modern learners, instructors, and administrators.
                         </p>
                     </div>
+                </ScrollAnimatel>
 
-                    {/* Features Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-46">
-                        {featuredWork.map((work, index) => (
+                {/* Features Grid */}
+                <ScrollAnimatel delay={250} direction="right">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-46">
+                        {features.map((feature, index) => (
                             <div
-                                key={index}
-                                className={`group relative  rounded-2xl p-8 shadow-sm hover:shadow-sm items-center transition-all duration-500 hover:-translate-y-2 cursor-pointer ${activeFeature === work.id ? 'ring-2 ring-white' : ''
+                                key={feature.id}
+                                className={`group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer ${activeFeature === feature.id ? 'ring-2 ring-emerald-500' : ''
                                     }`}
-                                onMouseEnter={() => setActiveFeature(work.id)}
+                                onMouseEnter={() => setActiveFeature(feature.id)}
                             >
+                                {/* Animated Border */}
+                                <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} rounded-2xl blur opacity-0 group-hover:opacity-20 transition duration-500`}></div>
 
-                                <div className="relative flex flex-col text-center justify-center">
-                                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-r bg-opacity-10 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300`}>
-                                        {work.icon}
+                                <div className="relative">
+                                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${feature.color} bg-opacity-10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                                        {feature.icon}
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">{work.title}</h3>
-                                    <p className="text-gray-600 leading-relaxed">{work.description}</p>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                                    <p className="text-gray-600  leading-relaxed">{feature.description}</p>
                                     <div className="flex items-center justify-between">
                                         <ArrowRight size={18} className="text-gray-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
                                     </div>
                                 </div>
                             </div>
                         ))}
-                    </div>
+                    </div> </ScrollAnimatel>
+
+                <div className='mb-20'>
+                    {/* Section Header */}
+                    <ScrollAnimatel delay={260} direction="down">
+                        <div className="text-center mb-16">
+                            <div className="inline-flex items-center gap-2 bg-primary-100 px-4 py-2 rounded-full mb-6">
+                                <span className="text-sm font-semibold text-primary-700 tracking-wider">
+                                    HOW IT WORKS
+                                </span>
+                            </div>
+                            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                                <span className="text-black">
+                                    From Sign Up to Success in 6 Steps
+                                </span>
+                                <br />
+                            </h2>
+                            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                                Getting started is simple. Here's your path to structured learning.
+                            </p>
+                        </div>
+                    </ScrollAnimatel>
+
+                    {/* Features Grid */}
+                    <ScrollAnimatel delay={280} direction="left">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-46">
+                            {featuredWork.map((work, index) => (
+                                <div
+                                    key={index}
+                                    className={`group relative  rounded-2xl p-8 shadow-sm hover:shadow-sm items-center transition-all duration-500 hover:-translate-y-2 cursor-pointer ${activeFeature === work.id ? 'ring-2 ring-white' : ''
+                                        }`}
+                                    onMouseEnter={() => setActiveFeature(work.id)}
+                                >
+
+                                    <div className="relative flex flex-col text-center justify-center">
+                                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-r bg-opacity-10 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300`}>
+                                            {work.icon}
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-3">{work.title}</h3>
+                                        <p className="text-gray-600 leading-relaxed">{work.description}</p>
+                                        <div className="flex items-center justify-between">
+                                            <ArrowRight size={18} className="text-gray-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div></ScrollAnimatel>
 
                 </div>
 
                 {/* Featured Courses Section */}
                 <div className="mb-20">
                     {/* Section Header */}
-                    <div className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 bg-primary-100 px-4 py-2 rounded-full mb-6">
-                            <span className="text-sm font-semibold text-primary-700 tracking-wider">
-                                BENEFITS
-                            </span>
+                    <ScrollAnimatel delay={300} direction="up">
+                        <div className="text-center mb-16">
+                            <div className="inline-flex items-center gap-2 bg-primary-100 px-4 py-2 rounded-full mb-6">
+                                <span className="text-sm font-semibold text-primary-700 tracking-wider">
+                                    BENEFITS
+                                </span>
+                            </div>
+                            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                                <span className="bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent">
+                                    Why Learners Love TalentFlow
+                                </span>
+                                <br />
+                            </h2>
+                            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                                Real outcomes for real learners. Here's what you gain.
+                            </p>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                            <span className="bg-gradient-to-r from-primary-800 to-primary-600 bg-clip-text text-transparent">
-                                Why Learners Love TalentFlow
-                            </span>
-                            <br />
-                        </h2>
-                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Real outcomes for real learners. Here's what you gain.
-                        </p>
-                    </div>
+                    </ScrollAnimatel>
 
                     {/* Features Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5 md:mb-46">
-                        {featuredCourses.map((course, index) => (
-                            <div
-                                key={index}
-                                className={`group relative  rounded-2xl p-8 shadow-lg hover:shadow-2xl bg-gradient-to-r ${course.color} items-center transition-all duration-500 hover:-translate-y-2 cursor-pointer ${activeFeature === course.id ? 'ring-2 ring-white' : ''
-                                    }`}
-                                onMouseEnter={() => setActiveFeature(course.id)}
-                            >
+                    <ScrollAnimatel delay={330} direction="down">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5 md:mb-46">
+                            {featuredCourses.map((course, index) => (
+                                <div
+                                    key={index}
+                                    className={`group relative  rounded-2xl p-8 shadow-lg hover:shadow-2xl bg-gradient-to-r ${course.color} items-center transition-all duration-500 hover:-translate-y-2 cursor-pointer ${activeFeature === course.id ? 'ring-2 ring-white' : ''
+                                        }`}
+                                    onMouseEnter={() => setActiveFeature(course.id)}
+                                >
 
-                                <div className="relative flex flex-col  justify-center">
-                                    <div className={`w-10 h-10 rounded-xl  flex items-center justify-center mb-6  group-hover:scale-110 transition-transform duration-300`}>
-                                        {course.icon}
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">{course.title}</h3>
-                                    <p className="text-gray-600 leading-relaxed">{course.description}</p>
-                                    <div className="flex items-center justify-between">
-                                        <ArrowRight size={18} className="text-gray-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+                                    <div className="relative flex flex-col  justify-center">
+                                        <div className={`w-10 h-10 rounded-xl  flex items-center justify-center mb-6  group-hover:scale-110 transition-transform duration-300`}>
+                                            {course.icon}
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-3">{course.title}</h3>
+                                        <p className="text-gray-600 leading-relaxed">{course.description}</p>
+                                        <div className="flex items-center justify-between">
+                                            <ArrowRight size={18} className="text-gray-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+
+                            ))}
+                        </div>
+                    </ScrollAnimatel>
                 </div>
 
 
