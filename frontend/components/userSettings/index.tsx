@@ -7,17 +7,21 @@ import Security from "./components/security";
 import Verification from "./components/verification";
 
 export interface UserProps {
-  name: string;
-  username: string;
+  FirstName: string;
+  lastName: string;
+  // username: string;
+  role: string;
   email: string;
   birthday: string;
   phone: string;
-  country: string;
-  cityState: string;
+  address: string;
+  location: string;
+  // country: string;
+  // cityState: string;
   postalCode: string;
-  taxId: string;
-  twoFactor: boolean;
-  loginAlert: boolean;
+  // taxId: string;
+  // twoFactor: boolean;
+  // loginAlert: boolean;
   avatarInitials: string;
 }
 
@@ -63,11 +67,11 @@ const UserSettings = () => {
           Manage your profile, address and security
         </p>
       </div>
-      <AvatarUpload user={USER} />
-      <PersonalInfoForm user={USER} />
-      <Address user={USER} />
-      <Verification />
-      <Security />
+      {/* <AvatarUpload user={USER} /> */}
+      {/* <PersonalInfoForm user={USER} /> */}
+      {/* <Address user={USER} /> */}
+      {/* <Verification /> */}
+      {/* <Security /> */}
     </div>
   );
 };

@@ -12,31 +12,52 @@ export function PersonalInfoForm({user}: {user: UserProps}) {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <SectionCard title="Personal Information" icon={User}>
-      <div>
-        <div className="grid  md:grid-cols-2 gap-4">
+    <div>
+      <div className="grid gap-6">
+        <div className="flex flex-col sm:flex-row gap-4">
           <FormField
-            label="Username"
-            placeholder={user.name}
-            value={user.name}
+            label="FirstName"
+            placeholder={user.FirstName}
+            value={user.FirstName}
           />
           <FormField
-            label="Bithday"
-            placeholder={user.birthday}
-            value={user.birthday }
+            label="LastName"
+            placeholder={user.lastName}
+            value={user.lastName}
           />
-          <FormField
-            label="Email"
-            placeholder={user.email}
-            value={user.email}
-          />
+        </div>
+        <FormField label="Email" placeholder={user.email} value={user.email} />
+        <FormField
+          label="Address"
+          placeholder={user.address}
+          value={user.address}
+        />
+        <div className="flex flex-col sm:flex-row gap-4">
           <FormField
             label="Phone Number"
             placeholder={user.phone || "+234 867 456 7392"}
             value={user.phone || "+234 867 456 7392"}
           />
+          <FormField
+            label="Date of Birth"
+            placeholder={user.birthday}
+            value={user.birthday}
+          />
         </div>
-        {/* {isEditing && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <FormField
+            label="Date of Birth"
+            placeholder={user.location}
+            value={user.location}
+          />
+          <FormField
+            label="Postal Code"
+            placeholder={user.postalCode}
+            value={user.postalCode}
+          />
+        </div>
+      </div>
+      {/* {isEditing && (
           <div className="flex justify-end mt-4">
             <button
               type="button"
@@ -49,7 +70,7 @@ export function PersonalInfoForm({user}: {user: UserProps}) {
             </button>
           </div>
         )} */}
-        {/* <button
+      {/* <button
           type="button"
           // onClick={() => setEditPersonal((v) => !v)}
           className="flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-700
@@ -58,7 +79,6 @@ export function PersonalInfoForm({user}: {user: UserProps}) {
           <Edit2Icon />
           {isEditing ? "Cancel" : "Edit"}
         </button> */}
-      </div>
-    </SectionCard>
+    </div>
   );
 }
