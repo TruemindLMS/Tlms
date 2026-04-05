@@ -43,6 +43,7 @@ function VerifyOTPContent() {
     const [countdown, setCountdown] = useState(60)
     const [canResend, setCanResend] = useState(false)
     const [resendLoading, setResendLoading] = useState(false)
+    const [resendMessage, setResendMessage] = useState('')
     const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
     useEffect(() => {
@@ -77,6 +78,9 @@ function VerifyOTPContent() {
         // Clear error when user starts typing
         if (errorMessage) {
             setErrorMessage('')
+        }
+        if (resendMessage) {
+            setResendMessage('')
         }
     }
 
@@ -122,10 +126,10 @@ function VerifyOTPContent() {
         setErrorMessage('')
 
         try {
-            // Call actual API to verify OTP
+            // Call API to verify OTP
             const response = await verifyOtp(email!, otpValue)
 
-            if (response.success || response.message === 'OTP verified successfully') {
+            if (response.success || response.token) {
                 // Get stored user data from registration
                 const userDataStr = localStorage.getItem('pendingUserData')
                 if (userDataStr) {
@@ -137,13 +141,21 @@ function VerifyOTPContent() {
                     localStorage.setItem('userRole', userData.role || role || 'Student')
                     localStorage.setItem('isAuthenticated', 'true')
 
-                    // Store auth token if returned
-                    if (response.token) {
-                        localStorage.setItem('authToken', response.token)
-                    }
-
                     // Clear pending data
                     localStorage.removeItem('pendingUserData')
+                }
+
+                // Store auth token if returned
+                if (response.token) {
+                    localStorage.setItem('authToken', response.token)
+                }
+
+                // Also store user info from response
+                if (response.user) {
+                    localStorage.setItem('user', JSON.stringify(response.user))
+                    localStorage.setItem('userFullName', `${response.user.firstName || ''} ${response.user.lastName || ''}`.trim())
+                    localStorage.setItem('userEmail', response.user.email)
+                    localStorage.setItem('userRole', response.user.role)
                 }
 
                 setStatus('success')
@@ -156,10 +168,15 @@ function VerifyOTPContent() {
                 throw new Error(response.message || 'Invalid OTP code. Please try again.')
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('OTP verification error:', error)
             setStatus('error')
-            setErrorMessage(error instanceof Error ? error.message : 'Invalid verification code. Please try again.')
+            setErrorMessage(error.message || 'Invalid verification code. Please try again.')
+
+            // Reset status after 3 seconds
+            setTimeout(() => {
+                setStatus('idle')
+            }, 3000)
         }
     }
 
@@ -168,23 +185,35 @@ function VerifyOTPContent() {
 
         setResendLoading(true)
         setErrorMessage('')
+        setResendMessage('')
 
         try {
-            // Call actual API to resend OTP
-            await sendOtp(email!)
+            // Call API to resend OTP
+            const response = await sendOtp(email!)
 
-            // Reset OTP inputs
-            setOtp(['', '', '', '', '', ''])
-            setCountdown(60)
-            setCanResend(false)
-            setStatus('idle')
+            if (response.success) {
+                setResendMessage('✅ New verification code sent successfully!')
 
-            // Focus on first input
-            inputRefs.current[0]?.focus()
+                // Reset OTP inputs
+                setOtp(['', '', '', '', '', ''])
+                setCountdown(60)
+                setCanResend(false)
+                setStatus('idle')
 
-        } catch (error) {
+                // Focus on first input
+                inputRefs.current[0]?.focus()
+
+                // Clear success message after 3 seconds
+                setTimeout(() => {
+                    setResendMessage('')
+                }, 3000)
+            } else {
+                throw new Error(response.message || 'Failed to resend OTP')
+            }
+
+        } catch (error: any) {
             console.error('Resend error:', error)
-            setErrorMessage('Failed to resend OTP. Please try again.')
+            setErrorMessage(error.message || 'Failed to resend OTP. Please try again.')
         } finally {
             setResendLoading(false)
         }
@@ -228,7 +257,6 @@ function VerifyOTPContent() {
 
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-[#004222] w-full">
-
             {/* Left Side - Brand Section */}
             <div className="w-full lg:w-[578px] relative bg-[#004222] min-h-[40vh] lg:min-h-screen hidden lg:flex lg:flex-col justify-center gap-3 md:5 lg:gap-28 p-6 sm:p-8 md:p-10">
                 <div className="mb-8 lg:mb-0">
@@ -364,9 +392,21 @@ function VerifyOTPContent() {
                                 />
                             ))}
                         </div>
+
+                        {/* Hint for mock mode */}
+                        <p className="text-xs text-gray-400 text-center mt-3">
+                            💡 Hint: Use code <span className="font-mono font-bold text-primary-600">123456</span> for testing
+                        </p>
+
                         {errorMessage && (
                             <p className="text-red-500 text-sm text-center mt-3">
                                 {errorMessage}
+                            </p>
+                        )}
+
+                        {resendMessage && (
+                            <p className="text-green-600 text-sm text-center mt-3">
+                                {resendMessage}
                             </p>
                         )}
                     </div>

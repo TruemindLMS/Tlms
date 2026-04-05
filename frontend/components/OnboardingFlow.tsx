@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { HardDriveUpload, BadgeCheck, CheckIcon, ChevronRight, Loader2 } from "lucide-react";
-import { onboardingApi, profileApi, getUser, getUserFullName } from "@/lib/api";
+import { onboardingApi, profileApi, getUser, getUserFullName, setUser } from "@/lib/api";
 
 // Types
 type Role = {
@@ -231,34 +231,65 @@ export default function OnboardingFlow() {
     const handleComplete = async () => {
         setLoading(true);
         try {
-            // Step 1: Submit bio
-            if (bio) {
-                await onboardingApi.submitBio({ bio });
-            }
+            // Get the role label from the selected role ID
+            const selectedRoleData = roles.find(r => r.id === selectedRole);
+            const roleLabel = selectedRoleData?.label || "UI/UX Design";
 
-            // Step 2: Update profile with role and goals
-            await profileApi.update({
-                role: selectedRole,
-                goals: selectedGoals,
+            // Get goal titles
+            const goalTitles = selectedGoals.map(goalId => {
+                const goal = goals.find(g => g.id === goalId);
+                return goal?.title || "";
+            }).filter(Boolean);
+
+            // Prepare profile data to save
+            const profileData = {
                 bio: bio,
-            });
+                role: roleLabel,
+                roleId: selectedRole,
+                goals: selectedGoals,
+                goalTitles: goalTitles,
+                jobTitle: roleLabel,
+                onboardingCompleted: true,
+                completedAt: new Date().toISOString()
+            };
 
-            // Mark onboarding as completed
+            // Save to localStorage for profile page to read
+            localStorage.setItem('userProfile', JSON.stringify(profileData));
+            localStorage.setItem('userRole', roleLabel);
+            localStorage.setItem('userBio', bio);
+            localStorage.setItem('userGoals', JSON.stringify(goalTitles));
             localStorage.setItem('onboardingCompleted', 'true');
 
-            console.log({
-                bio,
-                selectedRole,
-                selectedGoals,
-                name
-            });
+            // Update user object in localStorage
+            const existingUser = getUser();
+            if (existingUser) {
+                const updatedUser = {
+                    ...existingUser,
+                    role: roleLabel,
+                    bio: bio,
+                    goals: goalTitles,
+                    onboardingCompleted: true
+                };
+                setUser(updatedUser);
+            }
+
+            // Try to save to API if not in mock mode
+            try {
+                await profileApi.update(profileData);
+                await onboardingApi.completeOnboarding();
+                console.log('✅ Onboarding data saved to API');
+            } catch (apiError) {
+                console.log('⚠️ API save failed, but data saved locally:', apiError);
+            }
+
+            console.log('✅ Onboarding completed with data:', profileData);
 
             // Redirect to dashboard
-            router.push('/dash');
+            router.push('/dashboard');
         } catch (error) {
             console.error('Onboarding completion error:', error);
             // Still redirect even if API fails
-            router.push('/dash');
+            router.push('/dashboard');
         } finally {
             setLoading(false);
         }
@@ -339,6 +370,13 @@ function StepOne({ bio, setBio, profilePicture, setProfilePicture, profilePictur
             setProfilePicture(file);
             const previewUrl = URL.createObjectURL(file);
             setProfilePicturePreview(previewUrl);
+
+            // Save profile picture to localStorage as base64
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                localStorage.setItem('userProfilePicture', reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
