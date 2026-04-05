@@ -1,26 +1,101 @@
 "use client";
 
-import { useState } from "react";
-
-import { Settings } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Settings, Loader2, User, Mail, Briefcase, Award, Calendar, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { profileApi, getUser, getUserFullName, getUserEmail, getUserRole, isAuthenticated } from "@/lib/api";
 
 const UserProfile = () => {
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
-  return (
-    <div className="flex flex-col gap-3 max-w-6xl ml-16 md:ml-20 mx-auto py-6 md:pb-10">
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [stats, setStats] = useState({
+    enrolled: 0,
+    completed: 0,
+    progress: 0
+  });
 
+  useEffect(() => {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      router.push('/signin');
+      return;
+    }
+
+    fetchProfile();
+  }, [router]);
+
+  const fetchProfile = async () => {
+    setLoading(true);
+    try {
+      // Get profile from API
+      const profileData = await profileApi.get();
+      setProfile(profileData);
+
+      // You can also get stats from a separate endpoint or derive from profile
+      // For now, using placeholder data - replace with actual API call
+      setStats({
+        enrolled: profileData.enrolledCourses?.length || 3,
+        completed: profileData.completedCourses?.length || 2,
+        progress: profileData.overallProgress || 75
+      });
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      // Fallback to localStorage data
+      const user = getUser();
+      setProfile(user);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen ml-16 md:ml-20">
+        <div className="text-center">
+          <Loader2 size={40} className="animate-spin text-primary-600 mx-auto mb-4" />
+          <p className="text-gray-500">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const fullName = profile?.firstName && profile?.lastName
+    ? `${profile.firstName} ${profile.lastName}`
+    : getUserFullName() || "Bankole Shittu";
+
+  const email = profile?.email || getUserEmail() || "bankole@talentflow.com";
+  const role = profile?.role || getUserRole() || "UI/UX Designer";
+  const jobTitle = profile?.jobTitle || "UI/UX Intern";
+
+  return (
+    <div className="flex flex-col gap-3 max-w-6xl ml-16 md:ml-20 mx-auto py-6 md:pb-10 px-4">
+
+      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
           My Profile 📚
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">Here is your profile</p>
+        <p className="text-gray-600">Here is your profile information</p>
       </div>
-      <div className="py-6 md:py-8 px-3 md:px-4 flex justify-between shadow-md shadow-gray-200 rounded-lg">
-        <div>
-          <p className=" text-xl md:text-[28px] font-semibold text-[#1C2A39]">
-            Bankole Shittu
+
+      {/* Profile Card */}
+      <div className="py-6 md:py-8 px-3 md:px-6 flex justify-between items-start shadow-md shadow-gray-200 rounded-lg bg-white">
+        <div className="flex-1">
+          <p className="text-xl md:text-[28px] font-semibold text-[#1C2A39]">
+            {fullName}
           </p>
           <div className="flex gap-3 md:gap-4 mt-4 md:mt-8">
             {/* Avatar */}
@@ -63,7 +138,9 @@ const UserProfile = () => {
           </span>
         </Link>
       </div>
-      <div className="py-6 md:py-8 px-3 md:px-4 shadow-md shadow-gray-200 rounded-lg">
+
+      {/* Learning Summary */}
+      <div className="py-6 md:py-8 px-3 md:px-6 shadow-md shadow-gray-200 rounded-lg bg-white">
         <p className="text-2xl md:text-3xl font-semibold text-[#1C2A39]">
           Learning Summary
         </p>
@@ -108,26 +185,36 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
-      <div className="py-8 px-4 shadow-md shadow-gray-200 rounded-lg">
-        <p className="text-2xl md:text-3xl font-semibold text-[#1C2A39]">
-          Achievements
-        </p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 w-full mt-4 md:mt-8">
-          <div className="h-75 rounded-lg flex flex-col gap-12 justify-center items-center shadow-gray-200 shadow-md bg-[#CFE0D7]">
-            <Image
-              src={"/img/course-complete.png"}
-              alt="Completed Course"
-              width={26}
-              height={26}
-              className="w-6 "
-            />
 
-            <p className=" text-xl md:text-2xl font-medium text-[#1C2A39]">
-              Completed Course
-            </p>
-            <p className=" text-base md:text-lg font-normal text-[#1C2A39]">
-              UI/UX Intermediate
-            </p>
+      {/* Achievements */}
+      <div className="py-6 md:py-8 px-3 md:px-6 shadow-md shadow-gray-200 rounded-lg bg-white">
+        <div className="flex items-center justify-between mb-4 md:mb-6">
+          <p className="text-2xl md:text-3xl font-semibold text-[#1C2A39]">
+            Achievements
+          </p>
+          <Award className="text-yellow-500" size={24} />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 w-full">
+          {/* Achievement 1 */}
+          <div className="rounded-lg flex flex-col gap-4 justify-center items-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+              <Image
+                src={"/img/course-complete.png"}
+                alt="Completed Course"
+                width={32}
+                height={32}
+                className="w-8 h-8"
+              />
+            </div>
+            <div className="text-center">
+              <p className="text-lg md:text-xl font-semibold text-[#1C2A39]">
+                Course Complete
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                Completed 5+ courses
+              </p>
+            </div>
           </div>
 
           {/* Achievement 2 */}
@@ -193,7 +280,7 @@ const UserProfile = () => {
             <span className="text-gray-700">Member since {new Date().getFullYear()}</span>
           </div>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 };
