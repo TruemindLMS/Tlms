@@ -67,7 +67,7 @@ export default function CoursesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-cover ml-20 md:ml-10 lg:ml-1 bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
+        <div className="min-h-screen bg-cover ml-1 lg:ml-1 md:ml-5 bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2"> Courses 📚</h1>

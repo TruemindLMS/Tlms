@@ -51,7 +51,7 @@ export interface ApiResponse {
     user?: any
 }
 
-// ==================== Course DTOs (Matching Backend Exactly) ====================
+// ==================== Course DTOs ====================
 
 export interface CreateLessonRequestDto {
     title: string
@@ -71,7 +71,6 @@ export interface CreateCourseRequestDto {
     modules: CreateModuleRequestDto[]
 }
 
-// Update DTOs (for PUT requests)
 export interface UpdateLessonRequestDto {
     title?: string
     content?: string
@@ -89,8 +88,6 @@ export interface UpdateCourseRequestDto {
     description?: string
     modules?: CreateModuleRequestDto[]
 }
-
-// ==================== Response Interfaces ====================
 
 export interface Lesson {
     id: string
@@ -131,22 +128,44 @@ export interface Course {
     updatedAt?: string
 }
 
-// ==================== Mock Data ====================
+// ==================== Persistent Mock Data ====================
 
-// Mock user database for testing
-const mockUsers = new Map()
+// Helper to load users from localStorage
+function loadMockUsers(): Map<string, any> {
+    if (typeof window === 'undefined') return new Map()
 
-// Initialize with a test user
-mockUsers.set('test@example.com', {
-    id: '1',
-    email: 'test@example.com',
-    password: 'Test123!',
-    firstName: 'Test',
-    lastName: 'User',
-    role: 'individual'
-})
+    const savedUsers = localStorage.getItem('mockUsers')
+    if (savedUsers) {
+        const users = JSON.parse(savedUsers)
+        return new Map(Object.entries(users))
+    }
 
-// Mock reset tokens storage
+    // Initialize with default test user
+    const defaultUsers = {
+        'test@example.com': {
+            id: '1',
+            email: 'test@example.com',
+            password: 'Test123!',
+            firstName: 'Test',
+            lastName: 'User',
+            role: 'individual'
+        }
+    }
+    localStorage.setItem('mockUsers', JSON.stringify(defaultUsers))
+    return new Map(Object.entries(defaultUsers))
+}
+
+// Helper to save users to localStorage
+function saveMockUsers(users: Map<string, any>) {
+    if (typeof window === 'undefined') return
+    const usersObj = Object.fromEntries(users)
+    localStorage.setItem('mockUsers', JSON.stringify(usersObj))
+}
+
+// Load persistent mock users
+const mockUsers = loadMockUsers()
+
+// Mock reset tokens storage (session only, fine to not persist)
 const mockResetTokens = new Map()
 
 // Mock profile data
@@ -182,12 +201,12 @@ function convertToModule(moduleData: CreateModuleRequestDto, courseId?: string):
     }
 }
 
-// Mock courses data matching backend schema
+// Mock courses data
 const mockCourses: Course[] = [
     {
         id: '1',
         title: 'Advanced Figma Design and Prototype',
-        description: 'Master Figma design tools and create stunning prototypes. Learn advanced techniques for UI/UX design.',
+        description: 'Master Figma design tools and create stunning prototypes.',
         category: 'Design',
         level: 'Beginner',
         duration: '8 hours',
@@ -201,18 +220,8 @@ const mockCourses: Course[] = [
                 title: 'Introduction to Figma',
                 orderIndex: 1,
                 lessons: [
-                    { id: 'l1', title: 'Getting Started with Figma', content: 'Learn the basics of Figma interface', orderIndex: 1, duration: 15 },
-                    { id: 'l2', title: 'Tools Overview', content: 'Overview of all Figma tools', orderIndex: 2, duration: 20 },
-                    { id: 'l3', title: 'Creating Your First Design', content: 'Hands-on design creation', orderIndex: 3, duration: 45 }
-                ]
-            },
-            {
-                id: 'm2',
-                title: 'Advanced Prototyping',
-                orderIndex: 2,
-                lessons: [
-                    { id: 'l4', title: 'Interactive Components', content: 'Creating interactive elements', orderIndex: 1, duration: 30 },
-                    { id: 'l5', title: 'Micro-interactions', content: 'Adding micro-interactions', orderIndex: 2, duration: 25 }
+                    { id: 'l1', title: 'Getting Started with Figma', content: 'Learn the basics', orderIndex: 1, duration: 15 },
+                    { id: 'l2', title: 'Tools Overview', content: 'Overview of tools', orderIndex: 2, duration: 20 }
                 ]
             }
         ]
@@ -220,7 +229,7 @@ const mockCourses: Course[] = [
     {
         id: '2',
         title: 'Build Classic HTML and CSS Codes',
-        description: 'Learn to build responsive websites with modern HTML5 and CSS3 techniques.',
+        description: 'Learn to build responsive websites.',
         category: 'Development',
         level: 'Intermediate',
         duration: '12 hours',
@@ -228,31 +237,12 @@ const mockCourses: Course[] = [
         enrolledCount: 892,
         rating: 4.9,
         instructor: 'Prof. Sarah Johnson',
-        modules: [
-            {
-                id: 'm3',
-                title: 'HTML Fundamentals',
-                orderIndex: 1,
-                lessons: [
-                    { id: 'l6', title: 'HTML Structure', content: 'Understanding HTML document structure', orderIndex: 1, duration: 10 },
-                    { id: 'l7', title: 'Semantic HTML', content: 'Using semantic elements', orderIndex: 2, duration: 25 }
-                ]
-            },
-            {
-                id: 'm4',
-                title: 'CSS Styling',
-                orderIndex: 2,
-                lessons: [
-                    { id: 'l8', title: 'CSS Selectors', content: 'Understanding CSS selectors', orderIndex: 1, duration: 15 },
-                    { id: 'l9', title: 'Flexbox and Grid', content: 'Modern layout techniques', orderIndex: 2, duration: 40 }
-                ]
-            }
-        ]
+        modules: []
     },
     {
         id: '3',
         title: 'Intro To Digital Marketing',
-        description: 'Learn digital marketing strategies, SEO, social media, and analytics.',
+        description: 'Learn digital marketing strategies.',
         category: 'Marketing',
         level: 'Beginner',
         duration: '10 hours',
@@ -271,7 +261,10 @@ export async function loginUser(email: string, password: string): Promise<LoginR
         console.log('🔐 Mock login for:', email)
         await new Promise(resolve => setTimeout(resolve, 1000))
 
-        const user = mockUsers.get(email)
+        // Reload users from localStorage to ensure we have latest
+        const users = loadMockUsers()
+        const user = users.get(email)
+
         if (!user || user.password !== password) {
             throw new Error('Invalid email or password')
         }
@@ -330,23 +323,37 @@ export async function registerUser(userData: RegisterRequest): Promise<ApiRespon
     if (USE_MOCK) {
         console.log('📝 Mock registration for:', userData.email)
         await new Promise(resolve => setTimeout(resolve, 1000))
-        if (mockUsers.has(userData.email)) {
+
+        // Load current users
+        const users = loadMockUsers()
+
+        if (users.has(userData.email)) {
             throw new Error('User with this email already exists')
         }
+
         const newUser = {
-            id: String(mockUsers.size + 1),
+            id: String(users.size + 1),
             email: userData.email,
             password: userData.password,
             firstName: userData.firstName,
             lastName: userData.lastName,
             role: userData.role
         }
-        mockUsers.set(userData.email, newUser)
+
+        users.set(userData.email, newUser)
+
+        // Save back to localStorage
+        const usersObj = Object.fromEntries(users)
+        localStorage.setItem('mockUsers', JSON.stringify(usersObj))
+
         localStorage.setItem('pendingUserData', JSON.stringify({
             fullName: `${userData.firstName} ${userData.lastName}`,
             email: userData.email,
             role: userData.role
         }))
+
+        console.log('✅ User registered and saved to localStorage:', newUser.email)
+
         return { success: true, message: 'Registration successful. Please verify your email.' }
     }
     try {
@@ -398,29 +405,53 @@ export async function verifyOtp(email: string, otp: string): Promise<ApiResponse
         console.log('🔐 Verifying OTP for:', email)
         await new Promise(resolve => setTimeout(resolve, 500))
         if (otp === '123456' || (otp.length === 6 && /^\d+$/.test(otp))) {
-            const user = mockUsers.get(email)
+            // Load users to get the registered user
+            const users = loadMockUsers()
+            let user = users.get(email)
+
+            if (!user) {
+                // Try to get from pending registration
+                const pendingData = localStorage.getItem('pendingUserData')
+                if (pendingData) {
+                    const parsed = JSON.parse(pendingData)
+                    user = {
+                        id: String(users.size + 1),
+                        email: email,
+                        firstName: parsed.fullName?.split(' ')[0] || email.split('@')[0],
+                        lastName: parsed.fullName?.split(' ').slice(1).join(' ') || '',
+                        role: parsed.role || 'individual',
+                        password: 'temp' // Will be updated during registration
+                    }
+                } else {
+                    user = {
+                        id: '1',
+                        email: email,
+                        firstName: email.split('@')[0],
+                        lastName: 'User',
+                        role: 'individual'
+                    }
+                }
+            }
+
             const mockResponse = {
                 success: true,
                 token: 'mock-jwt-token-12345',
                 refreshToken: 'mock-refresh-token-67890',
-                user: user || {
-                    id: '1',
-                    email: email,
-                    firstName: email.split('@')[0],
-                    lastName: 'User',
-                    role: 'individual'
-                },
+                user: user,
                 message: 'OTP verified successfully'
             }
+
             localStorage.setItem('authToken', mockResponse.token)
             localStorage.setItem('refreshToken', mockResponse.refreshToken)
             localStorage.setItem('user', JSON.stringify(mockResponse.user))
             localStorage.setItem('isAuthenticated', 'true')
-            localStorage.setItem('userFullName', `${mockResponse.user.firstName} ${mockResponse.user.lastName}`.trim())
-            localStorage.setItem('userEmail', mockResponse.user.email)
-            localStorage.setItem('userRole', mockResponse.user.role)
+            localStorage.setItem('userFullName', `${user.firstName} ${user.lastName}`.trim())
+            localStorage.setItem('userEmail', user.email)
+            localStorage.setItem('userRole', user.role)
             localStorage.removeItem('mockOtp')
             localStorage.removeItem('otpEmail')
+            localStorage.removeItem('pendingUserData')
+
             return mockResponse
         } else {
             throw new Error('Invalid OTP. Please enter a valid 6-digit code.')
@@ -457,23 +488,20 @@ export async function forgotPassword(email: string): Promise<ApiResponse> {
         console.log('🔑 Mock password reset for:', email)
         await new Promise(resolve => setTimeout(resolve, 500))
 
-        // Check if user exists
-        const user = mockUsers.get(email)
+        const users = loadMockUsers()
+        const user = users.get(email)
         if (!user) {
-            // Don't reveal that user doesn't exist for security
             return { success: true, message: 'If an account exists with this email, you will receive a reset link.' }
         }
 
-        // Generate a mock token
         const mockToken = `reset_token_${Date.now()}_${Math.random().toString(36).substring(7)}`
-        mockResetTokens.set(mockToken, { email, expires: Date.now() + 3600000 }) // 1 hour expiry
-
+        mockResetTokens.set(mockToken, { email, expires: Date.now() + 3600000 })
         console.log(`🔑 Mock reset token for ${email}: ${mockToken}`)
 
         return {
             success: true,
             message: 'Password reset link sent to your email',
-            token: mockToken // Only in mock mode for testing
+            token: mockToken
         }
     }
     try {
@@ -496,7 +524,6 @@ export async function resetPassword(token: string, newPassword: string): Promise
         console.log('🔑 Mock password reset with token:', token)
         await new Promise(resolve => setTimeout(resolve, 500))
 
-        // Validate token
         const resetData = mockResetTokens.get(token)
         if (!resetData) {
             throw new Error('Invalid or expired reset token')
@@ -507,11 +534,12 @@ export async function resetPassword(token: string, newPassword: string): Promise
             throw new Error('Reset token has expired. Please request a new one.')
         }
 
-        // Find user and update password
-        const user = mockUsers.get(resetData.email)
+        const users = loadMockUsers()
+        const user = users.get(resetData.email)
         if (user) {
             user.password = newPassword
-            mockUsers.set(resetData.email, user)
+            users.set(resetData.email, user)
+            saveMockUsers(users)
             mockResetTokens.delete(token)
             console.log(`✅ Password reset successfully for ${resetData.email}`)
         }
@@ -578,6 +606,7 @@ export function logout(): void {
     localStorage.removeItem('onboardingCompleted')
     localStorage.removeItem('mockOtp')
     localStorage.removeItem('otpEmail')
+    // Note: We don't clear mockUsers here to preserve registered users
     sessionStorage.removeItem('authToken')
     sessionStorage.removeItem('refreshToken')
     sessionStorage.removeItem('user')
@@ -643,20 +672,16 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
 // ==================== Course API Endpoints ====================
 
 export const courseApi = {
-    // GET /api/Courses - Get all courses
     getAll: async (): Promise<Course[]> => {
         if (USE_MOCK) {
-            console.log('📚 Mock: Getting all courses')
             await new Promise(resolve => setTimeout(resolve, 500))
             return mockCourses
         }
         return apiClient('/Courses')
     },
 
-    // GET /api/Courses/{courseId} - Get course by ID
     getById: async (courseId: string): Promise<Course> => {
         if (USE_MOCK) {
-            console.log('📚 Mock: Getting course by ID:', courseId)
             await new Promise(resolve => setTimeout(resolve, 500))
             const course = mockCourses.find(c => c.id === courseId)
             if (!course) throw new Error('Course not found')
@@ -665,10 +690,8 @@ export const courseApi = {
         return apiClient(`/Courses/${courseId}`)
     },
 
-    // POST /api/Courses - Create new course
     create: async (courseData: CreateCourseRequestDto): Promise<Course> => {
         if (USE_MOCK) {
-            console.log('📝 Mock: Creating course:', courseData)
             await new Promise(resolve => setTimeout(resolve, 1000))
             const newCourse: Course = {
                 id: String(mockCourses.length + 1),
@@ -685,33 +708,26 @@ export const courseApi = {
         return apiClient('/Courses', { method: 'POST', body: JSON.stringify(courseData) })
     },
 
-    // PUT /api/Courses/{courseId} - Update entire course
     update: async (courseId: string, courseData: UpdateCourseRequestDto): Promise<Course> => {
         if (USE_MOCK) {
-            console.log('✏️ Mock: Updating course:', courseId, courseData)
             await new Promise(resolve => setTimeout(resolve, 500))
             const courseIndex = mockCourses.findIndex(c => c.id === courseId)
             if (courseIndex === -1) throw new Error('Course not found')
-
             const existingCourse = mockCourses[courseIndex]
             const updatedCourse = { ...existingCourse }
-
             if (courseData.title !== undefined) updatedCourse.title = courseData.title
             if (courseData.description !== undefined) updatedCourse.description = courseData.description
             if (courseData.modules !== undefined) {
                 updatedCourse.modules = courseData.modules.map((m, idx) => convertToModule(m, courseId))
             }
-
             mockCourses[courseIndex] = updatedCourse
             return updatedCourse
         }
         return apiClient(`/Courses/${courseId}`, { method: 'PUT', body: JSON.stringify(courseData) })
     },
 
-    // DELETE /api/Courses/{courseId} - Delete course
     delete: async (courseId: string): Promise<void> => {
         if (USE_MOCK) {
-            console.log('🗑️ Mock: Deleting course:', courseId)
             await new Promise(resolve => setTimeout(resolve, 500))
             const courseIndex = mockCourses.findIndex(c => c.id === courseId)
             if (courseIndex === -1) throw new Error('Course not found')
@@ -721,167 +737,32 @@ export const courseApi = {
         return apiClient(`/Courses/${courseId}`, { method: 'DELETE' })
     },
 
-    // POST /api/Courses/{courseId}/modules - Add module to course
-    addModule: async (courseId: string, moduleData: CreateModuleRequestDto): Promise<Module> => {
-        if (USE_MOCK) {
-            console.log('📦 Mock: Adding module to course:', courseId, moduleData)
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const course = mockCourses.find(c => c.id === courseId)
-            if (!course) throw new Error('Course not found')
-
-            const newModule = convertToModule(moduleData, courseId)
-            course.modules.push(newModule)
-            return newModule
-        }
-        return apiClient(`/Courses/${courseId}/modules`, { method: 'POST', body: JSON.stringify(moduleData) })
-    },
-
-    // PUT /api/Courses/modules/{moduleId} - Update module
-    updateModule: async (moduleId: string, moduleData: UpdateModuleRequestDto): Promise<Module> => {
-        if (USE_MOCK) {
-            console.log('✏️ Mock: Updating module:', moduleId, moduleData)
-            await new Promise(resolve => setTimeout(resolve, 500))
-            for (const course of mockCourses) {
-                const moduleIndex = course.modules.findIndex(m => m.id === moduleId)
-                if (moduleIndex !== -1) {
-                    const existingModule = course.modules[moduleIndex]
-                    if (moduleData.title !== undefined) existingModule.title = moduleData.title
-                    if (moduleData.orderIndex !== undefined) existingModule.orderIndex = moduleData.orderIndex
-                    if (moduleData.lessons) {
-                        existingModule.lessons = moduleData.lessons.map((l, idx) => ({
-                            id: existingModule.lessons[idx]?.id || `l${Date.now()}_${idx}`,
-                            title: l.title,
-                            content: l.content,
-                            orderIndex: idx,
-                            duration: l.duration,
-                            moduleId: moduleId
-                        }))
-                    }
-                    course.modules[moduleIndex] = existingModule
-                    return existingModule
-                }
-            }
-            throw new Error('Module not found')
-        }
-        return apiClient(`/Courses/modules/${moduleId}`, { method: 'PUT', body: JSON.stringify(moduleData) })
-    },
-
-    // DELETE /api/Courses/modules/{moduleId} - Delete module
-    deleteModule: async (moduleId: string): Promise<void> => {
-        if (USE_MOCK) {
-            console.log('🗑️ Mock: Deleting module:', moduleId)
-            await new Promise(resolve => setTimeout(resolve, 500))
-            for (const course of mockCourses) {
-                const moduleIndex = course.modules.findIndex(m => m.id === moduleId)
-                if (moduleIndex !== -1) {
-                    course.modules.splice(moduleIndex, 1)
-                    return
-                }
-            }
-            throw new Error('Module not found')
-        }
-        return apiClient(`/Courses/modules/${moduleId}`, { method: 'DELETE' })
-    },
-
-    // POST /api/Courses/{courseId}/modules/{moduleId}/lessons - Add lesson to module
-    addLesson: async (courseId: string, moduleId: string, lessonData: CreateLessonRequestDto): Promise<Lesson> => {
-        if (USE_MOCK) {
-            console.log('📖 Mock: Adding lesson to module:', moduleId, lessonData)
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const course = mockCourses.find(c => c.id === courseId)
-            if (!course) throw new Error('Course not found')
-            const module = course.modules.find(m => m.id === moduleId)
-            if (!module) throw new Error('Module not found')
-            const newLesson: Lesson = {
-                id: `l${Date.now()}`,
-                title: lessonData.title,
-                content: lessonData.content,
-                orderIndex: module.lessons.length,
-                duration: lessonData.duration,
-                moduleId: moduleId
-            }
-            module.lessons.push(newLesson)
-            return newLesson
-        }
-        return apiClient(`/Courses/${courseId}/modules/${moduleId}/lessons`, { method: 'POST', body: JSON.stringify(lessonData) })
-    },
-
-    // PUT /api/Courses/lessons/{lessonId} - Update lesson
-    updateLesson: async (lessonId: string, lessonData: UpdateLessonRequestDto): Promise<Lesson> => {
-        if (USE_MOCK) {
-            console.log('✏️ Mock: Updating lesson:', lessonId, lessonData)
-            await new Promise(resolve => setTimeout(resolve, 500))
-            for (const course of mockCourses) {
-                for (const module of course.modules) {
-                    const lessonIndex = module.lessons.findIndex(l => l.id === lessonId)
-                    if (lessonIndex !== -1) {
-                        const updatedLesson = { ...module.lessons[lessonIndex] }
-                        if (lessonData.title !== undefined) updatedLesson.title = lessonData.title
-                        if (lessonData.content !== undefined) updatedLesson.content = lessonData.content
-                        if (lessonData.duration !== undefined) updatedLesson.duration = lessonData.duration
-                        module.lessons[lessonIndex] = updatedLesson
-                        return updatedLesson
-                    }
-                }
-            }
-            throw new Error('Lesson not found')
-        }
-        return apiClient(`/Courses/lessons/${lessonId}`, { method: 'PUT', body: JSON.stringify(lessonData) })
-    },
-
-    // DELETE /api/Courses/lessons/{lessonId} - Delete lesson
-    deleteLesson: async (lessonId: string): Promise<void> => {
-        if (USE_MOCK) {
-            console.log('🗑️ Mock: Deleting lesson:', lessonId)
-            await new Promise(resolve => setTimeout(resolve, 500))
-            for (const course of mockCourses) {
-                for (const module of course.modules) {
-                    const lessonIndex = module.lessons.findIndex(l => l.id === lessonId)
-                    if (lessonIndex !== -1) {
-                        module.lessons.splice(lessonIndex, 1)
-                        return
-                    }
-                }
-            }
-            throw new Error('Lesson not found')
-        }
-        return apiClient(`/Courses/lessons/${lessonId}`, { method: 'DELETE' })
-    },
-
-    // Custom endpoint for enrollment
     enroll: async (courseId: string): Promise<{ success: boolean }> => {
         if (USE_MOCK) {
-            console.log('✅ Mock: Enrolling in course:', courseId)
             await new Promise(resolve => setTimeout(resolve, 500))
             return { success: true }
         }
         return apiClient(`/Courses/${courseId}/enroll`, { method: 'POST' })
     },
 
-    // Custom endpoint to get user's enrolled courses
     getEnrolledCourses: async (): Promise<Course[]> => {
         if (USE_MOCK) {
-            console.log('📚 Mock: Getting enrolled courses')
             await new Promise(resolve => setTimeout(resolve, 500))
             return mockCourses.slice(0, 2)
         }
         return apiClient('/Users/enrolled-courses')
     },
 
-    // Custom endpoint for lesson progress
     updateLessonProgress: async (lessonId: string, completed: boolean): Promise<void> => {
         if (USE_MOCK) {
-            console.log('📊 Mock: Updating lesson progress:', lessonId, completed)
             await new Promise(resolve => setTimeout(resolve, 300))
             return
         }
         return apiClient(`/Courses/lessons/${lessonId}/progress`, { method: 'PUT', body: JSON.stringify({ completed }) })
     },
 
-    // Custom endpoint to get course progress
     getCourseProgress: async (courseId: string): Promise<{ progress: number; completedLessons: string[] }> => {
         if (USE_MOCK) {
-            console.log('📊 Mock: Getting course progress:', courseId)
             await new Promise(resolve => setTimeout(resolve, 300))
             const course = mockCourses.find(c => c.id === courseId)
             if (course) {
@@ -935,7 +816,6 @@ export const profileApi = {
 export const onboardingApi = {
     getStatus: async () => {
         if (USE_MOCK) {
-            console.log('📋 Mock: Getting onboarding status')
             await new Promise(resolve => setTimeout(resolve, 500))
             return { success: true, status: 'pending', steps: { bio: false, profilePicture: false, role: false, goals: false } }
         }
@@ -943,7 +823,6 @@ export const onboardingApi = {
     },
     submitBio: async (bioData: { bio: string }) => {
         if (USE_MOCK) {
-            console.log('📝 Mock: Submitting bio:', bioData)
             await new Promise(resolve => setTimeout(resolve, 500))
             return { success: true, message: 'Bio submitted successfully' }
         }
@@ -951,7 +830,6 @@ export const onboardingApi = {
     },
     uploadProfilePicture: async (file: File) => {
         if (USE_MOCK) {
-            console.log('🖼️ Mock: Uploading profile picture:', file.name)
             await new Promise(resolve => setTimeout(resolve, 1000))
             return { success: true, message: 'Profile picture uploaded successfully', url: '/mock-profile-picture.jpg' }
         }
@@ -965,7 +843,6 @@ export const onboardingApi = {
     },
     submitRole: async (roleData: { role: string }) => {
         if (USE_MOCK) {
-            console.log('💼 Mock: Submitting role:', roleData)
             await new Promise(resolve => setTimeout(resolve, 500))
             return { success: true, message: 'Role submitted successfully' }
         }
@@ -973,7 +850,6 @@ export const onboardingApi = {
     },
     submitGoals: async (goalsData: { goals: string[] }) => {
         if (USE_MOCK) {
-            console.log('🎯 Mock: Submitting goals:', goalsData)
             await new Promise(resolve => setTimeout(resolve, 500))
             return { success: true, message: 'Goals submitted successfully' }
         }
@@ -981,7 +857,6 @@ export const onboardingApi = {
     },
     completeOnboarding: async () => {
         if (USE_MOCK) {
-            console.log('✅ Mock: Completing onboarding')
             await new Promise(resolve => setTimeout(resolve, 500))
             localStorage.setItem('onboardingCompleted', 'true')
             return { success: true, message: 'Onboarding completed successfully', redirectUrl: '/dashboard' }
@@ -990,7 +865,6 @@ export const onboardingApi = {
     },
     skipOnboarding: async () => {
         if (USE_MOCK) {
-            console.log('⏭️ Mock: Skipping onboarding')
             await new Promise(resolve => setTimeout(resolve, 500))
             localStorage.setItem('onboardingCompleted', 'skipped')
             return { success: true, message: 'Onboarding skipped successfully', redirectUrl: '/dashboard' }

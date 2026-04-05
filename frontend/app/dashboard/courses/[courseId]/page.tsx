@@ -9,7 +9,7 @@ import {
     FileText, Video, Download, Share2, Heart, GraduationCap,
     Info, List, Layers
 } from 'lucide-react';
-import { isAuthenticated, courseApi, Course, Module, Lesson } from '@/lib/api';
+import { isAuthenticated, courseApi, Course, Module, Lesson, getUser } from '@/lib/api';
 
 export default function CourseDetailPage() {
     const params = useParams();
@@ -20,6 +20,11 @@ export default function CourseDetailPage() {
     const [loading, setLoading] = useState(true);
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
     const [isEnrolled, setIsEnrolled] = useState(false);
+
+    const getCurrentUserId = () => {
+        const user = getUser();
+        return user?.id || user?.email || 'anonymous';
+    };
 
     useEffect(() => {
         if (!isAuthenticated()) {
@@ -35,13 +40,15 @@ export default function CourseDetailPage() {
             const data = await courseApi.getById(courseId);
             setCourse(data);
 
-            // Expand first module by default
             if (data.modules.length > 0) {
                 setExpandedModules(new Set([data.modules[0].id]));
             }
 
-            const enrolledCourses = await courseApi.getEnrolledCourses();
-            setIsEnrolled(enrolledCourses.some(c => c.id === courseId));
+            // Check if user is enrolled from localStorage
+            const userId = getCurrentUserId();
+            const enrolledCoursesKey = `enrolledCourses_${userId}`;
+            const enrolledCourses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
+            setIsEnrolled(enrolledCourses.some((c: any) => c.id === courseId));
         } catch (error) {
             console.error('Error fetching course:', error);
         } finally {
@@ -49,31 +56,63 @@ export default function CourseDetailPage() {
         }
     };
 
-    const toggleModule = (moduleId: string) => {
-        const newExpanded = new Set(expandedModules);
-        if (newExpanded.has(moduleId)) {
-            newExpanded.delete(moduleId);
-        } else {
-            newExpanded.add(moduleId);
-        }
-        setExpandedModules(newExpanded);
-    };
-
     const handleEnroll = async () => {
         try {
-            await courseApi.enroll(courseId);
+            const userId = getCurrentUserId();
+            const enrolledCoursesKey = `enrolledCourses_${userId}`;
+            const userStatsKey = `userStats_${userId}`;
+            const startedKey = `hasStartedCourse_${userId}`;
+
+            // Get existing enrolled courses
+            const enrolledCourses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
+
+            // Check if already enrolled
+            if (!enrolledCourses.some((c: any) => c.id === courseId)) {
+                // Add new course to enrolled list
+                const newCourse = {
+                    id: courseId,
+                    title: course?.title,
+                    enrolledDate: new Date().toISOString(),
+                    progress: 0,
+                    lastLessonId: null
+                };
+                enrolledCourses.push(newCourse);
+                localStorage.setItem(enrolledCoursesKey, JSON.stringify(enrolledCourses));
+
+                // Update user stats
+                const savedStats = localStorage.getItem(userStatsKey);
+                let currentStats = savedStats ? JSON.parse(savedStats) : { enrolled: 0, completed: 0, progress: 0 };
+                currentStats.enrolled = enrolledCourses.length;
+                localStorage.setItem(userStatsKey, JSON.stringify(currentStats));
+                localStorage.setItem(startedKey, "true");
+
+                // Also update the API (if needed)
+                await courseApi.enroll(courseId);
+            }
+
             setIsEnrolled(true);
             alert('Successfully enrolled in the course!');
+
+            // Refresh page to show updated state
+            router.refresh();
         } catch (error) {
             console.error('Enrollment error:', error);
             alert('Failed to enroll. Please try again.');
         }
     };
 
+    const handleStartLearning = () => {
+        // Find first lesson to start with
+        if (course && course.modules.length > 0 && course.modules[0].lessons.length > 0) {
+            const firstLesson = course.modules[0].lessons[0];
+            router.push(`/dashboard/courses/${courseId}/lessons/${firstLesson.id}`);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <Loader2 size={40} className="animate-spin text-green-600 mx-auto" />
+                <Loader2 size={40} className="animate-spin text-primary-600 mx-auto" />
             </div>
         );
     }
@@ -82,7 +121,7 @@ export default function CourseDetailPage() {
         return (
             <div className="text-center py-12">
                 <h2 className="text-xl font-semibold text-gray-900">Course not found</h2>
-                <Link href="/dashboard/courses" className="text-green-600 mt-2 inline-block">
+                <Link href="/dashboard/courses" className="text-primary-600 mt-2 inline-block">
                     Back to Courses
                 </Link>
             </div>
@@ -93,15 +132,14 @@ export default function CourseDetailPage() {
     const totalDuration = course.duration || '4 sections of 5 weeks, 3 hours per week';
 
     return (
-        <div className="min-h-screen bg-cover bg-center ml-20 md:ml-10 lg:ml-1 bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
+        <div className="min-h-screen bg-cover bg-center ml-1 lg:ml-1 md:ml-5 bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
             {/* Hero Section */}
-            <div className="bg-gradient-to-r  bg-cover rounded-lg from-green-900 to-green-700 text-white">
+            <div className="bg-gradient-to-r bg-cover rounded-lg from-green-900 to-primary-700 text-white">
                 <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
                     <div className="flex flex-col lg:flex-row gap-8">
                         <div className="flex-1">
                             <h1 className="text-3xl md:text-4xl font-bold mb-4">{course.title}</h1>
 
-                            {/* User Story Section */}
                             <div className="bg-white/10 rounded-lg p-4 mb-6">
                                 <h3 className="font-semibold text-white/90 mb-2">User Story:</h3>
                                 <p className="text-white/80 text-sm">
@@ -145,11 +183,12 @@ export default function CourseDetailPage() {
                             ) : (
                                 <div className="bg-white/20 rounded-lg p-4">
                                     <p className="text-sm mb-2">You are enrolled in this course!</p>
-                                    <Link href={`/dashboard/courses/${courseId}/lessons/${course.modules[0]?.lessons[0]?.id}`}>
-                                        <button className="bg-white text-green-900 px-6 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition">
-                                            Start Learning
-                                        </button>
-                                    </Link>
+                                    <button
+                                        onClick={handleStartLearning}
+                                        className="bg-white text-green-900 px-6 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition"
+                                    >
+                                        Start Learning
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -157,10 +196,9 @@ export default function CourseDetailPage() {
                 </div>
             </div>
 
-            {/* Course Content */}
+            {/* Rest of the component remains the same */}
             <div className="max-w-7xl mx-auto px-6 py-12">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
                     <div className="lg:col-span-2">
                         {/* What You Will Learn */}
                         <div className="bg-white rounded-xl p-6 shadow-sm border mb-8">
@@ -211,7 +249,15 @@ export default function CourseDetailPage() {
                                     module={module}
                                     index={index}
                                     isExpanded={expandedModules.has(module.id)}
-                                    onToggle={() => toggleModule(module.id)}
+                                    onToggle={() => {
+                                        const newExpanded = new Set(expandedModules);
+                                        if (newExpanded.has(module.id)) {
+                                            newExpanded.delete(module.id);
+                                        } else {
+                                            newExpanded.add(module.id);
+                                        }
+                                        setExpandedModules(newExpanded);
+                                    }}
                                     courseId={courseId}
                                     isEnrolled={isEnrolled}
                                 />
@@ -222,14 +268,7 @@ export default function CourseDetailPage() {
                         <div className="mt-8 bg-gray-50 rounded-xl p-6">
                             <h2 className="text-xl font-bold text-gray-900 mb-3">Description:</h2>
                             <p className="text-gray-600 leading-relaxed">
-                                {course.description} Whether you're a beginner or an experienced designer,
-                                this course will take your skills to the next level. The course covers everything
-                                from the basics to advanced techniques like working with variables, functions,
-                                plugins, and libraries. You'll learn how to create responsive designs, build
-                                interactive prototypes, and optimize your work for performance. By the end of
-                                the course, you'll have a solid understanding of Figma's features and be able
-                                to apply them to real-world projects. You'll also have a portfolio showcasing
-                                your best work, which will impress potential employers.
+                                {course.description}
                             </p>
                         </div>
                     </div>
@@ -284,31 +323,24 @@ function ModuleSection({
     courseId: string;
     isEnrolled: boolean;
 }) {
-    // Get section number (1, 2, 3, 4)
     const sectionNumber = index + 1;
-
-    // Map module titles to match screenshot
     const sectionTitles = [
         "Introduction to Figma Prototyping",
         "Creating Basic Components",
         "Styling Components",
         "Advanced Techniques"
     ];
-
     const displayTitle = sectionTitles[index] || module.title;
-
-    // Lessons for each section
     const sectionLessons = [
         ["Introduction to Figma", "Elements Panel", "Styles Panel", "Components Panel", "Libraries Panel"],
         ["Creating a Button", "Creating a Text Field", "Creating a Form", "Creating a Image Uploader"],
         ["Styling Buttons", "Styling Text Fields", "Styling Forms", "Styling Images"],
         ["Using Variables", "Using Functions", "Using Plugins", "Using Libraries"]
     ];
-
     const lessons = sectionLessons[index] || module.lessons.map(l => l.title);
 
     return (
-        <div className="h-screen bg-cover bg-center overflow-none bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <button
                 onClick={onToggle}
                 className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition"
@@ -333,12 +365,21 @@ function ModuleSection({
                             key={lessonIndex}
                             className="px-5 py-3 flex items-center gap-3 border-t first:border-t-0 hover:bg-gray-100 transition"
                         >
-                            <Play size={16} className="text-gray-400" />
-                            <div className="flex-1">
-                                <p className="text-sm text-gray-700">
-                                    {lessonTitle}
-                                </p>
-                            </div>
+                            {isEnrolled ? (
+                                <Link href={`/dashboard/courses/${courseId}/lessons/lesson_${index}_${lessonIndex}`} className="flex items-center gap-3 flex-1">
+                                    <Play size={16} className="text-gray-400" />
+                                    <div className="flex-1">
+                                        <p className="text-sm text-gray-700">{lessonTitle}</p>
+                                    </div>
+                                </Link>
+                            ) : (
+                                <div className="flex items-center gap-3 flex-1 cursor-not-allowed opacity-60">
+                                    <Play size={16} className="text-gray-400" />
+                                    <div className="flex-1">
+                                        <p className="text-sm text-gray-700">{lessonTitle}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

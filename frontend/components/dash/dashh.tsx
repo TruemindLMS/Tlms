@@ -23,7 +23,7 @@ import { isAuthenticated, getUser, logoutUser, courseApi } from "@/lib/api";
 export default function DashboardPage() {
   const router = useRouter();
   const [hasStartedCourse, setHasStartedCourse] = useState(false);
-  const [userName, setUserName] = useState("Favour");
+  const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
   const [userStats, setUserStats] = useState({
     enrolled: 0,
@@ -39,81 +39,91 @@ export default function DashboardPage() {
       return;
     }
     fetchDashboardData();
+
+    // Listen for stats updates from lesson player
+    const handleStatsUpdate = (event: any) => {
+      fetchDashboardData();
+    };
+    window.addEventListener('statsUpdated', handleStatsUpdate);
+    return () => window.removeEventListener('statsUpdated', handleStatsUpdate);
   }, [router]);
+
+  const getCurrentUserId = () => {
+    const user = getUser();
+    return user?.id || user?.email || 'anonymous';
+  };
 
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
       const user = getUser();
-      setUserName(user?.firstName || user?.email?.split('@')[0] || "Favour");
+      const userId = getCurrentUserId();
+      setUserName(user?.firstName || user?.email?.split('@')[0] || "User");
 
-      // Fetch real data from API
-      const enrolledCourses = await courseApi.getEnrolledCourses();
-      let completed = 0;
-      let totalProgress = 0;
-      let pending = 0;
+      // Get user-specific stats from localStorage with user ID prefix
+      const userStatsKey = `userStats_${userId}`;
+      const userCertKey = `userCertifications_${userId}`;
+      const startedKey = `hasStartedCourse_${userId}`;
+      const enrolledCoursesKey = `enrolledCourses_${userId}`;
 
-      for (const course of enrolledCourses) {
-        const progress = await courseApi.getCourseProgress(course.id);
-        totalProgress += progress.progress;
-        if (progress.progress === 100) {
-          completed++;
-        } else {
-          pending++;
-        }
-      }
+      const savedStats = localStorage.getItem(userStatsKey);
+      const started = localStorage.getItem(startedKey);
+      const enrolledCourses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
 
-      const enrolledCount = enrolledCourses.length;
-      const avgProgress = enrolledCount > 0 ? Math.floor(totalProgress / enrolledCount) : 0;
-
-      // Get certifications count from localStorage or API
-      const certifications = parseInt(localStorage.getItem('userCertifications') || '0');
-
-      // Get pending courses (enrolled but not completed)
-      const pendingCount = enrolledCount - completed;
-
-      const stats = {
-        enrolled: enrolledCount,
-        completed: completed,
-        progress: avgProgress,
-        pending: pendingCount,
-        certifications: certifications
-      };
-
-      setUserStats(stats);
-      setHasStartedCourse(enrolledCount > 0);
-
-      // Save to localStorage for profile page to read
-      localStorage.setItem('userStats', JSON.stringify({
-        enrolled: enrolledCount,
-        completed: completed,
-        progress: avgProgress
-      }));
-      localStorage.setItem('userCourses', JSON.stringify(enrolledCourses));
-      localStorage.setItem('hasStartedCourse', enrolledCount > 0 ? 'true' : 'false');
-
-    } catch (error) {
-      console.error('Error fetching dashboard:', error);
-
-      // Fallback to localStorage
-      const savedStats = localStorage.getItem("userStats");
-      const started = localStorage.getItem("hasStartedCourse");
-      const onboardingCompleted = localStorage.getItem("onboardingCompleted");
-
-      if (savedStats) {
+      if (savedStats && started === "true") {
         const parsedStats = JSON.parse(savedStats);
         setUserStats({
           enrolled: parsedStats.enrolled || 0,
           completed: parsedStats.completed || 0,
           progress: parsedStats.progress || 0,
           pending: (parsedStats.enrolled || 0) - (parsedStats.completed || 0),
-          certifications: parseInt(localStorage.getItem('userCertifications') || '0')
+          certifications: parseInt(localStorage.getItem(userCertKey) || '0')
         });
-        setHasStartedCourse(parsedStats.enrolled > 0);
-      } else if (started === "true" && onboardingCompleted === "true") {
+        setHasStartedCourse(parsedStats.enrolled > 0 || parsedStats.completed > 0);
+      } else if (enrolledCourses.length > 0) {
+        // Calculate stats from enrolled courses
+        let completed = 0;
+        let totalProgress = 0;
+        for (const course of enrolledCourses) {
+          totalProgress += course.progress || 0;
+          if (course.progress === 100) completed++;
+        }
+        const avgProgress = enrolledCourses.length > 0 ? Math.floor(totalProgress / enrolledCourses.length) : 0;
+
+        const stats = {
+          enrolled: enrolledCourses.length,
+          completed: completed,
+          progress: avgProgress,
+          pending: enrolledCourses.length - completed,
+          certifications: parseInt(localStorage.getItem(userCertKey) || '0')
+        };
+
+        localStorage.setItem(userStatsKey, JSON.stringify(stats));
+        localStorage.setItem(startedKey, "true");
+        setUserStats(stats);
         setHasStartedCourse(true);
-        setUserStats({ enrolled: 0, completed: 0, progress: 0, pending: 0, certifications: 0 });
+      } else {
+        // New user - all zeros
+        setUserStats({
+          enrolled: 0,
+          completed: 0,
+          progress: 0,
+          pending: 0,
+          certifications: 0
+        });
+        setHasStartedCourse(false);
       }
+
+    } catch (error) {
+      console.error('Error fetching dashboard:', error);
+      setUserStats({
+        enrolled: 0,
+        completed: 0,
+        progress: 0,
+        pending: 0,
+        certifications: 0
+      });
+      setHasStartedCourse(false);
     } finally {
       setLoading(false);
     }
@@ -121,6 +131,13 @@ export default function DashboardPage() {
 
   const handleStartCourse = () => {
     router.push('/dashboard/courses');
+  };
+
+  const handleUpdateStats = (newStats: any) => {
+    const userId = getCurrentUserId();
+    const userStatsKey = `userStats_${userId}`;
+    localStorage.setItem(userStatsKey, JSON.stringify(newStats));
+    setUserStats(newStats);
   };
 
   if (loading) {
@@ -135,19 +152,19 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen ml-20 lg:ml-1 md:ml-10 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
-      <div className="pt-5">
+    <div className="min-h-screen ml-1 lg:ml-1 md:ml-5 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
+      <div className="pt-5 p-6">
         {!hasStartedCourse ? (
           <FirstTimeDashboard onStartCourse={handleStartCourse} userName={userName} />
         ) : (
-          <ActiveDashboard userName={userName} userStats={userStats} />
+          <ActiveDashboard userName={userName} userStats={userStats} onUpdateStats={handleUpdateStats} />
         )}
       </div>
     </div>
   );
 }
 
-// FIRST TIME USER DASHBOARD
+// FIRST TIME USER DASHBOARD - Always shown for new users
 function FirstTimeDashboard({ onStartCourse, userName }: { onStartCourse: () => void; userName: string }) {
   const courses = [
     { title: "UI/UX Design", icon: "🎨", description: "Master user interface and user experience design" },
@@ -225,21 +242,59 @@ function FirstTimeDashboard({ onStartCourse, userName }: { onStartCourse: () => 
   );
 }
 
-// ACTIVE USER DASHBOARD - With dynamic stats
-function ActiveDashboard({ userName, userStats }: { userName: string; userStats: { enrolled: number; completed: number; progress: number; pending: number; certifications: number } }) {
+// ACTIVE USER DASHBOARD - With individual user stats and continue learning
+function ActiveDashboard({ userName, userStats, onUpdateStats }: {
+  userName: string;
+  userStats: { enrolled: number; completed: number; progress: number; pending: number; certifications: number };
+  onUpdateStats: (stats: any) => void;
+}) {
 
-  // Mock data for schedule and tasks (these would come from API in production)
+  const router = useRouter();
+  const [enrolledCoursesList, setEnrolledCoursesList] = useState<any[]>([]);
+
+  const getCurrentUserId = () => {
+    const user = getUser();
+    return user?.id || user?.email || 'anonymous';
+  };
+
+  useEffect(() => {
+    const userId = getCurrentUserId();
+    const enrolledCoursesKey = `enrolledCourses_${userId}`;
+    const courses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
+    setEnrolledCoursesList(courses);
+
+    // Listen for stats updates from lesson player
+    const handleStatsUpdate = () => {
+      const updatedCourses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
+      setEnrolledCoursesList(updatedCourses);
+
+      // Refresh stats
+      let completed = 0;
+      let totalProgress = 0;
+      for (const course of updatedCourses) {
+        totalProgress += course.progress || 0;
+        if (course.progress === 100) completed++;
+      }
+      const avgProgress = updatedCourses.length > 0 ? Math.floor(totalProgress / updatedCourses.length) : 0;
+
+      onUpdateStats({
+        enrolled: updatedCourses.length,
+        completed: completed,
+        progress: avgProgress,
+        pending: updatedCourses.length - completed,
+        certifications: userStats.certifications
+      });
+    };
+
+    window.addEventListener('statsUpdated', handleStatsUpdate);
+    return () => window.removeEventListener('statsUpdated', handleStatsUpdate);
+  }, []);
+
   const scheduleData = [
     { time: "09:00 AM", course: "UI/UX Design Fundamentals", type: "Live Session", duration: "1.5h" },
     { time: "11:00 AM", course: "Advanced React Development", type: "Workshop", duration: "2h" },
     { time: "02:00 PM", course: "Product Management", type: "Study Group", duration: "1.5h" },
     { time: "04:00 PM", course: "Portfolio Review", type: "Mentoring", duration: "1h" },
-  ];
-
-  // Dynamic active courses based on enrolled courses
-  const activeCourses = [
-    { title: "ADVANCE FIGMA DESIGN", category: "DESIGN", progress: userStats.completed > 0 ? Math.min(75, userStats.progress) : 0, color: "green" },
-    { title: "INTRODUCTION TO REACT JS", category: "DEVELOPMENT", progress: userStats.completed > 1 ? 45 : 0, color: "blue" },
   ];
 
   const tasks = [
@@ -248,14 +303,41 @@ function ActiveDashboard({ userName, userStats }: { userName: string; userStats:
     { title: "Join Study Group", description: "Product Management", time: "Friday" },
   ];
 
-  // Calculate trend percentages (mock - would come from API)
   const enrolledTrend = userStats.enrolled > 0 ? "+12.5%" : "0%";
   const pendingTrend = userStats.pending > 0 ? "+12.5%" : "0%";
   const completedTrend = userStats.completed > 0 ? "+12.5%" : "0%";
 
+  // Show empty state for users with no courses
+  if (userStats.enrolled === 0 && userStats.completed === 0 && enrolledCoursesList.length === 0) {
+    return (
+      <main className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-lg font-semibold text-gray-500">
+            {new Date().getHours() < 12 ? "GOOD MORNING" : new Date().getHours() < 17 ? "GOOD AFTERNOON" : "GOOD EVENING"}
+          </h1>
+          <p className="text-gray-900 font-bold text-2xl">Welcome Back, {userName.toUpperCase()}</p>
+        </div>
+
+        <div className="text-center py-12 bg-white rounded-2xl shadow-sm border">
+          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <BookOpen size={40} className="text-gray-400" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Courses Yet</h3>
+          <p className="text-gray-500 mb-6">Start your learning journey by enrolling in your first course</p>
+          <button
+            onClick={() => window.location.href = '/dashboard/courses'}
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+          >
+            Browse Courses
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
-      {/* GOOD EVENING Section */}
+    <main className="max-w-7xl mx-auto">
+      {/* Greeting Section */}
       <div className="mb-8">
         <h1 className="text-lg font-semibold text-gray-500">
           {new Date().getHours() < 12 ? "GOOD MORNING" : new Date().getHours() < 17 ? "GOOD AFTERNOON" : "GOOD EVENING"}
@@ -263,7 +345,7 @@ function ActiveDashboard({ userName, userStats }: { userName: string; userStats:
         <p className="text-gray-900 font-bold text-2xl">Welcome Back, {userName.toUpperCase()}</p>
       </div>
 
-      {/* Stats Cards - 4 columns with dynamic data */}
+      {/* Stats Cards - Individual user data */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         {/* Course Takers (Enrolled) */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
@@ -280,7 +362,7 @@ function ActiveDashboard({ userName, userStats }: { userName: string; userStats:
           <p className="text-3xl font-bold text-gray-900">{userStats.enrolled}</p>
           <p className="text-sm text-gray-500 mt-1">Course Takers</p>
           {userStats.enrolled > 0 && (
-            <p className="text-xs text-gray-400 mt-1">+12.5% from yesterday</p>
+            <p className="text-xs text-gray-400 mt-1">Courses you've enrolled in</p>
           )}
         </div>
 
@@ -299,7 +381,7 @@ function ActiveDashboard({ userName, userStats }: { userName: string; userStats:
           <p className="text-3xl font-bold text-gray-900">{userStats.pending}</p>
           <p className="text-sm text-gray-500 mt-1">Pending courses</p>
           {userStats.pending > 0 && (
-            <p className="text-xs text-gray-400 mt-1">+12.5% from last month</p>
+            <p className="text-xs text-gray-400 mt-1">Courses in progress</p>
           )}
         </div>
 
@@ -318,7 +400,7 @@ function ActiveDashboard({ userName, userStats }: { userName: string; userStats:
           <p className="text-3xl font-bold text-gray-900">{userStats.completed}</p>
           <p className="text-sm text-gray-500 mt-1">Completed courses</p>
           {userStats.completed > 0 && (
-            <p className="text-xs text-gray-400 mt-1">+12.5% from yesterday</p>
+            <p className="text-xs text-gray-400 mt-1">Courses you've finished</p>
           )}
         </div>
 
@@ -385,6 +467,43 @@ function ActiveDashboard({ userName, userStats }: { userName: string; userStats:
         {/* Active Courses */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h3 className="font-semibold text-gray-900 text-lg mb-4">Active Courses</h3>
+
+          {/* Continue Learning Section */}
+          {enrolledCoursesList.length > 0 && (
+            <div className="mb-6">
+              <h4 className="font-medium text-gray-700 text-sm mb-3">Continue Learning</h4>
+              {enrolledCoursesList.map((course: any) => (
+                <div key={course.id} className="mb-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+                  onClick={() => router.push(`/dashboard/courses/${course.id}`)}>
+                  <p className="font-medium text-gray-900 text-sm">{course.title}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex-1 mr-3">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-gray-500">Progress</span>
+                        <span className="text-green-600">{course.progress || 0}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div
+                          className="bg-green-600 h-1.5 rounded-full transition-all"
+                          style={{ width: `${course.progress || 0}%` }}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/dashboard/courses/${course.id}`);
+                      }}
+                      className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {userStats.enrolled === 0 ? (
             <div className="text-center py-8">
               <BookOpen size={48} className="text-gray-300 mx-auto mb-3" />
@@ -397,30 +516,12 @@ function ActiveDashboard({ userName, userStats }: { userName: string; userStats:
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {activeCourses.map((course, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-                      <div className={`w-2 h-2 rounded-full ${course.color === 'green' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{course.title}</p>
-                      <p className="text-xs text-gray-500">{course.category}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">{course.progress}%</span>
-                    <div className="w-20 bg-gray-100 rounded-full h-1.5">
-                      <div
-                        className={`h-1.5 rounded-full ${course.color === 'green' ? 'bg-green-500' : 'bg-blue-500'}`}
-                        style={{ width: `${course.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <button
+              onClick={() => window.location.href = '/dashboard/courses'}
+              className="w-full mt-2 py-2 bg-green-50 text-green-700 rounded-lg text-sm font-medium hover:bg-green-100 transition"
+            >
+              Browse More Courses
+            </button>
           )}
         </div>
 

@@ -136,7 +136,7 @@ const UserProfile = () => {
   const bio = profile?.bio || "No bio added yet. Click edit to add a bio.";
 
   return (
-    <div className="max-w-5xl mx-auto py-6 md:py-10 ml-20 md:ml-10 lg:ml-1 px-4">
+    <div className="max-w-5xl mx-auto py-6 md:py-10 ml-1 lg:ml-1 md:ml-5 px-4">
       {error && (
         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
           {error}

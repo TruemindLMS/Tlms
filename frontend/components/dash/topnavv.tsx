@@ -186,36 +186,36 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
             <nav
                 className={`fixed top-0 right-0 ${getLeftSpacing()} bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-40 transition-all duration-300`}
             >
-                <div className="flex items-center justify-between px-4 md:px-6 h-16">
-                    {/* Menu Button for Mobile */}
+                <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 h-16 gap-2">
+                    {/* Menu Button for Mobile - Only show on mobile when sidebar is collapsed */}
                     <button
                         onClick={onMenuClick}
-                        className="hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 mr-2"
-                    >s
+                        className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0"
+                    >
                         <Menu size={20} className="text-gray-600 dark:text-gray-300" />
                     </button>
 
-                    {/* Search Bar - Center */}
-                    <div className="flex-1 max-w-2xl mx-2 md:mx-4">
-                        <div className="relative">
+                    {/* Search Bar - Takes remaining space */}
+                    <div className="flex-1 min-w-0">
+                        <div className="relative w-full">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search Anything"
-                                className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                                className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all text-sm"
                             />
                         </div>
                     </div>
 
                     {/* Right side - Actions */}
-                    <div className="flex items-center gap-1 md:gap-4">
-                        {/* Language Selector */}
-                        <div className="relative">
+                    <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                        {/* Language Selector - Hide on mobile */}
+                        <div className="relative hidden md:flex">
                             <button
                                 onClick={() => setIsLangOpen(!isLangOpen)}
-                                className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                className="flex items-center gap-1 px-2 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                             >
                                 <Globe size={18} className="text-gray-600 dark:text-gray-300" />
                                 <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -237,7 +237,6 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                                 key={lang.code}
                                                 onClick={() => {
                                                     setIsLangOpen(false)
-                                                    // Handle language change
                                                 }}
                                                 className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
                                             >
@@ -262,24 +261,24 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                         <div className="relative">
                             <button
                                 onClick={() => setIsProfileOpen(true)}
-                                className="flex items-center gap-1 md:gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                className="flex items-center gap-1 pl-1 pr-1 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                             >
                                 {profilePicture ? (
                                     <Image
                                         src={profilePicture}
-                                        width={36}
-                                        height={36}
+                                        width={32}
+                                        height={32}
                                         alt="Profile"
-                                        className="rounded-full ring-2 ring-primary-200 dark:ring-gray-700 object-cover w-9 h-9"
+                                        className="rounded-full ring-2 ring-green-200 dark:ring-gray-700 object-cover w-8 h-8"
                                     />
                                 ) : (
-                                    <div className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center ring-2 ring-green-200">
-                                        <span className="text-white font-semibold text-sm">
+                                    <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center ring-2 ring-green-200">
+                                        <span className="text-white font-semibold text-xs">
                                             {userInitials || 'U'}
                                         </span>
                                     </div>
                                 )}
-                                <ChevronDown size={16} className="hidden sm:inline text-gray-400" />
+                                <ChevronDown size={14} className="hidden sm:inline text-gray-400" />
                             </button>
                         </div>
                     </div>
