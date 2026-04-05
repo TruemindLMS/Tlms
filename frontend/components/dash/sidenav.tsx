@@ -30,7 +30,7 @@ interface SidebarProps {
 
 const navigation: NavItem[] = [
     // GENERAL section
-    { name: 'Dashboard', href: '/dash', icon: LayoutDashboard, section: 'general' },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, section: 'general' },
     { name: 'Courses', href: '/dashboard/courses', icon: BookOpen, section: 'general' },
     { name: 'Task', href: '/dashboard/task', icon: Award, section: 'general' },
     { name: 'Team', href: '/dashboard/team', icon: Users, section: 'general' },
@@ -66,7 +66,7 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                         <img
                             width={150}
                             height={42}
-                            src="/img/tlogo.png"
+                            src="/img/logo.png"
                             alt="Learning Illustration"
                         />
                     )}

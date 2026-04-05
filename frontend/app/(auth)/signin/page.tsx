@@ -254,7 +254,7 @@ export default function LoginPage() {
               </div>
 
               {/* Options */}
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between w-full items-center">
                 <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
                   <input
                     type="checkbox"

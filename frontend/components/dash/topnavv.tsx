@@ -50,6 +50,8 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
     const [userName, setUserName] = useState('')
     const [userFullName, setUserFullName] = useState('')
     const [userEmail, setUserEmail] = useState('')
+    const [userInitials, setUserInitials] = useState('')
+    const [profilePicture, setProfilePicture] = useState<string | null>(null)
     const [greeting, setGreeting] = useState('Good Morning')
 
     // Check if mobile view
@@ -64,21 +66,49 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
 
     // Load user data and set greeting
     useEffect(() => {
-        const user = getUser()
-        const fullName = getUserFullName()
-        const email = getUserEmail()
+        const loadUserData = () => {
+            const user = getUser()
+            const fullName = getUserFullName()
+            const email = getUserEmail()
 
-        if (user) {
-            setUserName(user.firstName || user.email?.split('@')[0] || 'User')
-            setUserFullName(fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim())
-            setUserEmail(email || user.email || '')
-        } else {
-            // Fallback to localStorage directly if getUser fails
-            const storedName = localStorage.getItem('userFullName')
-            const storedEmail = localStorage.getItem('userEmail')
-            if (storedName) setUserFullName(storedName)
-            if (storedEmail) setUserEmail(storedEmail)
-            setUserName(storedName?.split(' ')[0] || 'User')
+            // Get profile picture from localStorage
+            const savedProfilePic = localStorage.getItem('userProfilePicture')
+            if (savedProfilePic) {
+                setProfilePicture(savedProfilePic)
+            }
+
+            if (user) {
+                const firstName = user.firstName || user.email?.split('@')[0] || 'User'
+                const lastName = user.lastName || ''
+                setUserName(firstName)
+                setUserFullName(fullName || `${firstName} ${lastName}`.trim())
+                setUserEmail(email || user.email || '')
+
+                // Generate initials from first and last name
+                const initials = `${firstName.charAt(0)}${lastName.charAt(0) || firstName.charAt(1) || ''}`.toUpperCase()
+                setUserInitials(initials)
+            } else {
+                // Fallback to localStorage directly if getUser fails
+                const storedName = localStorage.getItem('userFullName')
+                const storedEmail = localStorage.getItem('userEmail')
+                const storedProfilePic = localStorage.getItem('userProfilePicture')
+
+                if (storedName) {
+                    setUserFullName(storedName)
+                    const nameParts = storedName.split(' ')
+                    const firstName = nameParts[0] || 'User'
+                    setUserName(firstName)
+                    const initials = `${firstName.charAt(0)}${nameParts[1]?.charAt(0) || ''}`.toUpperCase()
+                    setUserInitials(initials || firstName.charAt(0).toUpperCase())
+                }
+                if (storedEmail) setUserEmail(storedEmail)
+                if (storedProfilePic) setProfilePicture(storedProfilePic)
+
+                if (!storedName) {
+                    setUserName('User')
+                    setUserInitials('U')
+                }
+            }
         }
 
         // Set greeting based on time of day
@@ -86,6 +116,27 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
         if (hour < 12) setGreeting('Good Morning')
         else if (hour < 17) setGreeting('Good Afternoon')
         else setGreeting('Good Evening')
+
+        loadUserData()
+
+        // Listen for profile updates
+        const handleProfileUpdate = () => {
+            const updatedPic = localStorage.getItem('userProfilePicture')
+            if (updatedPic) setProfilePicture(updatedPic)
+
+            const user = getUser()
+            if (user) {
+                const firstName = user.firstName || user.email?.split('@')[0] || 'User'
+                const lastName = user.lastName || ''
+                setUserName(firstName)
+                setUserFullName(`${firstName} ${lastName}`.trim())
+                const initials = `${firstName.charAt(0)}${lastName.charAt(0) || ''}`.toUpperCase()
+                setUserInitials(initials || firstName.charAt(0).toUpperCase())
+            }
+        }
+
+        window.addEventListener('profileUpdated', handleProfileUpdate)
+        return () => window.removeEventListener('profileUpdated', handleProfileUpdate)
     }, [])
 
     const languages = [
@@ -126,6 +177,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
         localStorage.removeItem('authToken')
         localStorage.removeItem('refreshToken')
         localStorage.removeItem('user')
+        localStorage.removeItem('userProfilePicture')
         window.location.href = '/signin'
     }
 
@@ -138,8 +190,8 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                     {/* Menu Button for Mobile */}
                     <button
                         onClick={onMenuClick}
-                        className="xl:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 mr-2"
-                    >
+                        className="hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 mr-2"
+                    >s
                         <Menu size={20} className="text-gray-600 dark:text-gray-300" />
                     </button>
 
@@ -206,20 +258,28 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                             </button>
                         </div>
 
-                        {/* User Profile Button */}
+                        {/* User Profile Button with Dynamic Avatar */}
                         <div className="relative">
                             <button
                                 onClick={() => setIsProfileOpen(true)}
-                                className="flex items-center gap-1 md:gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-800 transition-colors"
+                                className="flex items-center gap-1 md:gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                             >
-                                <Image
-                                    src="/img/Profile-img-1.jpg"
-                                    width={36}
-                                    height={36}
-                                    alt="Profile"
-                                    className="rounded-full ring-2 ring-primary-200 dark:ring-gray-700 object-cover"
-                                />
-                                <ChevronDown size={16} className="hidden sm:inline text-primary-400" />
+                                {profilePicture ? (
+                                    <Image
+                                        src={profilePicture}
+                                        width={36}
+                                        height={36}
+                                        alt="Profile"
+                                        className="rounded-full ring-2 ring-primary-200 dark:ring-gray-700 object-cover w-9 h-9"
+                                    />
+                                ) : (
+                                    <div className="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center ring-2 ring-green-200">
+                                        <span className="text-white font-semibold text-sm">
+                                            {userInitials || 'U'}
+                                        </span>
+                                    </div>
+                                )}
+                                <ChevronDown size={16} className="hidden sm:inline text-gray-400" />
                             </button>
                         </div>
                     </div>
@@ -244,17 +304,25 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                 <X size={20} className="text-gray-500" />
                             </button>
 
-                            {/* Profile Header - Updated with dynamic user name */}
+                            {/* Profile Header with Dynamic Avatar */}
                             <div className="flex flex-col items-center text-center mb-6">
                                 <div className="relative">
-                                    <Image
-                                        src="/img/Profile-img-1.jpg"
-                                        alt="user"
-                                        width={96}
-                                        height={96}
-                                        className="rounded-full ring-4 ring-primary-100 object-cover"
-                                    />
-                                    <button className="absolute bottom-0 right-0 bg-primary-600 text-white p-1.5 rounded-full hover:bg-primary-700 transition-colors">
+                                    {profilePicture ? (
+                                        <Image
+                                            src={profilePicture}
+                                            alt="user"
+                                            width={96}
+                                            height={96}
+                                            className="rounded-full ring-4 ring-green-100 object-cover w-24 h-24"
+                                        />
+                                    ) : (
+                                        <div className="w-24 h-24 rounded-full bg-green-600 flex items-center justify-center ring-4 ring-green-100">
+                                            <span className="text-white font-bold text-3xl">
+                                                {userInitials || 'U'}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <button className="absolute bottom-0 right-0 bg-green-600 text-white p-2 rounded-full hover:bg-green-700 transition-colors">
                                         <ChevronDown size={14} />
                                     </button>
                                 </div>
@@ -333,7 +401,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                             <div className="mb-6">
                                 <div className="flex items-center justify-between mb-4">
                                     <p className="text-lg font-semibold text-gray-900">Team Members</p>
-                                    <CirclePlus size={20} className="text-primary-600 cursor-pointer hover:text-primary-700 transition-colors" />
+                                    <CirclePlus size={20} className="text-green-600 cursor-pointer hover:text-green-700 transition-colors" />
                                 </div>
 
                                 <div className="space-y-2">
@@ -356,28 +424,13 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                             {/* Divider and Actions */}
                             <div className="pt-4 border-t border-gray-200">
                                 <Link
-                                    href="/dash/userprofile"
+                                    href="/dashboard/profile"
                                     className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                                     onClick={handleCloseProfile}
                                 >
                                     <User size={18} />
                                     Edit Profile
                                 </Link>
-                                <Link
-                                    href="/dash/settings"
-                                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                                    onClick={handleCloseProfile}
-                                >
-                                    <Settings size={18} />
-                                    Account Settings
-                                </Link>
-                                <button
-                                    onClick={handleLogout}
-                                    className="w-full flex items-center gap-3 px-4 py-2 mt-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                >
-                                    <LogOut size={18} />
-                                    Log out
-                                </button>
                             </div>
                         </div>
                     </aside>
