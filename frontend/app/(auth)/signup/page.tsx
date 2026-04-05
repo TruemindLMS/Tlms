@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, Check, ArrowRight, User, Mail, Lock } from 'lucide-react'
+import { Eye, EyeOff, Check, ArrowRight, User, Mail, Lock, Loader2 } from 'lucide-react'
 import { Google } from 'iconsax-react'
 import RoleSelection from "@/app/(auth)/RoleSelection"
+import { registerUser, sendOtp, verifyOtp } from '@/lib/api'
 
 export default function SignupPage() {
     const router = useRouter()
@@ -18,84 +19,102 @@ export default function SignupPage() {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [agreeTerms, setAgreeTerms] = useState(false)
-
-    // OTP states
-    const [otpSent, setOtpSent] = useState(false)
-    const [verificationEmail, setVerificationEmail] = useState('')
+    const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
 
     const handleRoleSelect = (role: string) => {
         setSelectedRole(role)
         setStep(2)
+        setError('')
     }
 
     const handleBackToRole = () => {
         setStep(1)
+        setError('')
+    }
+
+    // Split full name into first and last name
+    const splitFullName = (name: string) => {
+        const parts = name.trim().split(' ')
+        const firstName = parts[0] || ''
+        const lastName = parts.slice(1).join(' ') || ''
+        return { firstName, lastName }
     }
 
     const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault()
+        setError('')
 
-        // Basic validation
+        // Validation
         if (!fullName || !email || !password || !confirmPassword) {
-            alert('Please fill in all fields')
+            setError('Please fill in all fields')
             return
         }
 
         if (password !== confirmPassword) {
-            alert('Passwords do not match')
+            setError('Passwords do not match')
+            return
+        }
+
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters')
             return
         }
 
         if (!agreeTerms) {
-            alert('Please agree to the Terms of Service and Privacy Policy')
+            setError('Please agree to the Terms of Service and Privacy Policy')
+            return
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address')
             return
         }
 
         setLoading(true)
 
         try {
-            //  Replace with  actual API call to send OTP
-            // const response = await fetch('/api/auth/send-otp', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({
-            //         email,
-            //         fullName,
-            //         password,
-            //         role: selectedRole
-            //     })
-            // })
-            // const data = await response.json()
-            // if (!response.ok) throw new Error(data.message)
+            const { firstName, lastName } = splitFullName(fullName)
 
-            // Simulate API call to send OTP
-            await new Promise(resolve => setTimeout(resolve, 1500))
-
-            // Store user data temporarily
-            localStorage.setItem('pendingUserData', JSON.stringify({
-                fullName,
+            // Register user with backend
+            const registerResponse = await registerUser({
                 email,
                 password,
+                confirmPassword,
+                firstName,
+                lastName,
                 role: selectedRole
-            }))
+            })
 
-            // Show OTP verification screen
-            setVerificationEmail(email)
-            setOtpSent(true)
+            if (registerResponse.message || registerResponse.success) {
+                // Store email for OTP verification
+                localStorage.setItem('pendingVerificationEmail', email)
 
-        } catch (error) {
-            console.error('Signup error:', error)
-            alert('Failed to send OTP. Please try again.')
+                // Send OTP
+                await sendOtp(email)
+
+                // Navigate to OTP verification page
+                router.push(`/verify-otp?email=${encodeURIComponent(email)}&role=${selectedRole}`)
+            } else {
+                setError(registerResponse.message || 'Registration failed. Please try again.')
+            }
+
+        } catch (err: any) {
+            console.error('Signup error:', err)
+
+            // Handle specific error messages
+            if (err.message?.includes('already exists') || err.message?.includes('duplicate')) {
+                setError('An account with this email already exists. Please sign in instead.')
+            } else if (err.message?.includes('network')) {
+                setError('Network error. Please check your connection.')
+            } else {
+                setError(err.message || 'Failed to create account. Please try again.')
+            }
         } finally {
             setLoading(false)
         }
-    }
-
-
-    if (otpSent) {
-        router.push(`/verify-otp?email=${encodeURIComponent(verificationEmail)}`)
-        return null
     }
 
     return (
@@ -171,26 +190,26 @@ export default function SignupPage() {
                         </div>
                     </div>
 
-                    <div className="absolute z-10 top-0 right-0 ">
+                    <div className="absolute z-10 top-0 right-0">
                         <img
                             src="/img/gaddd.png"
-                            alt="Smiling woman with books"
+                            alt="Decoration"
                             className="w-full h-full drop-shadow-2xl"
                         />
                     </div>
 
-                    <div className="absolute z-10 top-0 right-0 ">
+                    <div className="absolute z-10 top-0 right-0">
                         <img
                             src="/img/gadd.png"
-                            alt="Smiling woman with books"
+                            alt="Decoration"
                             className="w-full h-full drop-shadow-2xl"
                         />
                     </div>
 
-                    <div className="absolute z-10 bottom-0 left-0 ">
+                    <div className="absolute z-10 bottom-0 left-0">
                         <img
                             src="/img/gad.png"
-                            alt="Smiling woman with books"
+                            alt="Decoration"
                             className="w-[680px] h-56 drop-shadow-2xl"
                         />
                     </div>
@@ -253,6 +272,13 @@ export default function SignupPage() {
                                     </div>
                                 </div>
 
+                                {/* Error Message */}
+                                {error && (
+                                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                                        {error}
+                                    </div>
+                                )}
+
                                 {/* Sign Up Form */}
                                 <form className="space-y-4 md:space-y-5" onSubmit={handleSignUp}>
                                     {/* Full Name */}
@@ -268,6 +294,7 @@ export default function SignupPage() {
                                                 onChange={(e) => setFullName(e.target.value)}
                                                 placeholder="John Doe"
                                                 className="w-full pl-10 pr-3 md:pr-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                                disabled={loading}
                                                 required
                                             />
                                         </div>
@@ -286,6 +313,7 @@ export default function SignupPage() {
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 placeholder="email@company.com"
                                                 className="w-full pl-10 pr-3 md:pr-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                                disabled={loading}
                                                 required
                                             />
                                         </div>
@@ -306,6 +334,7 @@ export default function SignupPage() {
                                                     onChange={(e) => setPassword(e.target.value)}
                                                     placeholder="Create a password"
                                                     className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                                    disabled={loading}
                                                     required
                                                 />
                                                 <button
@@ -331,6 +360,7 @@ export default function SignupPage() {
                                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                                     placeholder="Confirm"
                                                     className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                                    disabled={loading}
                                                     required
                                                 />
                                                 <button
@@ -351,6 +381,7 @@ export default function SignupPage() {
                                             checked={agreeTerms}
                                             onChange={(e) => setAgreeTerms(e.target.checked)}
                                             className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                            disabled={loading}
                                         />
                                         <span className="text-xs md:text-sm text-gray-600">
                                             I agree to the{' '}
@@ -370,8 +401,17 @@ export default function SignupPage() {
                                         disabled={loading}
                                         className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        {loading ? 'Sending OTP...' : 'Create account'}
-                                        {!loading && <ArrowRight size={18} />}
+                                        {loading ? (
+                                            <>
+                                                <Loader2 size={18} className="animate-spin" />
+                                                Creating account...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Create account
+                                                <ArrowRight size={18} />
+                                            </>
+                                        )}
                                     </button>
                                 </form>
 

@@ -2,15 +2,59 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image';
-import { Eye, EyeOff, Check, ArrowRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Eye, EyeOff, Check, ArrowRight, Loader2 } from 'lucide-react'
 import { Google } from 'iconsax-react'
+import { loginUser } from '@/lib/api'
 
 export default function LoginPage() {
+    const router = useRouter()
     const [showPassword, setShowPassword] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [keepSignedIn, setKeepSignedIn] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState('')
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setError('')
+        setIsLoading(true)
+
+        // Basic validation
+        if (!email || !password) {
+            setError('Please fill in all fields')
+            setIsLoading(false)
+            return
+        }
+
+        try {
+            const response = await loginUser(email, password)
+
+            if (response.token) {
+                // Store token based on "Keep me signed in" option
+                if (keepSignedIn) {
+                    localStorage.setItem('authToken', response.token)
+                    localStorage.setItem('refreshToken', response.refreshToken)
+                } else {
+                    sessionStorage.setItem('authToken', response.token)
+                    sessionStorage.setItem('refreshToken', response.refreshToken)
+                }
+
+                // Store user info (optional)
+                localStorage.setItem('user', JSON.stringify(response.user))
+
+                // Redirect to dashboard
+                router.push('/dash')
+            } else {
+                setError(response.message || 'Login failed. Please try again.')
+            }
+        } catch (err: any) {
+            setError(err.message || 'An error occurred. Please try again.')
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     return (
         <div className="min-h-screen w-full bg-white">
@@ -56,10 +100,8 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-
                     {/* Testimonial */}
-                    <div className="hidden  lg:block border border-white/30 p-6 rounded-xl bg-white/10 backdrop-blur-sm">
-
+                    <div className="hidden lg:block border border-white/30 p-6 rounded-xl bg-white/10 backdrop-blur-sm">
                         <p className="text-white/90 italic text-sm mb-4">
                             "TalentFlow transformed how our team approaches growth.
                             The experience is surgical, intuitive, and effective."
@@ -74,23 +116,21 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <div className="absolute z-10 top-0 right-0 ">
+                    {/* Decorative Images */}
+                    <div className="absolute z-10 top-0 right-0">
                         <img
                             src="/img/gaddd.png"
-                            alt="Smiling woman with books"
+                            alt="Decoration"
                             className="w-full h-full drop-shadow-2xl"
                         />
-
                     </div>
-                    <div className="absolute z-10 top-0 right-0 ">
+                    <div className="absolute z-10 top-0 right-0">
                         <img
                             src="/img/gadd.png"
-                            alt="Smiling woman with books"
+                            alt="Decoration"
                             className="w-full h-full drop-shadow-2xl"
                         />
-
                     </div>
-
 
                     {/* Mobile Features */}
                     <div className="md:hidden mt-6 space-y-2">
@@ -110,13 +150,12 @@ export default function LoginPage() {
                         ))}
                     </div>
 
-                    <div className="absolute z-10 bottom-0 left-0 ">
+                    <div className="absolute z-10 bottom-0 left-0">
                         <img
                             src="/img/gad.png"
-                            alt="Smiling woman with books"
+                            alt="Decoration"
                             className="w-[680px] h-56 drop-shadow-2xl"
                         />
-
                     </div>
                 </div>
 
@@ -150,9 +189,15 @@ export default function LoginPage() {
                             </p>
                         </div>
 
-                        {/* Form */}
-                        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+                        {/* Error Message */}
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                                {error}
+                            </div>
+                        )}
 
+                        {/* Form */}
+                        <form className="space-y-5" onSubmit={handleSubmit}>
                             {/* Email */}
                             <div>
                                 <label className="text-sm font-medium text-gray-700 block mb-2">
@@ -163,7 +208,9 @@ export default function LoginPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="email@company.com"
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                                    disabled={isLoading}
+                                    required
                                 />
                             </div>
 
@@ -178,12 +225,14 @@ export default function LoginPage() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter your password"
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 pr-10 focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 pr-10 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                                        disabled={isLoading}
+                                        required
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                     >
                                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                     </button>
@@ -197,24 +246,36 @@ export default function LoginPage() {
                                         type="checkbox"
                                         checked={keepSignedIn}
                                         onChange={(e) => setKeepSignedIn(e.target.checked)}
+                                        className="rounded border-gray-300"
+                                        disabled={isLoading}
                                     />
                                     Keep me signed in
-                                    <Link href="/forgotpassword">
-                                        <button type="button" className="text-sm text-primary-600 hover:underline">
-                                            Forgot password?
-                                        </button>
-                                    </Link>
                                 </label>
-
+                                <Link
+                                    href="/forgot-password"
+                                    className="text-sm text-primary-600 hover:underline"
+                                >
+                                    Forgot password?
+                                </Link>
                             </div>
 
-                            {/* Submit */}
+                            {/* Submit Button */}
                             <button
                                 type="submit"
-                                className="w-full bg-primary-600 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-primary-700"
+                                disabled={isLoading}
+                                className="w-full bg-primary-600 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Sign in to dashboard
-                                <ArrowRight size={18} />
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 size={18} className="animate-spin" />
+                                        Signing in...
+                                    </>
+                                ) : (
+                                    <>
+                                        Sign in to dashboard
+                                        <ArrowRight size={18} />
+                                    </>
+                                )}
                             </button>
                         </form>
 
@@ -226,8 +287,11 @@ export default function LoginPage() {
                             </span>
                         </div>
 
-                        {/* Google */}
-                        <button className="w-full flex items-center justify-center gap-3 px-4 py-2 border rounded-lg hover:bg-gray-100">
+                        {/* Google Sign In */}
+                        <button
+                            className="w-full flex items-center justify-center gap-3 px-4 py-2 border rounded-lg hover:bg-gray-50 transition-colors"
+                            disabled={isLoading}
+                        >
                             <Google color='#283c30ff' size={20} />
                             <span className="text-sm font-medium">
                                 Sign in with Google

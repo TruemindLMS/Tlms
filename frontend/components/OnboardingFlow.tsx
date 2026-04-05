@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { HardDriveUpload, BadgeCheck, CheckIcon, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { HardDriveUpload, BadgeCheck, CheckIcon, ChevronRight, Loader2 } from "lucide-react";
+import { onboardingApi, profileApi, getUser, getUserFullName } from "@/lib/api";
 
 // Types
 type Role = {
@@ -127,14 +129,15 @@ const goals: Goal[] = [
 import { TrendingUp, BriefcaseBusinessIcon, BrainCog } from "lucide-react";
 
 // Navigation Component - Consistent across all steps
-const NavigationButtons = ({ onBack, onNext, onSkip, showSkip = true, isLastStep = false, nextButtonText = "Continue" }: any) => {
+const NavigationButtons = ({ onBack, onNext, onSkip, showSkip = true, isLastStep = false, nextButtonText = "Continue", loading = false }: any) => {
     return (
         <div className="border-t border-gray-200 w-full bg-white px-6 py-5">
             <div className="flex items-center justify-center gap-4 max-w-[700px] mx-auto">
                 {onBack && (
                     <button
                         onClick={onBack}
-                        className="flex-1 border-2 border-[#2d6a4f] text-[#2d6a4f] font-semibold text-base py-3 rounded-2xl hover:bg-[#f0f7f3] transition-colors"
+                        disabled={loading}
+                        className="flex-1 border-2 border-[#2d6a4f] text-[#2d6a4f] font-semibold text-base py-3 rounded-2xl hover:bg-[#f0f7f3] transition-colors disabled:opacity-50"
                     >
                         Back
                     </button>
@@ -142,20 +145,22 @@ const NavigationButtons = ({ onBack, onNext, onSkip, showSkip = true, isLastStep
                 {!isLastStep ? (
                     <button
                         onClick={onNext}
-                        className="flex-1 bg-[#2d6a4f] text-white font-semibold text-base py-3 rounded-2xl shadow-md hover:bg-[#245a42] transition-colors"
+                        disabled={loading}
+                        className="flex-1 bg-[#2d6a4f] text-white font-semibold text-base py-3 rounded-2xl shadow-md hover:bg-[#245a42] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                        {nextButtonText}
+                        {loading ? <Loader2 size={18} className="animate-spin" /> : null}
+                        {loading ? 'Saving...' : nextButtonText}
                     </button>
                 ) : (
                     <button
                         onClick={onNext}
-                        className="flex-1 bg-[#2d6a4f] text-white font-semibold text-base py-3 rounded-2xl shadow-md hover:bg-[#245a42] transition-colors"
+                        disabled={loading}
+                        className="flex-1 bg-[#2d6a4f] text-white font-semibold text-base py-3 rounded-2xl shadow-md hover:bg-[#245a42] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                        Go to Dashboard
+                        {loading ? <Loader2 size={18} className="animate-spin" /> : null}
+                        {loading ? 'Completing...' : 'Go to Dashboard'}
                     </button>
                 )}
-
-
             </div>
 
             {showSkip && !isLastStep && (
@@ -171,13 +176,30 @@ const NavigationButtons = ({ onBack, onNext, onSkip, showSkip = true, isLastStep
 };
 
 export default function OnboardingFlow() {
+    const router = useRouter();
     const [step, setStep] = useState(1);
     const [bio, setBio] = useState("");
     const [selectedRole, setSelectedRole] = useState<string>("uiux");
     const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
-    const [name, setName] = useState("Ethan");
+    const [name, setName] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [profilePicture, setProfilePicture] = useState<File | null>(null);
+    const [profilePicturePreview, setProfilePicturePreview] = useState<string>("");
 
     const totalSteps = 4;
+
+    // Load user data on mount
+    useEffect(() => {
+        const user = getUser();
+        const fullName = getUserFullName();
+        if (fullName) {
+            setName(fullName);
+        } else if (user?.firstName) {
+            setName(`${user.firstName} ${user.lastName || ''}`);
+        } else {
+            setName("there");
+        }
+    }, []);
 
     const handleNext = () => {
         if (step < totalSteps) {
@@ -206,15 +228,40 @@ export default function OnboardingFlow() {
         );
     };
 
-    const handleComplete = () => {
+    const handleComplete = async () => {
+        setLoading(true);
+        try {
+            // Step 1: Submit bio
+            if (bio) {
+                await onboardingApi.submitBio({ bio });
+            }
 
-        console.log({
-            bio,
-            selectedRole,
-            selectedGoals,
-            name
-        });
-        window.location.href = "/dash";
+            // Step 2: Update profile with role and goals
+            await profileApi.update({
+                role: selectedRole,
+                goals: selectedGoals,
+                bio: bio,
+            });
+
+            // Mark onboarding as completed
+            localStorage.setItem('onboardingCompleted', 'true');
+
+            console.log({
+                bio,
+                selectedRole,
+                selectedGoals,
+                name
+            });
+
+            // Redirect to dashboard
+            router.push('/dash');
+        } catch (error) {
+            console.error('Onboarding completion error:', error);
+            // Still redirect even if API fails
+            router.push('/dash');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const renderStep = () => {
@@ -224,9 +271,14 @@ export default function OnboardingFlow() {
                     <StepOne
                         bio={bio}
                         setBio={setBio}
+                        profilePicture={profilePicture}
+                        setProfilePicture={setProfilePicture}
+                        profilePicturePreview={profilePicturePreview}
+                        setProfilePicturePreview={setProfilePicturePreview}
                         onNext={handleNext}
                         onBack={step > 1 ? handleBack : undefined}
                         onSkip={handleSkip}
+                        loading={loading}
                     />
                 );
             case 2:
@@ -237,6 +289,7 @@ export default function OnboardingFlow() {
                         onNext={handleNext}
                         onBack={handleBack}
                         onSkip={handleSkip}
+                        loading={loading}
                     />
                 );
             case 3:
@@ -248,6 +301,7 @@ export default function OnboardingFlow() {
                         onNext={handleNext}
                         onBack={handleBack}
                         onSkip={handleSkip}
+                        loading={loading}
                     />
                 );
             case 4:
@@ -256,6 +310,7 @@ export default function OnboardingFlow() {
                         name={name}
                         onComplete={handleComplete}
                         onBack={handleBack}
+                        loading={loading}
                     />
                 );
             default:
@@ -264,7 +319,7 @@ export default function OnboardingFlow() {
     };
 
     return (
-        <div className="max-h-screen bg-[#f6f8f7]">
+        <div className="min-h-screen bg-[#f6f8f7]">
             {/* Step Indicator */}
             {step !== 4 && (
                 <div className="text-center text-sm tracking-widest text-gray-400 py-4">
@@ -277,9 +332,18 @@ export default function OnboardingFlow() {
 }
 
 // Step 1: Personalize Profile
-function StepOne({ bio, setBio, onNext, onBack, onSkip }: any) {
+function StepOne({ bio, setBio, profilePicture, setProfilePicture, profilePicturePreview, setProfilePicturePreview, onNext, onBack, onSkip, loading }: any) {
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setProfilePicture(file);
+            const previewUrl = URL.createObjectURL(file);
+            setProfilePicturePreview(previewUrl);
+        }
+    };
+
     return (
-        <div className="max-h-screen flex flex-col bg-[#f6f8f7]">
+        <div className="min-h-screen flex flex-col bg-[#f6f8f7]">
             <div className="flex-1 flex items-center justify-center px-4 py-8">
                 <div className="bg-white rounded-2xl shadow-sm w-full max-w-lg p-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -291,18 +355,34 @@ function StepOne({ bio, setBio, onNext, onBack, onSkip }: any) {
                     </p>
 
                     <div className="flex flex-col items-center mb-8">
-                        <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center relative">
-                            <Image
-                                src="/img/camera-icon.png"
-                                alt="upload"
-                                width={28}
-                                height={28}
-                                className="opacity-60"
-                            />
+                        <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center relative overflow-hidden">
+                            {profilePicturePreview ? (
+                                <img
+                                    src={profilePicturePreview}
+                                    alt="Profile preview"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <Image
+                                    src="/img/camera-icon.png"
+                                    alt="upload"
+                                    width={28}
+                                    height={28}
+                                    className="opacity-60"
+                                />
+                            )}
                         </div>
-                        <button className="mt-4 flex items-center gap-2 text-green-600 text-sm font-medium hover:underline">
-                            <HardDriveUpload size={18} /> Upload Photo
-                        </button>
+                        <label className="mt-4 flex items-center gap-2 text-green-600 text-sm font-medium hover:underline cursor-pointer">
+                            <HardDriveUpload size={18} />
+                            Upload Photo
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileUpload}
+                                className="hidden"
+                                disabled={loading}
+                            />
+                        </label>
                     </div>
 
                     <div>
@@ -314,7 +394,8 @@ function StepOne({ bio, setBio, onNext, onBack, onSkip }: any) {
                             onChange={(e) => setBio(e.target.value)}
                             maxLength={250}
                             placeholder="Tell us about your professional background and learning goals..."
-                            className="w-full h-28 border border-gray-400 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                            className="w-full h-28 border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                            disabled={loading}
                         />
                         <div className="flex justify-between items-center mt-2">
                             <p className="text-sm text-gray-600">
@@ -331,13 +412,14 @@ function StepOne({ bio, setBio, onNext, onBack, onSkip }: any) {
                 onSkip={onSkip}
                 showSkip={true}
                 isLastStep={false}
+                loading={loading}
             />
         </div>
     );
 }
 
 // Step 2: Role Selection
-function StepTwo({ selectedRole, setSelectedRole, onNext, onBack, onSkip }: any) {
+function StepTwo({ selectedRole, setSelectedRole, onNext, onBack, onSkip, loading }: any) {
     return (
         <div className="min-h-screen flex flex-col bg-[#f5f5f3]">
             <div className="flex-1 flex items-center justify-center px-4 py-8">
@@ -358,6 +440,7 @@ function StepTwo({ selectedRole, setSelectedRole, onNext, onBack, onSkip }: any)
                                 <button
                                     key={role.id}
                                     onClick={() => setSelectedRole(role.id)}
+                                    disabled={loading}
                                     className={`flex flex-col items-center justify-center gap-3 rounded-2xl py-8 px-4 transition-all duration-150 ${isSelected
                                         ? "bg-[#2d6a4f] text-white shadow-lg scale-[1.02]"
                                         : "bg-white text-gray-700 border border-gray-200 shadow-sm hover:shadow-md hover:scale-[1.01]"
@@ -382,13 +465,14 @@ function StepTwo({ selectedRole, setSelectedRole, onNext, onBack, onSkip }: any)
                 onSkip={onSkip}
                 showSkip={true}
                 isLastStep={false}
+                loading={loading}
             />
         </div>
     );
 }
 
 // Step 3: Goals Selection
-function StepThree({ selectedGoals, toggleGoal, goals, onNext, onBack, onSkip }: any) {
+function StepThree({ selectedGoals, toggleGoal, goals, onNext, onBack, onSkip, loading }: any) {
     return (
         <div className="min-h-screen flex flex-col bg-[#f6f8f7]">
             <div className="flex-1 flex items-center justify-center px-4 py-8">
@@ -408,9 +492,9 @@ function StepThree({ selectedGoals, toggleGoal, goals, onNext, onBack, onSkip }:
                             return (
                                 <div
                                     key={goal.id}
-                                    onClick={() => toggleGoal(goal.id)}
-                                    className={`p-4 rounded-xl cursor-pointer transition-all ${isSelected ? "bg-primary-600 text-white" : "bg-white border border-gray-200"
-                                        }`}
+                                    onClick={() => !loading && toggleGoal(goal.id)}
+                                    className={`p-4 rounded-xl cursor-pointer transition-all ${isSelected ? "bg-[#2d6a4f] text-white" : "bg-white border border-gray-200"
+                                        } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                                 >
                                     <GoalCard
                                         icon={goal.icon}
@@ -430,6 +514,7 @@ function StepThree({ selectedGoals, toggleGoal, goals, onNext, onBack, onSkip }:
                 onSkip={onSkip}
                 showSkip={true}
                 isLastStep={false}
+                loading={loading}
             />
         </div>
     );
@@ -464,8 +549,8 @@ function GoalCard({ title, description, icon: Icon, isSelected }: any) {
     );
 }
 
-// Step 4: Completion - Only Back and Go to Dashboard
-function StepFour({ name, onComplete, onBack }: any) {
+// Step 4: Completion
+function StepFour({ name, onComplete, onBack, loading }: any) {
     const steps = [
         { label: "Profile set up", completed: true },
         { label: "Role selected", completed: true },
@@ -503,24 +588,26 @@ function StepFour({ name, onComplete, onBack }: any) {
                             </div>
                         ))}
                     </div>
-
                 </div>
             </div>
 
-            {/* Last page navigation - Only Back and Go to Dashboard */}
+            {/* Last page navigation */}
             <div className="border-t border-gray-200 w-full bg-white px-6 py-5">
                 <div className="flex items-center justify-center gap-4 max-w-[700px] mx-auto">
                     <button
                         onClick={onBack}
-                        className="flex-1 border-2 border-[#2d6a4f] text-[#2d6a4f] font-semibold text-base py-3 rounded-2xl hover:bg-[#f0f7f3] transition-colors"
+                        disabled={loading}
+                        className="flex-1 border-2 border-[#2d6a4f] text-[#2d6a4f] font-semibold text-base py-3 rounded-2xl hover:bg-[#f0f7f3] transition-colors disabled:opacity-50"
                     >
                         Back
                     </button>
                     <button
                         onClick={onComplete}
-                        className="flex-1 bg-[#2d6a4f] text-white font-semibold text-base py-3 rounded-2xl shadow-md hover:bg-[#245a42] transition-colors"
+                        disabled={loading}
+                        className="flex-1 bg-[#2d6a4f] text-white font-semibold text-base py-3 rounded-2xl shadow-md hover:bg-[#245a42] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                        Go to Dashboard
+                        {loading ? <Loader2 size={18} className="animate-spin" /> : null}
+                        {loading ? 'Completing...' : 'Go to Dashboard'}
                     </button>
                 </div>
             </div>

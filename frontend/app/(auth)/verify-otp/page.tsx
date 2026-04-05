@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, Check, XCircle, Loader2, ArrowRight, Mail } from 'lucide-react'
+import { verifyOtp, sendOtp } from '@/lib/api'
 
 // Main component wrapped with Suspense
 export default function VerifyOTPPage() {
@@ -34,6 +35,7 @@ function VerifyOTPContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
     const email = searchParams.get('email')
+    const role = searchParams.get('role')
 
     const [otp, setOtp] = useState(['', '', '', '', '', ''])
     const [status, setStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle')
@@ -120,34 +122,29 @@ function VerifyOTPContent() {
         setErrorMessage('')
 
         try {
-            //  Replace with  actual API call
-            // const response = await fetch('/api/auth/verify-otp', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({
-            //         email,
-            //         otp: otpValue
-            //     })
-            // })
-            // const data = await response.json()
-            // if (!response.ok) throw new Error(data.message)
+            // Call actual API to verify OTP
+            const response = await verifyOtp(email!, otpValue)
 
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500))
+            if (response.success || response.message === 'OTP verified successfully') {
+                // Get stored user data from registration
+                const userDataStr = localStorage.getItem('pendingUserData')
+                if (userDataStr) {
+                    const userData = JSON.parse(userDataStr)
 
-            // Check OTP - Default code is 654321
-            if (otpValue === '654321') {
-                // Get stored user data
-                const userData = JSON.parse(localStorage.getItem('pendingUserData') || '{}')
+                    // Store user data permanently
+                    localStorage.setItem('userFullName', userData.fullName)
+                    localStorage.setItem('userEmail', userData.email)
+                    localStorage.setItem('userRole', userData.role || role || 'Student')
+                    localStorage.setItem('isAuthenticated', 'true')
 
-                // Store user data permanently
-                localStorage.setItem('userFullName', userData.fullName)
-                localStorage.setItem('userEmail', userData.email)
-                localStorage.setItem('userRole', userData.role)
-                localStorage.setItem('isAuthenticated', 'true')
+                    // Store auth token if returned
+                    if (response.token) {
+                        localStorage.setItem('authToken', response.token)
+                    }
 
-                // Clear pending data
-                localStorage.removeItem('pendingUserData')
+                    // Clear pending data
+                    localStorage.removeItem('pendingUserData')
+                }
 
                 setStatus('success')
 
@@ -156,7 +153,7 @@ function VerifyOTPContent() {
                     router.push('/onboarding')
                 }, 2000)
             } else {
-                throw new Error('Invalid OTP code. Please check and try again.')
+                throw new Error(response.message || 'Invalid OTP code. Please try again.')
             }
 
         } catch (error) {
@@ -170,28 +167,17 @@ function VerifyOTPContent() {
         if (!canResend) return
 
         setResendLoading(true)
+        setErrorMessage('')
 
         try {
-            //  Replace with  actual API call
-            // const response = await fetch('/api/auth/resend-otp', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ email })
-            // })
-            // const data = await response.json()
-            // if (!response.ok) throw new Error(data.message)
-
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            // Call actual API to resend OTP
+            await sendOtp(email!)
 
             // Reset OTP inputs
             setOtp(['', '', '', '', '', ''])
             setCountdown(60)
             setCanResend(false)
-            setErrorMessage('')
             setStatus('idle')
-
-            alert('A new verification code has been sent to your email!')
 
             // Focus on first input
             inputRefs.current[0]?.focus()
@@ -244,7 +230,7 @@ function VerifyOTPContent() {
         <div className="flex flex-col lg:flex-row min-h-screen bg-[#004222] w-full">
 
             {/* Left Side - Brand Section */}
-            <div className="w-full lg:w-[578px] relative bg-[#004222] min-h-[40vh] lg:min-h-screen hidden  lg:flex lg:flex-col justify-center gap-3 md:5 lg:gap-28 p-6 sm:p-8 md:p-10">
+            <div className="w-full lg:w-[578px] relative bg-[#004222] min-h-[40vh] lg:min-h-screen hidden lg:flex lg:flex-col justify-center gap-3 md:5 lg:gap-28 p-6 sm:p-8 md:p-10">
                 <div className="mb-8 lg:mb-0">
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
                         TalentFlow
@@ -312,34 +298,34 @@ function VerifyOTPContent() {
                     </div>
                 </div>
 
-                <div className="absolute z-10 top-0 right-0 ">
+                <div className="absolute z-10 top-0 right-0">
                     <img
                         src="/img/gaddd.png"
-                        alt="Smiling woman with books"
+                        alt="Decoration"
                         className="w-full h-full drop-shadow-2xl"
                     />
                 </div>
 
-                <div className="absolute z-10 top-0 right-0 ">
+                <div className="absolute z-10 top-0 right-0">
                     <img
                         src="/img/gadd.png"
-                        alt="Smiling woman with books"
+                        alt="Decoration"
                         className="w-full h-full drop-shadow-2xl"
                     />
                 </div>
 
-                <div className="absolute z-10 bottom-0 left-0 ">
+                <div className="absolute z-10 bottom-0 left-0">
                     <img
                         src="/img/gad.png"
-                        alt="Smiling woman with books"
+                        alt="Decoration"
                         className="w-[680px] h-56 drop-shadow-2xl"
                     />
                 </div>
             </div>
 
-
+            {/* Right Side - OTP Form */}
             <div className="w-full lg:flex-1 min-h-[50vh] lg:bg-white bg-[#004222] flex items-center justify-center py-12 px-4 sm:px-6 md:px-8 lg:px-12">
-                <div className="bg-white rounded-3xl shadow-2xl p-8">
+                <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full">
                     <div className="text-center mb-8">
                         <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Mail size={40} className="text-primary-600" />
@@ -350,7 +336,7 @@ function VerifyOTPContent() {
                         <p className="text-gray-600">
                             We've sent a 6-digit verification code to
                         </p>
-                        <p className="text-lg font-semibold text-primary-600 mt-1">
+                        <p className="text-lg font-semibold text-primary-600 mt-1 break-all">
                             {email}
                         </p>
                     </div>
@@ -383,10 +369,6 @@ function VerifyOTPContent() {
                                 {errorMessage}
                             </p>
                         )}
-                        {/* Demo hint */}
-                        <p className="text-xs text-gray-400 text-center mt-3">
-                            Demo code: <span className="font-mono font-semibold">654321</span>
-                        </p>
                     </div>
 
                     {/* Verify Button */}
