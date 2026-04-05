@@ -97,7 +97,7 @@ const ForgotPassword = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                                 placeholder="you@example.com"
                                 disabled={isLoading}
                             />
@@ -106,7 +106,7 @@ const ForgotPassword = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {isLoading ? (
                                 <>
@@ -123,7 +123,7 @@ const ForgotPassword = () => {
                     <div className="mt-6 text-center">
                         <Link
                             href="/signin"
-                            className="text-sm text-green-600 hover:text-green-700"
+                            className="text-sm text-primary-600 hover:text-primary-700"
                         >
                             Back to Sign In
                         </Link>
@@ -149,7 +149,7 @@ const ForgotPassword = () => {
                 {/* Success Icon */}
                 <div className="flex justify-center mb-6">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                        <CheckCircle className="w-8 h-8 text-green-500" />
+                        <CheckCircle className="w-8 h-8 text-primary-500" />
                     </div>
                 </div>
 
@@ -169,7 +169,7 @@ const ForgotPassword = () => {
                 <button
                     onClick={handleResendEmail}
                     disabled={isLoading}
-                    className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors mb-6 flex items-center justify-center gap-2"
+                    className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors mb-6 flex items-center justify-center gap-2"
                 >
                     {isLoading ? (
                         <>
@@ -187,7 +187,7 @@ const ForgotPassword = () => {
                         Didn't receive the email? Check your spam folder or{" "}
                         <button
                             onClick={() => window.location.href = "/contact"}
-                            className="text-green-600 hover:text-green-700"
+                            className="text-primary-600 hover:text-primary-700"
                         >
                             Contact Support
                         </button>
