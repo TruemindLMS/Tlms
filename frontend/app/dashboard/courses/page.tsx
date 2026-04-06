@@ -59,7 +59,7 @@ export default function CoursesPage() {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <div className="text-center">
-                    <Loader2 size={40} className="animate-spin text-green-600 mx-auto mb-4" />
+                    <Loader2 size={40} className="animate-spin text-primary-600 mx-auto mb-4" />
                     <p className="text-gray-500">Loading courses...</p>
                 </div>
             </div>

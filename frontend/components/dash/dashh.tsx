@@ -153,7 +153,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen ml-1 lg:ml-1 md:ml-5 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
-      <div className="pt-5 p-6">
+      <div className="pt-5 p-1">
         {!hasStartedCourse ? (
           <FirstTimeDashboard onStartCourse={handleStartCourse} userName={userName} />
         ) : (
@@ -173,8 +173,8 @@ function FirstTimeDashboard({ onStartCourse, userName }: { onStartCourse: () => 
   ];
 
   return (
-    <main className="p-4 lg:p-6 max-w-7xl mx-auto">
-      <div className="relative bg-gradient-to-r from-green-900 to-green-700 text-white rounded-2xl p-6 lg:p-8 mb-8 overflow-hidden">
+    <main className="p-2 lg:p-6 md:max-w-7xl mx-auto">
+      <div className="relative bg-gradient-to-r from-green-900 to-primary-700 text-white rounded-2xl p-6 lg:p-8 mb-8 overflow-hidden">
         <div className="relative z-10">
           <p className="text-sm mb-2 opacity-80">Welcome, {userName}! 👋</p>
           <h2 className="text-2xl lg:text-3xl font-bold mb-4 leading-snug">
@@ -211,7 +211,7 @@ function FirstTimeDashboard({ onStartCourse, userName }: { onStartCourse: () => 
               <div className="text-4xl mb-3">{course.icon}</div>
               <h4 className="font-semibold text-gray-900 mb-1">{course.title}</h4>
               <p className="text-sm text-gray-500 mb-3">{course.description}</p>
-              <button onClick={onStartCourse} className="text-green-700 text-sm font-medium hover:underline">
+              <button onClick={onStartCourse} className="text-primary-700 text-sm font-medium hover:underline">
                 Learn More →
               </button>
             </div>
