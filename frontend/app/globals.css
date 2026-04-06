@@ -14,6 +14,8 @@
     --color-primary-800: #0a2b18;
     --color-primary-900: #05150c;
     --color-primary: #1A6B3C;
+    --color-primary-fade: #B7E4C3;
+    --color-primary-text: #04542A;
 
     --animate-fade-in: fadeIn 0.5s ease-in-out;
     --animate-slide-up: slideUp 0.3s ease-out;
