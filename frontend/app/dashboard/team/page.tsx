@@ -45,7 +45,7 @@ const TEAM_MEMBERS = [
 
 export default function TeamPage() {
   return (
-    <section className="ml-20 pr-8">
+    <section className="bg-cover ml-1 lg:ml-1 md:ml-5 bg-center bg-no-repeat pr-8" style={{ backgroundImage: "url('/img/tback.png')" }}>
 
       {/* Header */}
       <div className="mb-10 flex justify-between items-start">

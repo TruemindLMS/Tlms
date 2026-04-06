@@ -16,7 +16,7 @@ export function TeamBreadCrumb() {
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink className="text-primary">Team</BreadcrumbLink>
+          <BreadcrumbLink className="text-primary-400">Team</BreadcrumbLink>
         </BreadcrumbItem>
         {/* <BreadcrumbSeparator />
         <BreadcrumbItem>

@@ -35,7 +35,7 @@ const navigation: NavItem[] = [
     { name: 'Courses', href: '/dashboard/courses', icon: BookOpen, section: 'general' },
     { name: 'Task', href: '/dashboard/task', icon: Award, section: 'general' },
     { name: 'Team', href: '/dashboard/team', icon: Users, section: 'general' },
-    { name: 'My Certificates', href: '/dashboard/certificates', icon: Award, section: 'general' },
+    { name: 'My Certificates', href: '/dashboard/certificate', icon: Award, section: 'general' },
     { name: 'Account & Settings', href: '/dashboard/userprofile', icon: Settings, section: 'tools' },
 ]
 
