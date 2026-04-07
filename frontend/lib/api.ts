@@ -1,3 +1,4 @@
+// lib/api.ts
 const API_BASE_URL = 'https://tims-backend-11dz.onrender.com/api'
 
 // Helper to safely parse JSON responses
@@ -531,17 +532,27 @@ export async function apiClient(endpoint: string, options: RequestInit = {}): Pr
         Object.assign(headers, customHeaders)
     }
 
-    logApiCall(options.method || 'GET', endpoint)
+    const url = `${API_BASE_URL}${endpoint}`
+    logApiCall(options.method || 'GET', url)
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers })
-    const data = await parseResponse(response)
+    try {
+        const response = await fetch(url, { ...options, headers })
+        const data = await parseResponse(response)
 
-    if (!response.ok) {
-        console.error(`API Client Error (${response.status}):`, data)
-        throw new Error(data.message || 'API request failed')
+        if (!response.ok) {
+            console.error(`API Client Error (${response.status}):`, data)
+            throw new Error(data.message || `API request failed: ${response.status}`)
+        }
+
+        return data
+    } catch (error: any) {
+        console.error(`Network Error for ${url}:`, error.message)
+
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            throw new Error('Cannot connect to server. Please check if the backend is running.')
+        }
+        throw error
     }
-
-    return data
 }
 
 // ==================== Course API Endpoints ====================
@@ -551,16 +562,13 @@ export const courseApi = {
         try {
             const response: any = await apiClient('/Courses')
 
-            // Debug: log what we received
             console.log('📚 Courses API raw response:', response)
 
-            // Handle different response formats
             if (Array.isArray(response)) {
                 console.log('✅ Response is an array with', response.length, 'courses')
                 return response as Course[]
             }
 
-            // If response has a data property that's an array
             if (response && typeof response === 'object') {
                 if (response.data && Array.isArray(response.data)) {
                     console.log('✅ Found response.data array with', response.data.length, 'courses')
@@ -578,19 +586,17 @@ export const courseApi = {
                     console.log('✅ Found response.results array with', response.results.length, 'courses')
                     return response.results as Course[]
                 }
-                // If it's a single course object
                 if (response.id && response.title) {
                     console.log('✅ Single course object found, wrapping in array')
                     return [response] as Course[]
                 }
             }
 
-            // If we get here, something is wrong
             console.warn('⚠️ Unexpected courses response format:', response)
             return []
         } catch (error) {
             console.error('❌ Error in courseApi.getAll:', error)
-            return []
+            throw error
         }
     },
 
@@ -598,7 +604,6 @@ export const courseApi = {
         try {
             const response: any = await apiClient(`/Courses/${courseId}`)
 
-            // Handle wrapped response
             if (response && typeof response === 'object') {
                 if (response.data && response.data.id) {
                     return response.data as Course
@@ -638,7 +643,6 @@ export const courseApi = {
         try {
             const response: any = await apiClient('/Users/enrolled-courses')
 
-            // Handle different response formats
             if (Array.isArray(response)) {
                 return response as Course[]
             }
@@ -739,16 +743,15 @@ export const teamApi = {
 
 export async function testBackendConnection(): Promise<boolean> {
     try {
-        console.log('🔍 Testing backend connection...')
-        const response = await fetch(`${API_BASE_URL}/health`, {
-            method: 'GET',
+        console.log('🔍 Testing backend connection to:', API_BASE_URL)
+        const response = await fetch(API_BASE_URL.replace('/api', ''), {
+            method: 'HEAD',
             signal: AbortSignal.timeout(5000)
         })
-        const isConnected = response.ok
-        console.log(isConnected ? '✅ Backend connected' : '❌ Backend connection failed')
-        return isConnected
+        console.log('Backend response status:', response.status)
+        return response.ok
     } catch (error) {
-        console.error('❌ Backend connection error:', error)
+        console.error('Backend connection failed:', error)
         return false
     }
 }
