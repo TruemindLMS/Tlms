@@ -5,13 +5,15 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ScrollAnimatel from '../cards/AnimatedCardl';
+import ExploreDropdown from '@/app/explore/page';
 
 const Hero = () => {
-    // State for switching between two different hero designs
+
     const [designIndex, setDesignIndex] = useState(0);
     const [isGlowing, setIsGlowing] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [isExploreOpen, setIsExploreOpen] = useState(false);
 
-    // Image pairs for the second design (Heroo)
     const imagePairs = [
         {
             left: '/img/guy.png',
@@ -34,37 +36,61 @@ const Hero = () => {
     // Image carousel state for second design
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    // Switch between designs every 12 seconds
+    // Check if device is mobile
     useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+
+    useEffect(() => {
+        if (isMobile) return;
+
         const designInterval = setInterval(() => {
             setDesignIndex((prevIndex) => (prevIndex + 1) % 2);
         }, 12000);
 
         return () => clearInterval(designInterval);
-    }, []);
+    }, [isMobile]);
 
-    // Change images every 8 seconds for second design
+
     useEffect(() => {
+        if (isMobile) return;
+
         const imageInterval = setInterval(() => {
             setCurrentImageIndex((prevIndex) => (prevIndex + 1) % imagePairs.length);
         }, 8000);
 
         return () => clearInterval(imageInterval);
-    }, []);
+    }, [isMobile]);
 
-    // Glow effect every 4 seconds for second design
+
     useEffect(() => {
+        if (isMobile) return;
+
         const glowInterval = setInterval(() => {
             setIsGlowing(true);
             setTimeout(() => setIsGlowing(false), 800);
         }, 4000);
 
         return () => clearInterval(glowInterval);
-    }, []);
+    }, [isMobile]);
 
     const currentPair = imagePairs[currentImageIndex];
 
-    // First Design (Original Hero) - Images aligned to bottom
+    // Handle Explore button click
+    const handleExploreClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsExploreOpen(true);
+    };
+
+
     const FirstDesign = () => (
         <div
             className="relative overflow-hidden lg:h-[800px] h-full flex items-center"
@@ -81,7 +107,7 @@ const Hero = () => {
                     <div className="flex-1 text-left">
 
                         {/* Main Heading */}
-                        <h1 className="text-5xl md:text-6xl  font-extrabold text-[#111827] leading-[1.1] mb-6 tracking-tight">
+                        <h1 className="text-5xl md:text-6xl font-extrabold text-[#111827] leading-[1.1] mb-6 tracking-tight">
                             Learn. Build.
                             <br />
                             Collaborate —
@@ -105,29 +131,18 @@ const Hero = () => {
                             >
                                 Get started
                             </Link>
-                            <Link
-                                href="/explore" className="bg-white text-[#0D6144] px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-all duration-300 border-2 border-[#D1FAE5] shadow-md hover:shadow-lg hover:-translate-y-0.5 min-w-[180px]">
+                            <button
+                                onClick={handleExploreClick}
+                                className="bg-white text-[#0D6144] px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-all duration-300 border-2 border-[#D1FAE5] shadow-md hover:shadow-lg hover:-translate-y-0.5 min-w-[180px] cursor-pointer"
+                            >
                                 Explore Programs
-                            </Link>
+                            </button>
                         </div>
 
                     </div>
 
                     <div className="flex-1 relative flex justify-center lg:justify-end mt-12 lg:mt-0">
-
                         <div className="relative w-full max-w-[500px] lg:max-w-[600px] xl:max-w-[700px] 2xl:max-w-[804px]">
-
-                            {/* Main Image Container */}
-                            <div className="absolute z-10">
-                                <Image
-                                    src="/img/studf.png"
-                                    alt="Smiling woman with books"
-                                    width={804}
-                                    height={944}
-                                    className="w-full h-auto drop-shadow-2xl"
-                                    priority
-                                />
-                            </div>
                             {/* Main Image Container */}
                             <div className="relative z-10 -mb-16 md:-mb-24 lg:-mb-32">
                                 <img
@@ -136,20 +151,17 @@ const Hero = () => {
                                     className="w-full h-auto drop-shadow-2xl"
                                 />
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
-
-
         </div>
     );
 
-    // Second Design (Heroo with carousel) - Images centered
+
     const SecondDesign = () => (
         <div
-            className="relative overflow-hidden  lg:h-[800px] h-full hidden  md:flex items-center"
+            className="relative overflow-hidden lg:h-[800px] h-full hidden md:flex items-center"
             style={{
                 backgroundImage: "url('/img/back.png')",
                 backgroundSize: 'cover',
@@ -187,12 +199,12 @@ const Hero = () => {
                                 Get started
                                 <span className="group-hover:translate-x-1 transition-transform">→</span>
                             </Link>
-                            <Link
-                                href="/explore"
-                                className="bg-white text-[#0D6144] px-6 md:px-8 lg:px-10 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:bg-gray-50 transition-all duration-300 border-2 border-[#0D6144]/20 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-center min-w-[150px] md:min-w-[160px] lg:min-w-[180px]"
+                            <button
+                                onClick={handleExploreClick}
+                                className="bg-white text-[#0D6144] px-6 md:px-8 lg:px-10 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:bg-gray-50 transition-all duration-300 border-2 border-[#0D6144]/20 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-center min-w-[150px] md:min-w-[160px] lg:min-w-[180px] cursor-pointer"
                             >
                                 Explore Programs
-                            </Link>
+                            </button>
                         </div>
                     </div>
 
@@ -256,7 +268,12 @@ const Hero = () => {
 
     return (
         <>
-            {designIndex === 0 ? <FirstDesign /> : <SecondDesign />}
+            {/* On mobile: always show FirstDesign */}
+            {/* On desktop: switch between FirstDesign and SecondDesign */}
+            {isMobile ? <FirstDesign /> : (designIndex === 0 ? <FirstDesign /> : <SecondDesign />)}
+
+            {/* Explore Dropdown */}
+            <ExploreDropdown isOpen={isExploreOpen} onClose={() => setIsExploreOpen(false)} />
 
             {/* Shared Decorative Elements */}
             <div className="fixed bottom-0 left-0 w-32 h-32 bg-[#0D6144]/5 rounded-full blur-3xl animate-pulse-slow pointer-events-none"></div>

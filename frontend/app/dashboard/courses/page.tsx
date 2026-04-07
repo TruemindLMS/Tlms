@@ -17,8 +17,8 @@ export default function CoursesPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
-
-    const categories = ['All', 'Design', 'Development', 'Marketing', 'Data Analysis', 'Security'];
+    const [error, setError] = useState('');
+    const [categories, setCategories] = useState<string[]>(['All']);
 
     useEffect(() => {
         if (!isAuthenticated()) {
@@ -30,12 +30,41 @@ export default function CoursesPage() {
 
     const fetchCourses = async () => {
         setLoading(true);
+        setError('');
+
         try {
+            console.log('🟡 Fetching courses...');
             const data = await courseApi.getAll();
-            setCourses(data);
-            setFilteredCourses(data);
-        } catch (error) {
-            console.error('Error fetching courses:', error);
+
+            console.log('🟢 Courses fetched:', data);
+
+            let coursesArray: Course[] = Array.isArray(data) ? data : [];
+
+            // Validate courses have IDs
+            const validatedCourses = coursesArray.map((course, index) => {
+                if (!course.id) {
+                    console.warn(`Course missing ID: ${course.title}, generating fallback`);
+                }
+                return {
+                    ...course,
+                    id: course.id || `course_${index}_${Date.now()}`
+                };
+            });
+
+            setCourses(validatedCourses);
+            setFilteredCourses(validatedCourses);
+
+            const uniqueCategories = ['All', ...new Set(validatedCourses.map(c => c.category).filter(Boolean))];
+            setCategories(uniqueCategories as string[]);
+
+            if (validatedCourses.length === 0) {
+                setError('No courses found. Please check back later.');
+            }
+        } catch (error: any) {
+            console.error('❌ Error fetching courses:', error);
+            setError(error.message || 'Failed to load courses. Please try again later.');
+            setCourses([]);
+            setFilteredCourses([]);
         } finally {
             setLoading(false);
         }
@@ -43,15 +72,18 @@ export default function CoursesPage() {
 
     useEffect(() => {
         let filtered = [...courses];
+
         if (searchQuery) {
             filtered = filtered.filter(course =>
-                course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                course.description.toLowerCase().includes(searchQuery.toLowerCase())
+                course.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                course.description?.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
+
         if (selectedCategory !== 'All') {
             filtered = filtered.filter(course => course.category === selectedCategory);
         }
+
         setFilteredCourses(filtered);
     }, [searchQuery, selectedCategory, courses]);
 
@@ -68,9 +100,8 @@ export default function CoursesPage() {
 
     return (
         <div className="min-h-screen bg-cover ml-1 lg:ml-1 md:ml-5 bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
-            {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2"> Courses 📚</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Courses 📚</h1>
                 <p className="text-gray-500">Discover courses and start your learning journey</p>
             </div>
 
@@ -135,11 +166,30 @@ export default function CoursesPage() {
                 </p>
             </div>
 
+            {/* Error Message */}
+            {error && (
+                <div className="text-center py-12 bg-red-50 rounded-xl mb-4">
+                    <p className="text-red-600 mb-4">{error}</p>
+                    <button
+                        onClick={fetchCourses}
+                        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            )}
+
             {/* Courses Grid */}
-            {filteredCourses.length === 0 ? (
+            {!error && filteredCourses.length === 0 && courses.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50 rounded-xl">
                     <BookOpen size={48} className="text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No courses available</h3>
+                    <p className="text-gray-500">Check back later for new courses</p>
+                </div>
+            ) : !error && filteredCourses.length === 0 && courses.length > 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-xl">
+                    <BookOpen size={48} className="text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No matching courses</h3>
                     <p className="text-gray-500">Try adjusting your search or filters</p>
                 </div>
             ) : (
@@ -157,9 +207,8 @@ export default function CoursesPage() {
 function CourseCard({ course }: { course: Course }) {
     return (
         <Link href={`/dashboard/courses/${course.id}`}>
-
-            <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all group cursor-pointer">
-                <div className="relative h-48 bg-gradient-to-r from-primary-500 to-primary-600">
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all group cursor-pointer h-full flex flex-col">
+                <div className="relative h-48 bg-gradient-to-r from-green-600 to-green-700">
                     {course.imageUrl ? (
                         <Image src={course.imageUrl} alt={course.title} fill className="object-cover" />
                     ) : (
@@ -178,19 +227,26 @@ function CourseCard({ course }: { course: Course }) {
                             {course.duration}
                         </span>
                     )}
-                    {course.rating && (
-                        <span className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                            <Star size={12} fill="white" />
-                            {course.rating}
-                        </span>
-                    )}
                 </div>
 
-                <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">
+                <div className="p-4 flex-1 flex flex-col">
+                    <div className="flex items-center gap-2 mb-2">
+                        {course.category && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                                {course.category}
+                            </span>
+                        )}
+                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                            <Star size={14} className="text-yellow-400 fill-current" />
+                            <span>{course.rating || 4.5}</span>
+                        </div>
+                    </div>
+
+                    <h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-1">
                         {course.title}
                     </h3>
-                    <p className="text-sm text-gray-500 mb-3 line-clamp-2">
+
+                    <p className="text-sm text-gray-500 mb-4 line-clamp-2 flex-1">
                         {course.description}
                     </p>
 
@@ -199,14 +255,13 @@ function CourseCard({ course }: { course: Course }) {
                             <Users size={14} />
                             <span>{course.enrolledCount || 0} students</span>
                         </div>
-                        {course.category && (
-                            <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">
-                                {course.category}
-                            </span>
-                        )}
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <BookOpen size={14} />
+                            <span>{course.modules?.length || 0} modules</span>
+                        </div>
                     </div>
 
-                    <button className="w-full py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center justify-center gap-2 group-hover:gap-3">
+                    <button className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center justify-center gap-2 group-hover:gap-3">
                         View Course
                         <ChevronRight size={16} className="group-hover:translate-x-1 transition" />
                     </button>

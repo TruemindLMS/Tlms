@@ -233,7 +233,7 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                                 )}
                             </button>
 
-                            <Link href="/signin">
+                            <Link href="/">
                                 <button
                                     className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors group relative ${collapsed && !isMobile ? 'justify-center' : ''
                                         }`}
@@ -241,7 +241,7 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                                     <LogOut size={20} />
                                     {(!collapsed || isMobile) && <span className="text-sm font-medium"></span>}
                                     {collapsed && !isMobile && (
-                                        <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                                        <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-black text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                                             Logout
                                         </span>
                                     )}

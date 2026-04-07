@@ -40,7 +40,7 @@ export default function CourseDetailPage() {
             const data = await courseApi.getById(courseId);
             setCourse(data);
 
-            if (data.modules.length > 0) {
+            if (data.modules && data.modules.length > 0) {
                 setExpandedModules(new Set([data.modules[0].id]));
             }
 
@@ -103,7 +103,7 @@ export default function CourseDetailPage() {
 
     const handleStartLearning = () => {
         // Find first lesson to start with
-        if (course && course.modules.length > 0 && course.modules[0].lessons.length > 0) {
+        if (course && course.modules && course.modules.length > 0 && course.modules[0].lessons.length > 0) {
             const firstLesson = course.modules[0].lessons[0];
             router.push(`/dashboard/courses/${courseId}/lessons/${firstLesson.id}`);
         }
@@ -128,7 +128,7 @@ export default function CourseDetailPage() {
         );
     }
 
-    const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0);
+    const totalLessons = course.modules?.reduce((acc, m) => acc + (m.lessons?.length || 0), 0) || 0;
     const totalDuration = course.duration || '4 sections of 5 weeks, 3 hours per week';
 
     return (
@@ -204,34 +204,20 @@ export default function CourseDetailPage() {
                         <div className="bg-white rounded-xl p-6 shadow-sm border mb-8">
                             <h2 className="text-xl font-bold text-gray-900 mb-4">What You Will Learn:</h2>
                             <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <li className="flex items-start gap-2 text-sm text-gray-600">
-                                    <CheckCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
-                                    How to use the Elements Panel in Figma.
-                                </li>
-                                <li className="flex items-start gap-2 text-sm text-gray-600">
-                                    <CheckCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
-                                    How to create components and libraries.
-                                </li>
-                                <li className="flex items-start gap-2 text-sm text-gray-600">
-                                    <CheckCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
-                                    How to style components with CSS.
-                                </li>
-                                <li className="flex items-start gap-2 text-sm text-gray-600">
-                                    <CheckCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
-                                    How to use the Styles panel for styling.
-                                </li>
-                                <li className="flex items-start gap-2 text-sm text-gray-600">
-                                    <CheckCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
-                                    How to use the Components panel for creating components.
-                                </li>
-                                <li className="flex items-start gap-2 text-sm text-gray-600">
-                                    <CheckCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
-                                    How to use the Libraries panel for adding reusable components.
-                                </li>
-                                <li className="flex items-start gap-2 text-sm text-gray-600">
-                                    <CheckCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
-                                    How to use the Assets panel for managing assets like fonts and images.
-                                </li>
+                                {[
+                                    "How to use the Elements Panel in Figma.",
+                                    "How to create components and libraries.",
+                                    "How to style components with CSS.",
+                                    "How to use the Styles panel for styling.",
+                                    "How to use the Components panel for creating components.",
+                                    "How to use the Libraries panel for adding reusable components.",
+                                    "How to use the Assets panel for managing assets like fonts and images."
+                                ].map((item, idx) => (
+                                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                                        <CheckCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
@@ -243,7 +229,7 @@ export default function CourseDetailPage() {
 
                         {/* Modules Sections */}
                         <div className="space-y-3">
-                            {course.modules.map((module, index) => (
+                            {course.modules && course.modules.map((module, index) => (
                                 <ModuleSection
                                     key={module.id}
                                     module={module}
@@ -279,18 +265,18 @@ export default function CourseDetailPage() {
                             <h3 className="font-semibold text-gray-900 text-lg mb-4">Other Courses:</h3>
                             <div className="space-y-4">
                                 {[
-                                    { title: "Advanced Essential Navigation Guide", duration: "4 Weeks", cost: "$0" },
-                                    { title: "Code Hero UI Kit", duration: "6 Weeks", cost: "$0" },
-                                    { title: "Gatsby Starter Template", duration: "8 Weeks", cost: "$0" },
-                                    { title: "Elementor Essential Page Builder", duration: "10 Weeks", cost: "$0" },
-                                    { title: "Custom Bootstrap Layouts", duration: "12 Weeks", cost: "$0" },
-                                    { title: "Foundation CSS Framework", duration: "14 Weeks", cost: "$0" },
-                                    { title: "Tailwind CSS", duration: "16 Weeks", cost: "$0" },
-                                    { title: "Bootstrap 5", duration: "18 Weeks", cost: "$0" },
-                                    { title: "Material UI", duration: "20 Weeks", cost: "$0" },
-                                    { title: "Ant Design", duration: "22 Weeks", cost: "$0" },
-                                ].map((item, idx) => (
-                                    <div key={idx} className="pb-3 border-b border-gray-100 last:border-0">
+                                    { id: "other1", title: "Advanced Essential Navigation Guide", duration: "4 Weeks", cost: "$0" },
+                                    { id: "other2", title: "Code Hero UI Kit", duration: "6 Weeks", cost: "$0" },
+                                    { id: "other3", title: "Gatsby Starter Template", duration: "8 Weeks", cost: "$0" },
+                                    { id: "other4", title: "Elementor Essential Page Builder", duration: "10 Weeks", cost: "$0" },
+                                    { id: "other5", title: "Custom Bootstrap Layouts", duration: "12 Weeks", cost: "$0" },
+                                    { id: "other6", title: "Foundation CSS Framework", duration: "14 Weeks", cost: "$0" },
+                                    { id: "other7", title: "Tailwind CSS", duration: "16 Weeks", cost: "$0" },
+                                    { id: "other8", title: "Bootstrap 5", duration: "18 Weeks", cost: "$0" },
+                                    { id: "other9", title: "Material UI", duration: "20 Weeks", cost: "$0" },
+                                    { id: "other10", title: "Ant Design", duration: "22 Weeks", cost: "$0" },
+                                ].map((item) => (
+                                    <div key={item.id} className="pb-3 border-b border-gray-100 last:border-0">
                                         <p className="font-medium text-gray-900 text-sm">{item.title}</p>
                                         <div className="flex items-center gap-3 mt-1">
                                             <span className="text-xs text-gray-500">{item.duration}</span>
@@ -307,7 +293,7 @@ export default function CourseDetailPage() {
     );
 }
 
-// Module Section Component
+// Module Section Component - FIXED with proper keys
 function ModuleSection({
     module,
     index,
@@ -337,7 +323,7 @@ function ModuleSection({
         ["Styling Buttons", "Styling Text Fields", "Styling Forms", "Styling Images"],
         ["Using Variables", "Using Functions", "Using Plugins", "Using Libraries"]
     ];
-    const lessons = sectionLessons[index] || module.lessons.map(l => l.title);
+    const lessons = sectionLessons[index] || (module.lessons ? module.lessons.map(l => l.title) : []);
 
     return (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -362,7 +348,7 @@ function ModuleSection({
                 <div className="border-t bg-gray-50">
                     {lessons.map((lessonTitle, lessonIndex) => (
                         <div
-                            key={lessonIndex}
+                            key={`${module.id}_lesson_${lessonIndex}`}
                             className="px-5 py-3 flex items-center gap-3 border-t first:border-t-0 hover:bg-gray-100 transition"
                         >
                             {isEnrolled ? (

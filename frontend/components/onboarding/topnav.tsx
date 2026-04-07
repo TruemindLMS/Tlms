@@ -4,9 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ExploreDropdown from '@/app/explore/page';
-import ArrowRight2, { Icon } from 'iconsax-react';
-import { Compass } from 'lucide-react';
-
 
 const Topnav = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,11 +11,20 @@ const Topnav = () => {
     const pathname = usePathname();
 
     const allowedRoutes = ['/', '/blog', '/about', '/courses', '/contact', '/explore', '/faq'];
-    if (!allowedRoutes.includes(pathname)) return null;
+
+    // Check dashboard routes first
+    if (pathname?.startsWith('/dashboard')) {
+        return null;
+    }
+
+    // If not in allowedRoutes, return null
+    if (!allowedRoutes.includes(pathname)) {
+        return null;
+    }
 
     const navLinks = [
         { href: '/', label: 'Home' },
-        { href: '/explore', label: 'Explore', icon: Compass },
+        { href: '/explore', label: 'Explore' },
         { href: '/about', label: 'About Us' },
         { href: '/faq', label: 'Help/FAQ' },
     ];
@@ -34,10 +40,6 @@ const Topnav = () => {
         setIsExploreOpen(!isExploreOpen);
     };
 
-    if (pathname?.startsWith('/dashboard')) {
-        return null;
-    }
-
     return (
         <>
             <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -45,12 +47,15 @@ const Topnav = () => {
                     <div className="flex justify-between items-center h-16">
                         {/* Logo */}
                         <div className="flex gap-2">
-                            <img
-                                width={150}
-                                height={42}
-                                src="/img/logo.png"
-                                alt="Learning Illustration"
-                            />
+                            <Link href="/">
+                                <img
+                                    width={150}
+                                    height={42}
+                                    src="/img/logo.png"
+                                    alt="Learning Illustration"
+                                    className="cursor-pointer"
+                                />
+                            </Link>
                         </div>
 
                         {/* Desktop Navigation Links */}
@@ -63,10 +68,7 @@ const Topnav = () => {
                                         className={`${isExploreOpen ? 'text-primary-600' : isActive(link.href) ? 'text-primary-600 border-b-2 border-primary-600' : 'text-gray-700 hover:text-primary-600'} transition-colors font-medium pb-1`}
                                     >
                                         {link.label}
-
-
                                     </button>
-
                                 ) : (
                                     <Link
                                         key={link.href}
@@ -77,13 +79,12 @@ const Topnav = () => {
                                             } transition-colors font-medium pb-1`}
                                     >
                                         {link.label}
-
                                     </Link>
                                 )
                             ))}
                         </div>
 
-                        {/* Auth Buttons */}
+                        {/* Auth Buttons - Public Version (No Sign Out) */}
                         <div className="hidden lg:flex items-center space-x-4">
                             <Link
                                 href="/signin"
@@ -91,7 +92,6 @@ const Topnav = () => {
                             >
                                 Login
                             </Link>
-
                             <Link
                                 href="/signup"
                                 className="bg-primary-600 text-white px-8 py-1 rounded-2xl hover:bg-primary-700 transition-colors"
@@ -159,7 +159,6 @@ const Topnav = () => {
                                 >
                                     Login
                                 </Link>
-
                                 <Link
                                     href="/signup"
                                     className="bg-primary-600 text-white px-5 py-2 rounded-full hover:bg-primary-700 transition-colors text-center"
