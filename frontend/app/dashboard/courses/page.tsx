@@ -6,19 +6,32 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
     BookOpen, Clock, Star, Users, Play, ChevronRight,
-    Search, Filter, Loader2, Trophy, Award, Target, GraduationCap
+    Search, Filter, Loader2, Trophy, Award, Target, GraduationCap,
+    CheckCircle, X, AlertCircle
 } from 'lucide-react';
-import { isAuthenticated, courseApi, Course } from '@/lib/api';
+import { isAuthenticated, courseApi, Course, getUser } from '@/lib/api';
 
 export default function CoursesPage() {
     const router = useRouter();
     const [courses, setCourses] = useState<Course[]>([]);
     const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+    const [enrolledCourseIds, setEnrolledCourseIds] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const [categories, setCategories] = useState<string[]>(['All']);
+    const [showFilters, setShowFilters] = useState(false);
+    const [selectedLevel, setSelectedLevel] = useState('All');
+    const [enrollingCourseId, setEnrollingCourseId] = useState<string | null>(null);
+
+    const levels = ['All', 'Beginner', 'Intermediate', 'Advanced'];
+
+    const getCurrentUserId = () => {
+        const user = getUser();
+        return user?.id || user?.email || 'anonymous';
+    };
 
     useEffect(() => {
         if (!isAuthenticated()) {
@@ -26,7 +39,15 @@ export default function CoursesPage() {
             return;
         }
         fetchCourses();
+        loadEnrolledCourses();
     }, [router]);
+
+    const loadEnrolledCourses = () => {
+        const userId = getCurrentUserId();
+        const enrolledCoursesKey = `enrolledCourses_${userId}`;
+        const enrolled = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
+        setEnrolledCourseIds(new Set(enrolled.map((c: any) => c.id)));
+    };
 
     const fetchCourses = async () => {
         setLoading(true);
@@ -36,20 +57,12 @@ export default function CoursesPage() {
             console.log('🟡 Fetching courses...');
             const data = await courseApi.getAll();
 
-            console.log('🟢 Courses fetched:', data);
-
             let coursesArray: Course[] = Array.isArray(data) ? data : [];
 
-            // Validate courses have IDs
-            const validatedCourses = coursesArray.map((course, index) => {
-                if (!course.id) {
-                    console.warn(`Course missing ID: ${course.title}, generating fallback`);
-                }
-                return {
-                    ...course,
-                    id: course.id || `course_${index}_${Date.now()}`
-                };
-            });
+            const validatedCourses = coursesArray.map((course, index) => ({
+                ...course,
+                id: course.id || `course_${index}_${Date.now()}`
+            }));
 
             setCourses(validatedCourses);
             setFilteredCourses(validatedCourses);
@@ -70,6 +83,66 @@ export default function CoursesPage() {
         }
     };
 
+    const handleEnroll = async (course: Course) => {
+        if (enrolledCourseIds.has(course.id)) {
+            router.push(`/dashboard/courses/${course.id}`);
+            return;
+        }
+
+        setEnrollingCourseId(course.id);
+
+        try {
+            const userId = getCurrentUserId();
+            const enrolledCoursesKey = `enrolledCourses_${userId}`;
+            const userStatsKey = `userStats_${userId}`;
+            const startedKey = `hasStartedCourse_${userId}`;
+
+            const enrolledCourses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
+
+            const newCourse = {
+                id: course.id,
+                title: course.title,
+                enrolledDate: new Date().toISOString(),
+                progress: 0,
+                lastLessonId: null
+            };
+
+            enrolledCourses.push(newCourse);
+            localStorage.setItem(enrolledCoursesKey, JSON.stringify(enrolledCourses));
+
+            // Update user stats
+            const savedStats = localStorage.getItem(userStatsKey);
+            let currentStats = savedStats ? JSON.parse(savedStats) : { enrolled: 0, completed: 0, progress: 0 };
+            currentStats.enrolled = enrolledCourses.length;
+            localStorage.setItem(userStatsKey, JSON.stringify(currentStats));
+            localStorage.setItem(startedKey, "true");
+
+            // Update enrolled courses set
+            setEnrolledCourseIds(prev => new Set([...prev, course.id]));
+
+            // Dispatch event for notification
+            window.dispatchEvent(new CustomEvent('courseEnrolled', {
+                detail: {
+                    courseTitle: course.title,
+                    courseId: course.id
+                }
+            }));
+
+            setSuccessMessage(`✅ Successfully enrolled in "${course.title}"!`);
+            setTimeout(() => setSuccessMessage(''), 3000);
+
+            // Also call API enrollment
+            await courseApi.enroll(course.id);
+
+        } catch (error) {
+            console.error('Enrollment error:', error);
+            setError('Failed to enroll. Please try again.');
+            setTimeout(() => setError(''), 3000);
+        } finally {
+            setEnrollingCourseId(null);
+        }
+    };
+
     useEffect(() => {
         let filtered = [...courses];
 
@@ -84,14 +157,24 @@ export default function CoursesPage() {
             filtered = filtered.filter(course => course.category === selectedCategory);
         }
 
+        if (selectedLevel !== 'All') {
+            filtered = filtered.filter(course => course.level === selectedLevel);
+        }
+
         setFilteredCourses(filtered);
-    }, [searchQuery, selectedCategory, courses]);
+    }, [searchQuery, selectedCategory, selectedLevel, courses]);
+
+    const clearFilters = () => {
+        setSearchQuery('');
+        setSelectedCategory('All');
+        setSelectedLevel('All');
+    };
 
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <div className="text-center">
-                    <Loader2 size={40} className="animate-spin text-primary-600 mx-auto mb-4" />
+                    <Loader2 size={40} className="animate-spin text-green-600 mx-auto mb-4" />
                     <p className="text-gray-500">Loading courses...</p>
                 </div>
             </div>
@@ -100,6 +183,26 @@ export default function CoursesPage() {
 
     return (
         <div className="min-h-screen bg-cover ml-1 lg:ml-1 md:ml-5 bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
+            {/* Success Message */}
+            {successMessage && (
+                <div className="fixed top-20 right-4 z-50 animate-slide-in">
+                    <div className="bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+                        <CheckCircle size={18} />
+                        <span className="text-sm">{successMessage}</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+                <div className="fixed top-20 right-4 z-50 animate-slide-in">
+                    <div className="bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+                        <AlertCircle size={18} />
+                        <span className="text-sm">{error}</span>
+                    </div>
+                </div>
+            )}
+
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">Courses 📚</h1>
                 <p className="text-gray-500">Discover courses and start your learning journey</p>
@@ -114,8 +217,8 @@ export default function CoursesPage() {
                 </div>
                 <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                     <Users size={24} className="text-green-500 mb-2" />
-                    <p className="text-2xl font-bold text-gray-900">10k+</p>
-                    <p className="text-xs text-gray-500">Active Students</p>
+                    <p className="text-2xl font-bold text-gray-900">{enrolledCourseIds.size}</p>
+                    <p className="text-xs text-gray-500">Enrolled</p>
                 </div>
                 <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                     <Trophy size={24} className="text-yellow-500 mb-2" />
@@ -129,27 +232,89 @@ export default function CoursesPage() {
                 </div>
             </div>
 
-            {/* Search Bar */}
+            {/* Search and Filter Bar */}
             <div className="mb-6">
-                <div className="relative">
-                    <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search courses by title or description..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
-                    />
+                <div className="flex flex-col md:flex-row gap-3">
+                    <div className="flex-1 relative">
+                        <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search courses by title or description..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                    </div>
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition"
+                    >
+                        <Filter size={18} />
+                        Filters
+                        {(selectedCategory !== 'All' || selectedLevel !== 'All') && (
+                            <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">
+                                {(selectedCategory !== 'All' ? 1 : 0) + (selectedLevel !== 'All' ? 1 : 0)}
+                            </span>
+                        )}
+                    </button>
                 </div>
+
+                {/* Filter Panel */}
+                {showFilters && (
+                    <div className="mt-3 p-4 bg-white rounded-xl border border-gray-200">
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="font-medium text-gray-900">Filter Courses</h3>
+                            <button onClick={clearFilters} className="text-sm text-red-500 hover:text-red-600">
+                                Clear all
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {categories.map(cat => (
+                                        <button
+                                            key={cat}
+                                            onClick={() => setSelectedCategory(cat)}
+                                            className={`px-3 py-1 rounded-full text-sm transition-all ${selectedCategory === cat
+                                                ? 'bg-green-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                        >
+                                            {cat}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {levels.map(level => (
+                                        <button
+                                            key={level}
+                                            onClick={() => setSelectedLevel(level)}
+                                            className={`px-3 py-1 rounded-full text-sm transition-all ${selectedLevel === level
+                                                ? 'bg-green-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                        >
+                                            {level}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* Category Filters */}
-            <div className="flex flex-wrap gap-2 mb-6 border-b pb-4">
-                {categories.map((category) => (
+            {/* Category Quick Filters */}
+            <div className="flex flex-wrap gap-2 mb-6 border-b pb-4 overflow-x-auto">
+                {categories.slice(0, 6).map((category) => (
                     <button
                         key={category}
                         onClick={() => setSelectedCategory(category)}
-                        className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${selectedCategory === category
                             ? 'bg-green-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
@@ -160,14 +325,19 @@ export default function CoursesPage() {
             </div>
 
             {/* Results Count */}
-            <div className="mb-4">
+            <div className="mb-4 flex justify-between items-center">
                 <p className="text-sm text-gray-500">
                     Showing {filteredCourses.length} of {courses.length} courses
                 </p>
+                {(selectedCategory !== 'All' || selectedLevel !== 'All' || searchQuery) && (
+                    <button onClick={clearFilters} className="text-sm text-green-600 hover:text-green-700">
+                        Clear all filters
+                    </button>
+                )}
             </div>
 
             {/* Error Message */}
-            {error && (
+            {error && !successMessage && (
                 <div className="text-center py-12 bg-red-50 rounded-xl mb-4">
                     <p className="text-red-600 mb-4">{error}</p>
                     <button
@@ -181,21 +351,30 @@ export default function CoursesPage() {
 
             {/* Courses Grid */}
             {!error && filteredCourses.length === 0 && courses.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-xl">
+                <div className="text-center py-12 bg-white rounded-xl shadow-sm border">
                     <BookOpen size={48} className="text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No courses available</h3>
                     <p className="text-gray-500">Check back later for new courses</p>
                 </div>
             ) : !error && filteredCourses.length === 0 && courses.length > 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-xl">
+                <div className="text-center py-12 bg-white rounded-xl shadow-sm border">
                     <BookOpen size={48} className="text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No matching courses</h3>
                     <p className="text-gray-500">Try adjusting your search or filters</p>
+                    <button onClick={clearFilters} className="mt-4 text-green-600 hover:text-green-700">
+                        Clear all filters
+                    </button>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredCourses.map((course) => (
-                        <CourseCard key={course.id} course={course} />
+                        <CourseCard
+                            key={course.id}
+                            course={course}
+                            isEnrolled={enrolledCourseIds.has(course.id)}
+                            onEnroll={() => handleEnroll(course)}
+                            isEnrolling={enrollingCourseId === course.id}
+                        />
                     ))}
                 </div>
             )}
@@ -204,10 +383,15 @@ export default function CoursesPage() {
 }
 
 // Course Card Component
-function CourseCard({ course }: { course: Course }) {
+function CourseCard({ course, isEnrolled, onEnroll, isEnrolling }: {
+    course: Course;
+    isEnrolled: boolean;
+    onEnroll: () => void;
+    isEnrolling: boolean;
+}) {
     return (
-        <Link href={`/dashboard/courses/${course.id}`}>
-            <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all group cursor-pointer h-full flex flex-col">
+        <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all group h-full flex flex-col">
+            <Link href={`/dashboard/courses/${course.id}`} className="block">
                 <div className="relative h-48 bg-gradient-to-r from-green-600 to-green-700">
                     {course.imageUrl ? (
                         <Image src={course.imageUrl} alt={course.title} fill className="object-cover" />
@@ -225,6 +409,12 @@ function CourseCard({ course }: { course: Course }) {
                         <span className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
                             <Clock size={12} />
                             {course.duration}
+                        </span>
+                    )}
+                    {isEnrolled && (
+                        <span className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                            <CheckCircle size={12} />
+                            Enrolled
                         </span>
                     )}
                 </div>
@@ -260,13 +450,37 @@ function CourseCard({ course }: { course: Course }) {
                             <span>{course.modules?.length || 0} modules</span>
                         </div>
                     </div>
-
-                    <button className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center justify-center gap-2 group-hover:gap-3">
-                        View Course
-                        <ChevronRight size={16} className="group-hover:translate-x-1 transition" />
-                    </button>
                 </div>
+            </Link>
+
+            <div className="px-4 pb-4">
+                {isEnrolled ? (
+                    <Link href={`/dashboard/courses/${course.id}`}>
+                        <button className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center justify-center gap-2">
+                            <Play size={16} />
+                            Continue Learning
+                        </button>
+                    </Link>
+                ) : (
+                    <button
+                        onClick={onEnroll}
+                        disabled={isEnrolling}
+                        className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isEnrolling ? (
+                            <>
+                                <Loader2 size={16} className="animate-spin" />
+                                Enrolling...
+                            </>
+                        ) : (
+                            <>
+                                Enroll Now
+                                <ChevronRight size={16} />
+                            </>
+                        )}
+                    </button>
+                )}
             </div>
-        </Link>
+        </div>
     );
 }
