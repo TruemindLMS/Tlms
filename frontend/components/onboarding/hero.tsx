@@ -105,9 +105,10 @@ const Hero = () => {
                             >
                                 Get started
                             </Link>
-                            <button className="bg-white text-[#0D6144] px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-all duration-300 border-2 border-[#D1FAE5] shadow-md hover:shadow-lg hover:-translate-y-0.5 min-w-[180px]">
+                            <Link
+                                href="/explore" className="bg-white text-[#0D6144] px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-all duration-300 border-2 border-[#D1FAE5] shadow-md hover:shadow-lg hover:-translate-y-0.5 min-w-[180px]">
                                 Explore Programs
-                            </button>
+                            </Link>
                         </div>
 
                     </div>
@@ -187,7 +188,7 @@ const Hero = () => {
                                 <span className="group-hover:translate-x-1 transition-transform">→</span>
                             </Link>
                             <Link
-                                href="/courses"
+                                href="/explore"
                                 className="bg-white text-[#0D6144] px-6 md:px-8 lg:px-10 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:bg-gray-50 transition-all duration-300 border-2 border-[#0D6144]/20 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-center min-w-[150px] md:min-w-[160px] lg:min-w-[180px]"
                             >
                                 Explore Programs

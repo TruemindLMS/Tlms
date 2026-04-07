@@ -4,33 +4,17 @@ import { Suspense } from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle, Check, XCircle, Loader2, ArrowRight, Mail } from 'lucide-react'
+import { CheckCircle, Check, Loader2, ArrowRight, Mail, AlertCircle } from 'lucide-react'
 import { verifyOtp, sendOtp } from '@/lib/api'
 
-// Main component wrapped with Suspense
 export default function VerifyOTPPage() {
     return (
-        <Suspense fallback={<OTPLoadingFallback />}>
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" size={40} /></div>}>
             <VerifyOTPContent />
         </Suspense>
     )
 }
 
-// Loading fallback component
-function OTPLoadingFallback() {
-    return (
-        <div className="min-h-screen flex bg-[#004222] items-center justify-center p-4">
-            <div className="max-w-md w-full">
-                <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
-                    <Loader2 size={40} className="text-primary-600 animate-spin mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-gray-900">Loading...</h2>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// Main content component that uses useSearchParams
 function VerifyOTPContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -49,7 +33,6 @@ function VerifyOTPContent() {
     useEffect(() => {
         if (!email) {
             router.push('/signup')
-            return
         }
     }, [email, router])
 
@@ -70,23 +53,19 @@ function VerifyOTPContent() {
         newOtp[index] = value
         setOtp(newOtp)
 
-        // Auto-focus next input
         if (value && index < 5) {
             inputRefs.current[index + 1]?.focus()
         }
 
-        // Clear error when user starts typing
-        if (errorMessage) {
-            setErrorMessage('')
-        }
-        if (resendMessage) {
-            setResendMessage('')
-        }
+        if (errorMessage) setErrorMessage('')
     }
 
     const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
         if (e.key === 'Backspace' && !otp[index] && index > 0) {
             inputRefs.current[index - 1]?.focus()
+        }
+        if (e.key === 'Enter' && otp.every(d => d !== '')) {
+            handleVerifyOTP()
         }
     }
 
@@ -103,16 +82,9 @@ function VerifyOTPContent() {
         })
 
         setOtp(newOtp)
-
-        // Focus on the next empty input or last input
         const lastFilledIndex = newOtp.findLastIndex(char => char !== '')
         const focusIndex = lastFilledIndex < 5 ? lastFilledIndex + 1 : 5
         inputRefs.current[focusIndex]?.focus()
-
-        // Clear error when user pastes
-        if (errorMessage) {
-            setErrorMessage('')
-        }
     }
 
     const handleVerifyOTP = async () => {
@@ -126,57 +98,38 @@ function VerifyOTPContent() {
         setErrorMessage('')
 
         try {
-            // Call API to verify OTP
             const response = await verifyOtp(email!, otpValue)
 
             if (response.success || response.token) {
-                // Get stored user data from registration
                 const userDataStr = localStorage.getItem('pendingUserData')
                 if (userDataStr) {
                     const userData = JSON.parse(userDataStr)
-
-                    // Store user data permanently
                     localStorage.setItem('userFullName', userData.fullName)
                     localStorage.setItem('userEmail', userData.email)
                     localStorage.setItem('userRole', userData.role || role || 'Student')
                     localStorage.setItem('isAuthenticated', 'true')
-
-                    // Clear pending data
                     localStorage.removeItem('pendingUserData')
                 }
 
-                // Store auth token if returned
                 if (response.token) {
                     localStorage.setItem('authToken', response.token)
                 }
 
-                // Also store user info from response
                 if (response.user) {
                     localStorage.setItem('user', JSON.stringify(response.user))
-                    localStorage.setItem('userFullName', `${response.user.firstName || ''} ${response.user.lastName || ''}`.trim())
-                    localStorage.setItem('userEmail', response.user.email)
-                    localStorage.setItem('userRole', response.user.role)
                 }
 
                 setStatus('success')
-
-                // Redirect to onboarding after 2 seconds
                 setTimeout(() => {
                     router.push('/onboarding')
                 }, 2000)
             } else {
-                throw new Error(response.message || 'Invalid OTP code. Please try again.')
+                throw new Error(response.message || 'Invalid OTP code')
             }
-
         } catch (error: any) {
-            console.error('OTP verification error:', error)
             setStatus('error')
-            setErrorMessage(error.message || 'Invalid verification code. Please try again.')
-
-            // Reset status after 3 seconds
-            setTimeout(() => {
-                setStatus('idle')
-            }, 3000)
+            setErrorMessage(error.message || 'Invalid verification code')
+            setTimeout(() => setStatus('idle'), 3000)
         }
     }
 
@@ -188,278 +141,127 @@ function VerifyOTPContent() {
         setResendMessage('')
 
         try {
-            // Call API to resend OTP
             const response = await sendOtp(email!)
-
             if (response.success) {
-                setResendMessage('✅ New verification code sent successfully!')
-
-                // Reset OTP inputs
+                setResendMessage('✅ New code sent! Check your email.')
                 setOtp(['', '', '', '', '', ''])
                 setCountdown(60)
                 setCanResend(false)
-                setStatus('idle')
-
-                // Focus on first input
                 inputRefs.current[0]?.focus()
-
-                // Clear success message after 3 seconds
-                setTimeout(() => {
-                    setResendMessage('')
-                }, 3000)
+                setTimeout(() => setResendMessage(''), 5000)
             } else {
-                throw new Error(response.message || 'Failed to resend OTP')
+                throw new Error(response.message || 'Failed to resend')
             }
-
         } catch (error: any) {
-            console.error('Resend error:', error)
-            setErrorMessage(error.message || 'Failed to resend OTP. Please try again.')
+            setErrorMessage(error.message || 'Failed to resend OTP')
+            setTimeout(() => setErrorMessage(''), 5000)
         } finally {
             setResendLoading(false)
         }
     }
 
-    const handleContinueToOnboarding = () => {
-        router.push('/onboarding')
-    }
-
     if (status === 'success') {
         return (
             <div className="min-h-screen flex bg-[#004222] items-center justify-center p-4">
-                <div className="max-w-md w-full">
-                    <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
-                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <CheckCircle size={40} className="text-green-600" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            Email Verified Successfully!
-                        </h2>
-                        <p className="text-gray-600 mb-4">
-                            Your email has been confirmed. Now let's personalize your profile.
-                        </p>
-                        <div className="bg-primary-50 rounded-lg p-4 mb-6">
-                            <p className="text-sm text-primary-700">
-                                <strong>Next step:</strong> Complete your profile to get personalized course recommendations.
-                            </p>
-                        </div>
-                        <button
-                            onClick={handleContinueToOnboarding}
-                            className="w-full bg-primary-600 text-white py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
-                        >
-                            Continue to Profile Setup
-                            <ArrowRight size={18} />
-                        </button>
+                <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 text-center">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <CheckCircle size={40} className="text-green-600" />
                     </div>
+                    <h2 className="text-2xl font-bold mb-2">Email Verified!</h2>
+                    <p className="text-gray-600 mb-6">Your email has been confirmed.</p>
+                    <button
+                        onClick={() => router.push('/onboarding')}
+                        className="w-full bg-primary-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2"
+                    >
+                        Continue <ArrowRight size={18} />
+                    </button>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="flex flex-col lg:flex-row min-h-screen bg-[#004222] w-full">
-            {/* Left Side - Brand Section */}
-            <div className="w-full lg:w-[578px] relative bg-[#004222] min-h-[40vh] lg:min-h-screen hidden lg:flex lg:flex-col justify-center gap-3 md:5 lg:gap-28 p-6 sm:p-8 md:p-10">
-                <div className="mb-8 lg:mb-0">
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-                        TalentFlow
-                    </h1>
-                    <p className="text-sm sm:text-md text-white/80 mt-1">
-                        TRUEMINDS INNOVATIONS
-                    </p>
+        <div className="min-h-screen bg-[#004222] flex items-center justify-center p-4">
+            <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8">
+                <div className="text-center mb-8">
+                    <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Mail size={40} className="text-primary-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold mb-2">Verify Your Email</h2>
+                    <p className="text-gray-600">We sent a 6-digit code to</p>
+                    <p className="text-lg font-semibold text-primary-600 mt-1">{email}</p>
                 </div>
 
-                <div className="flex flex-col gap-6 lg:gap-8 my-8 lg:my-0">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white">
-                        Start your journey
-                        <br />
-                        with us today
-                    </h2>
-
-                    <div className="space-y-3 md:space-y-4 hidden md:flex flex-col">
-                        {[
-                            'Access to 500+ courses',
-                            'Personalized learning paths',
-                        ].map((feature, index) => (
-                            <div key={index} className="flex items-center gap-3">
-                                <div className="w-5 h-5 border border-white/80 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <Check size={12} className="text-white/80" />
-                                </div>
-                                <span className="text-white/80 text-sm md:text-[16px]">
-                                    {feature}
-                                </span>
-                            </div>
+                <div className="mb-8">
+                    <div className="flex justify-center gap-2">
+                        {otp.map((digit, index) => (
+                            <input
+                                key={index}
+                                ref={(el) => { inputRefs.current[index] = el }}
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={1}
+                                value={digit}
+                                onChange={(e) => handleOtpChange(index, e.target.value)}
+                                onKeyDown={(e) => handleKeyDown(index, e)}
+                                onPaste={handlePaste}
+                                className="w-12 h-12 text-center text-xl font-semibold border-2 border-gray-300 rounded-lg focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                                autoFocus={index === 0}
+                                disabled={status === 'verifying'}
+                            />
                         ))}
                     </div>
-                </div>
 
-                <div className="hidden lg:block border border-white/30 p-6 md:p-6 rounded-xl bg-white/10 backdrop-blur-sm mt-8 lg:mt-0">
-                    <p className="text-white/90 italic text-sm md:text-base mb-4">
-                        "Joining TalentFlow was the best decision for my career.
-                        The learning experience is unmatched!"
-                    </p>
-                    <div>
-                        <p className="font-semibold text-white">
-                            Obiajulu
-                        </p>
-                        <p className="text-sm text-white/70">
-                            SENIOR DEVELOPER
-                        </p>
-                    </div>
-                </div>
-
-                <div className="md:hidden mt-6">
-                    <div className="space-y-2">
-                        {[
-                            'Access to 500+ courses',
-                            'Personalized learning paths',
-                            'Industry-recognized certificates'
-                        ].map((feature, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                                <div className="w-4 h-4 border border-white/80 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <Check size={10} className="text-white/80" />
-                                </div>
-                                <span className="text-white/80 text-xs">
-                                    {feature}
-                                </span>
+                    {errorMessage && (
+                        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <div className="flex items-center gap-2 text-red-600">
+                                <AlertCircle size={16} />
+                                <p className="text-sm">{errorMessage}</p>
                             </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="absolute z-10 top-0 right-0">
-                    <img
-                        src="/img/gaddd.png"
-                        alt="Decoration"
-                        className="w-full h-full drop-shadow-2xl"
-                    />
-                </div>
-
-                <div className="absolute z-10 top-0 right-0">
-                    <img
-                        src="/img/gadd.png"
-                        alt="Decoration"
-                        className="w-full h-full drop-shadow-2xl"
-                    />
-                </div>
-
-                <div className="absolute z-10 bottom-0 left-0">
-                    <img
-                        src="/img/gad.png"
-                        alt="Decoration"
-                        className="w-[680px] h-56 drop-shadow-2xl"
-                    />
-                </div>
-            </div>
-
-            {/* Right Side - OTP Form */}
-            <div className="w-full lg:flex-1 min-h-[50vh] lg:bg-white bg-[#004222] flex items-center justify-center py-12 px-4 sm:px-6 md:px-8 lg:px-12">
-                <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full">
-                    <div className="text-center mb-8">
-                        <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Mail size={40} className="text-primary-600" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            Verify Your Email
-                        </h2>
-                        <p className="text-gray-600">
-                            We've sent a 6-digit verification code to
-                        </p>
-                        <p className="text-lg font-semibold text-primary-600 mt-1 break-all">
-                            {email}
-                        </p>
-                    </div>
+                    )}
 
-                    {/* OTP Input Fields */}
-                    <div className="mb-8">
-                        <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
-                            Enter Verification Code
-                        </label>
-                        <div className="flex justify-center gap-2 md:gap-3">
-                            {otp.map((digit, index) => (
-                                <input
-                                    key={index}
-                                    ref={(el) => { inputRefs.current[index] = el }}
-                                    type="text"
-                                    inputMode="numeric"
-                                    maxLength={1}
-                                    value={digit}
-                                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(index, e)}
-                                    onPaste={handlePaste}
-                                    className="w-12 h-12 md:w-14 md:h-14 text-center text-xl font-semibold border-2 border-gray-300 rounded-lg focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition-all"
-                                    autoFocus={index === 0}
-                                    disabled={status === 'verifying'}
-                                />
-                            ))}
+                    {resendMessage && (
+                        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <p className="text-green-600 text-sm text-center">{resendMessage}</p>
                         </div>
+                    )}
+                </div>
 
-                        {/* Hint for mock mode */}
-                        <p className="text-xs text-gray-400 text-center mt-3">
-                            💡 Hint: Use code <span className="font-mono font-bold text-primary-600">123456</span> for testing
-                        </p>
+                <button
+                    onClick={handleVerifyOTP}
+                    disabled={status === 'verifying'}
+                    className="w-full bg-primary-600 text-white py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 mb-4 flex items-center justify-center gap-2"
+                >
+                    {status === 'verifying' ? (
+                        <>
+                            <Loader2 size={18} className="animate-spin" />
+                            Verifying...
+                        </>
+                    ) : (
+                        'Verify & Continue'
+                    )}
+                </button>
 
-                        {errorMessage && (
-                            <p className="text-red-500 text-sm text-center mt-3">
-                                {errorMessage}
-                            </p>
-                        )}
+                <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-2">Didn't receive the code?</p>
+                    {canResend ? (
+                        <button
+                            onClick={handleResendOTP}
+                            disabled={resendLoading}
+                            className="text-primary-600 font-medium hover:text-primary-700"
+                        >
+                            {resendLoading ? 'Sending...' : 'Resend Code'}
+                        </button>
+                    ) : (
+                        <p className="text-sm text-gray-400">Resend available in {countdown} seconds</p>
+                    )}
+                </div>
 
-                        {resendMessage && (
-                            <p className="text-green-600 text-sm text-center mt-3">
-                                {resendMessage}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Verify Button */}
-                    <button
-                        onClick={handleVerifyOTP}
-                        disabled={status === 'verifying'}
-                        className="w-full bg-primary-600 text-white py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4 flex items-center justify-center gap-2"
-                    >
-                        {status === 'verifying' ? (
-                            <>
-                                <Loader2 size={18} className="animate-spin" />
-                                Verifying...
-                            </>
-                        ) : (
-                            'Verify & Continue'
-                        )}
-                    </button>
-
-                    {/* Resend Section */}
-                    <div className="text-center">
-                        <p className="text-sm text-gray-600 mb-2">
-                            Didn't receive the code?
-                        </p>
-                        {canResend ? (
-                            <button
-                                onClick={handleResendOTP}
-                                disabled={resendLoading}
-                                className="text-primary-600 font-medium hover:text-primary-700 transition-colors disabled:opacity-50"
-                            >
-                                {resendLoading ? (
-                                    <>
-                                        <Loader2 size={14} className="inline animate-spin mr-1" />
-                                        Sending...
-                                    </>
-                                ) : (
-                                    'Resend Code'
-                                )}
-                            </button>
-                        ) : (
-                            <p className="text-sm text-gray-400">
-                                Resend available in {countdown} seconds
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Back to Signup Link */}
-                    <div className="mt-6 text-center">
-                        <Link href="/signup" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
-                            ← Back to Sign Up
-                        </Link>
-                    </div>
+                <div className="mt-6 text-center">
+                    <Link href="/signup" className="text-sm text-gray-500 hover:text-gray-700">
+                        ← Back to Sign Up
+                    </Link>
                 </div>
             </div>
         </div>
