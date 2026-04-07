@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 }
 
-export default function Dashb() {
+export default function Dashboard() {
     return (
         <main>
             <Dashh />

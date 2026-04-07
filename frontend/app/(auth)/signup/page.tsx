@@ -337,7 +337,7 @@ export default function SignupPage() {
                                     </div>
 
                                     {/* Password and Confirm Password in a row */}
-                                    <div className='flex gap-4'>
+                                    <div className='flex flex-col md:flex-row gap-4'>
                                         {/* Password */}
                                         <div className="flex-1">
                                             <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">

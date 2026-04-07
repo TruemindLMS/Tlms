@@ -15,18 +15,18 @@ export default function LoginPage() {
   const [keepSignedIn, setKeepSignedIn] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccessMessage('')
 
-    // Validation
     if (!email || !password) {
       setError('Please fill in all fields')
       return
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       setError('Please enter a valid email address')
@@ -36,7 +36,11 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
+      console.log('🟡 Attempting login for:', email)
+
       const response = await loginUser(email, password)
+
+      console.log('🟢 Login response:', response)
 
       if (response.token) {
         // Store session based on "Keep me signed in" preference
@@ -45,44 +49,57 @@ export default function LoginPage() {
           localStorage.setItem('refreshToken', response.refreshToken)
           localStorage.setItem('user', JSON.stringify(response.user))
           localStorage.setItem('isAuthenticated', 'true')
+          console.log('✅ Stored in localStorage (persistent)')
         } else {
           sessionStorage.setItem('authToken', response.token)
           sessionStorage.setItem('refreshToken', response.refreshToken)
           sessionStorage.setItem('user', JSON.stringify(response.user))
           sessionStorage.setItem('isAuthenticated', 'true')
+          console.log('✅ Stored in sessionStorage (temporary)')
         }
 
-        // Redirect to dashboard or home page
-        router.push('/dashboard')
+        // Store user details for display
+        const fullName = response.user?.firstName && response.user?.lastName
+          ? `${response.user.firstName} ${response.user.lastName}`
+          : response.user?.email || email
+
+        localStorage.setItem('userFullName', fullName)
+        localStorage.setItem('userEmail', response.user?.email || email)
+        localStorage.setItem('userRole', response.user?.role || 'user')
+        localStorage.setItem('userFirstName', response.user?.firstName || '')
+        localStorage.setItem('userLastName', response.user?.lastName || '')
+
+        setSuccessMessage('Login successful! Redirecting to dashboard...')
+
+        // Force redirect to dashboard using multiple methods
+        console.log('🔴 Redirecting to /dashboard')
+
+        try {
+          router.push('/dashboard')
+          setTimeout(() => {
+            window.location.href = '/dashboard'
+          }, 500)
+        } catch (navError) {
+          console.error('Navigation error:', navError)
+        }
+
       } else {
-        setError(response.message || 'Login failed. Please try again.')
+        console.error('Missing token in response:', response);
+        setError(`Details: ${JSON.stringify(response)}`);
+        setLoading(false);
       }
     } catch (err: any) {
-      console.error('Login error:', err)
-
-      if (err.message?.includes('404') || err.message?.includes('not found')) {
-        setError('Unable to connect to the server. Please check if the backend is running.')
-      } else if (err.message?.includes('500')) {
-        setError('Server error. Please try again later.')
-      } else if (err.message?.includes('Invalid credentials') || err.message?.includes('password')) {
-        setError('Invalid email or password. Please try again.')
-      } else if (err.message?.includes('network')) {
-        setError('Network error. Please check your connection.')
-      } else {
-        setError(err.message || 'Failed to sign in. Please try again.')
-      }
-    } finally {
+      console.error('🔴 Login error:', err)
+      setError(err.message || 'Failed to sign in. Please try again.')
       setLoading(false)
     }
   }
 
   return (
     <div className="min-h-screen w-full bg-white">
-      {/* Main Container */}
       <div className="flex flex-col lg:flex-row min-h-screen w-full">
         {/* Left Side */}
         <div className="w-full lg:w-[578px] relative bg-[#004222] min-h-[40vh] lg:min-h-screen flex flex-col md:justify-between p-6 sm:p-8 md:p-10">
-          {/* Logo */}
           <div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
               TalentFlow
@@ -92,7 +109,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Tagline */}
           <div className="flex flex-col gap-6 lg:gap-8 my-8">
             <h2 className="text-3xl md:text-4xl font-bold text-white">
               Develop talent.
@@ -118,7 +134,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Testimonial */}
           <div className="hidden lg:block border border-white/30 p-6 rounded-xl bg-white/10 backdrop-blur-sm">
             <p className="text-white/90 italic text-sm mb-4">
               "TalentFlow transformed how our team approaches growth.
@@ -135,21 +150,12 @@ export default function LoginPage() {
           </div>
 
           <div className="absolute z-10 top-0 right-0">
-            <img
-              src="/img/gaddd.png"
-              alt="Decoration"
-              className="w-full h-full drop-shadow-2xl"
-            />
+            <img src="/img/gaddd.png" alt="Decoration" className="w-full h-full drop-shadow-2xl" />
           </div>
           <div className="absolute z-10 top-0 right-0">
-            <img
-              src="/img/gadd.png"
-              alt="Decoration"
-              className="w-full h-full drop-shadow-2xl"
-            />
+            <img src="/img/gadd.png" alt="Decoration" className="w-full h-full drop-shadow-2xl" />
           </div>
 
-          {/* Mobile Features */}
           <div className="md:hidden mt-6 space-y-2">
             {[
               "Curated Learning Pathways",
@@ -166,11 +172,7 @@ export default function LoginPage() {
           </div>
 
           <div className="absolute z-10 bottom-0 left-0">
-            <img
-              src="/img/gad.png"
-              alt="Decoration"
-              className="w-[680px] h-56 drop-shadow-2xl"
-            />
+            <img src="/img/gad.png" alt="Decoration" className="w-[680px] h-56 drop-shadow-2xl" />
           </div>
         </div>
 
@@ -193,7 +195,6 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            {/* Header */}
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 Welcome back
@@ -203,6 +204,13 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {/* Success Message */}
+            {successMessage && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+                {successMessage}
+              </div>
+            )}
+
             {/* Error Message */}
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
@@ -210,9 +218,18 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* Success manual redirect button fallback */}
+            {successMessage && (
+              <a
+                href="/dashboard"
+                className="w-full mb-4 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium text-center"
+              >
+                Click here to proceed to Dashboard
+              </a>
+            )}
+
             {/* Form */}
             <form className="space-y-5" onSubmit={handleSubmit}>
-              {/* Email */}
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-2">
                   EMAIL ADDRESS
@@ -228,7 +245,6 @@ export default function LoginPage() {
                 />
               </div>
 
-              {/* Password */}
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-2">
                   PASSWORD
@@ -253,7 +269,6 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Options */}
               <div className="flex justify-between w-full items-center">
                 <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
                   <input
@@ -273,7 +288,6 @@ export default function LoginPage() {
                 </Link>
               </div>
 
-              {/* Submit */}
               <button
                 type="submit"
                 disabled={loading}
@@ -293,7 +307,6 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* Divider */}
             <div className="relative my-6">
               <div className="border-t border-gray-300"></div>
               <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-white px-2 text-sm text-gray-500">
@@ -301,11 +314,9 @@ export default function LoginPage() {
               </span>
             </div>
 
-            {/* Google */}
             <button
               className="w-full flex items-center justify-center gap-3 px-4 py-2 border rounded-lg hover:bg-gray-100 transition-colors"
               onClick={() => {
-                // TODO: Implement Google OAuth
                 console.log('Google sign in clicked')
               }}
             >
@@ -315,7 +326,6 @@ export default function LoginPage() {
               </span>
             </button>
 
-            {/* Footer */}
             <p className="text-center text-sm text-gray-600 mt-6">
               New to the platform?{" "}
               <Link

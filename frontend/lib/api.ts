@@ -80,7 +80,7 @@ export interface RegisterRequest {
     email: string
     password: string
     confirmPassword: string
-    fullName: string  // ✅ FIXED: Changed from firstName + lastName to fullName
+    fullName: string
     role: string
 }
 
@@ -180,26 +180,54 @@ export async function loginUser(email: string, password: string): Promise<LoginR
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
         })
-        const data = await parseResponse(response)
+        const responseBody: any = await parseResponse(response)
 
         if (!response.ok) {
-            console.error('Login failed:', data)
-            throw new Error(data.message || 'Login failed')
+            console.error('Login failed:', responseBody)
+            throw new Error(responseBody.message || 'Login failed')
         }
 
-        if (data.token) {
-            localStorage.setItem('authToken', data.token)
-            if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken)
-            if (data.user) {
-                localStorage.setItem('user', JSON.stringify(data.user))
-                localStorage.setItem('userFullName', `${data.user.firstName || ''} ${data.user.lastName || ''}`.trim())
-                localStorage.setItem('userEmail', data.user.email)
-                localStorage.setItem('userRole', data.user.role)
-            }
+        const token = responseBody.data?.token || responseBody.token;
+
+        if (token) {
+            const userData = responseBody.data || responseBody.user || {};
+            const userEmail = userData.email || email;
+            const fullName = userData.fullName || '';
+            const nameParts = fullName.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+            const role = userData.role || 'user';
+
+            localStorage.setItem('authToken', token)
+            if (responseBody.refreshToken) localStorage.setItem('refreshToken', responseBody.refreshToken)
+
+            const userObj = {
+                id: userData.id || '',
+                email: userEmail,
+                firstName: firstName,
+                lastName: lastName,
+                role: role
+            };
+
+            localStorage.setItem('user', JSON.stringify(userObj))
+            localStorage.setItem('userFullName', fullName || `${firstName} ${lastName}`.trim())
+            localStorage.setItem('userEmail', userEmail)
+            localStorage.setItem('userRole', role)
+            localStorage.setItem('userFirstName', firstName)
+            localStorage.setItem('userLastName', lastName)
+
             localStorage.setItem('isAuthenticated', 'true')
             console.log('✅ Login successful for:', email)
+
+            return {
+                token: token,
+                refreshToken: responseBody.refreshToken || '',
+                user: userObj,
+                message: responseBody.message
+            } as LoginResponse
         }
-        return data
+
+        return responseBody as LoginResponse
     } catch (error) {
         console.error('Login error:', error)
         throw error
@@ -217,7 +245,7 @@ export async function registerUser(userData: RegisterRequest): Promise<ApiRespon
                 email: userData.email,
                 password: userData.password,
                 confirmPassword: userData.confirmPassword,
-                fullName: userData.fullName,  // ✅ FIXED: Sending fullName instead of firstName/lastName
+                fullName: userData.fullName,
                 role: userData.role
             }),
         })
@@ -295,6 +323,8 @@ export async function verifyOtp(email: string, code: string): Promise<ApiRespons
                 localStorage.setItem('userFullName', `${data.user.firstName || ''} ${data.user.lastName || ''}`.trim())
                 localStorage.setItem('userEmail', data.user.email)
                 localStorage.setItem('userRole', data.user.role)
+                localStorage.setItem('userFirstName', data.user.firstName || '')
+                localStorage.setItem('userLastName', data.user.lastName || '')
             }
             localStorage.setItem('isAuthenticated', 'true')
 
@@ -406,6 +436,8 @@ export function logout(): void {
     localStorage.removeItem('userFullName')
     localStorage.removeItem('userEmail')
     localStorage.removeItem('userRole')
+    localStorage.removeItem('userFirstName')
+    localStorage.removeItem('userLastName')
     localStorage.removeItem('onboardingCompleted')
     sessionStorage.removeItem('authToken')
     sessionStorage.removeItem('refreshToken')
@@ -416,13 +448,16 @@ export function logout(): void {
 export function isAuthenticated(): boolean {
     if (typeof window === 'undefined') return false
     const token = getAuthToken()
-    const isAuth = localStorage.getItem('isAuthenticated') === 'true'
+    const isAuthLocal = localStorage.getItem('isAuthenticated') === 'true'
+    const isAuthSession = sessionStorage.getItem('isAuthenticated') === 'true'
+    const isAuth = isAuthLocal || isAuthSession
     return !!token && isAuth
 }
 
 export function getUser(): any {
     if (typeof window === 'undefined') return null
-    const userStr = localStorage.getItem('user')
+    let userStr = sessionStorage.getItem('user')
+    if (!userStr) userStr = localStorage.getItem('user')
     if (userStr) {
         try { return JSON.parse(userStr) } catch { return null }
     }
@@ -432,6 +467,13 @@ export function getUser(): any {
 export function setUser(user: any): void {
     if (typeof window === 'undefined') return
     localStorage.setItem('user', JSON.stringify(user))
+    if (user.firstName) localStorage.setItem('userFirstName', user.firstName)
+    if (user.lastName) localStorage.setItem('userLastName', user.lastName)
+    if (user.email) localStorage.setItem('userEmail', user.email)
+    if (user.role) localStorage.setItem('userRole', user.role)
+    if (user.firstName || user.lastName) {
+        localStorage.setItem('userFullName', `${user.firstName || ''} ${user.lastName || ''}`.trim())
+    }
 }
 
 export function getUserFullName(): string {
@@ -452,9 +494,35 @@ export function getUserRole(): string {
     return localStorage.getItem('userRole') || ''
 }
 
+export function getUserFirstName(): string {
+    const user = getUser()
+    if (user) return user.firstName || ''
+    return localStorage.getItem('userFirstName') || ''
+}
+
+export function getUserLastName(): string {
+    const user = getUser()
+    if (user) return user.lastName || ''
+    return localStorage.getItem('userLastName') || ''
+}
+
+export function setUserFirstName(firstName: string): void {
+    if (typeof window === 'undefined') return
+    localStorage.setItem('userFirstName', firstName)
+    const lastName = getUserLastName()
+    localStorage.setItem('userFullName', `${firstName} ${lastName}`.trim())
+}
+
+export function setUserLastName(lastName: string): void {
+    if (typeof window === 'undefined') return
+    localStorage.setItem('userLastName', lastName)
+    const firstName = getUserFirstName()
+    localStorage.setItem('userFullName', `${firstName} ${lastName}`.trim())
+}
+
 // ==================== API Client ====================
 
-export async function apiClient(endpoint: string, options: RequestInit = {}) {
+export async function apiClient(endpoint: string, options: RequestInit = {}): Promise<any> {
     const token = getAuthToken()
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
     if (token) headers['Authorization'] = `Bearer ${token}`
@@ -480,11 +548,74 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
 
 export const courseApi = {
     getAll: async (): Promise<Course[]> => {
-        return apiClient('/Courses')
+        try {
+            const response: any = await apiClient('/Courses')
+
+            // Debug: log what we received
+            console.log('📚 Courses API raw response:', response)
+
+            // Handle different response formats
+            if (Array.isArray(response)) {
+                console.log('✅ Response is an array with', response.length, 'courses')
+                return response as Course[]
+            }
+
+            // If response has a data property that's an array
+            if (response && typeof response === 'object') {
+                if (response.data && Array.isArray(response.data)) {
+                    console.log('✅ Found response.data array with', response.data.length, 'courses')
+                    return response.data as Course[]
+                }
+                if (response.courses && Array.isArray(response.courses)) {
+                    console.log('✅ Found response.courses array with', response.courses.length, 'courses')
+                    return response.courses as Course[]
+                }
+                if (response.items && Array.isArray(response.items)) {
+                    console.log('✅ Found response.items array with', response.items.length, 'courses')
+                    return response.items as Course[]
+                }
+                if (response.results && Array.isArray(response.results)) {
+                    console.log('✅ Found response.results array with', response.results.length, 'courses')
+                    return response.results as Course[]
+                }
+                // If it's a single course object
+                if (response.id && response.title) {
+                    console.log('✅ Single course object found, wrapping in array')
+                    return [response] as Course[]
+                }
+            }
+
+            // If we get here, something is wrong
+            console.warn('⚠️ Unexpected courses response format:', response)
+            return []
+        } catch (error) {
+            console.error('❌ Error in courseApi.getAll:', error)
+            return []
+        }
     },
 
     getById: async (courseId: string): Promise<Course> => {
-        return apiClient(`/Courses/${courseId}`)
+        try {
+            const response: any = await apiClient(`/Courses/${courseId}`)
+
+            // Handle wrapped response
+            if (response && typeof response === 'object') {
+                if (response.data && response.data.id) {
+                    return response.data as Course
+                }
+                if (response.course && response.course.id) {
+                    return response.course as Course
+                }
+                if (response.id) {
+                    return response as Course
+                }
+            }
+
+            return response as Course
+        } catch (error) {
+            console.error(`❌ Error fetching course ${courseId}:`, error)
+            throw error
+        }
     },
 
     create: async (courseData: CreateCourseRequestDto): Promise<Course> => {
@@ -504,7 +635,26 @@ export const courseApi = {
     },
 
     getEnrolledCourses: async (): Promise<Course[]> => {
-        return apiClient('/Users/enrolled-courses')
+        try {
+            const response: any = await apiClient('/Users/enrolled-courses')
+
+            // Handle different response formats
+            if (Array.isArray(response)) {
+                return response as Course[]
+            }
+            if (response && typeof response === 'object') {
+                if (response.data && Array.isArray(response.data)) {
+                    return response.data as Course[]
+                }
+                if (response.courses && Array.isArray(response.courses)) {
+                    return response.courses as Course[]
+                }
+            }
+            return []
+        } catch (error) {
+            console.error('❌ Error fetching enrolled courses:', error)
+            return []
+        }
     },
 
     updateLessonProgress: async (lessonId: string, completed: boolean): Promise<void> => {
@@ -614,6 +764,8 @@ export function debugAuthState() {
     console.log('  - refreshToken:', getRefreshToken() ? '✅ Present' : '❌ Missing')
     console.log('  - user:', getUser())
     console.log('  - userFullName:', getUserFullName())
+    console.log('  - userFirstName:', getUserFirstName())
+    console.log('  - userLastName:', getUserLastName())
     console.log('  - userEmail:', getUserEmail())
     console.log('  - userRole:', getUserRole())
     console.log('  - pendingUserData:', localStorage.getItem('pendingUserData'))
