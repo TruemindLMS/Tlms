@@ -149,7 +149,7 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                                             href={item.href}
                                             onClick={() => isMobile && setIsMobileOpen(false)}
                                             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative ${isActive
-                                                ? 'bg-primary-50 dark:bg-green-900/20 text-primary-600 dark:text-primary-400'
+                                                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
                                                 : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                                                 } ${collapsed && !isMobile ? 'justify-center' : ''}`}
                                         >

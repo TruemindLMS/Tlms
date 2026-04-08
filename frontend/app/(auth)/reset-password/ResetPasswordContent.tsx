@@ -140,7 +140,7 @@ function ResetPasswordContent() {
                         </p>
                         <Link
                             href="/forgot-password"
-                            className="inline-block w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-center"
+                            className="inline-block w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors text-center"
                         >
                             Request New Reset Link
                         </Link>
@@ -155,7 +155,7 @@ function ResetPasswordContent() {
         return (
             <div className="min-h-screen bg-[#f6f8f7] flex items-center justify-center p-4">
                 <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <CheckCircle size={32} className="text-primary-600" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Password Reset Successfully!</h2>
@@ -167,7 +167,7 @@ function ResetPasswordContent() {
                     </p>
                     <Link
                         href="/signin"
-                        className="inline-block w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-center"
+                        className="inline-block w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors text-center"
                     >
                         Go to Sign In
                     </Link>
@@ -204,7 +204,7 @@ function ResetPasswordContent() {
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 placeholder="••••••••"
                                 disabled={loading}
                                 required
@@ -229,7 +229,7 @@ function ResetPasswordContent() {
                                 type={showConfirmPassword ? "text" : "password"}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 placeholder="••••••••"
                                 disabled={loading}
                                 required
@@ -247,7 +247,7 @@ function ResetPasswordContent() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-green-600 text-white py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full bg-primary-600 text-white py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {loading ? (
                             <>

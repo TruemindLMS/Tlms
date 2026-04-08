@@ -231,6 +231,23 @@ export default function OnboardingFlow() {
     const handleComplete = async () => {
         setLoading(true);
         try {
+            // Enum maps aligning with backend C# enums
+            const roleToDisciplineMap: Record<string, number> = {
+                "pm": 0,          // ProjectManagement
+                "uiux": 1,        // UIUXDesign
+                "frontend": 2,    // FrontendDevelopment
+                "backend": 3,     // BackendDevelopment
+                "graphic": 4,     // GraphicsDesign
+                "social": 5       // SocialMedia
+            };
+
+            const goalToEnumMap: Record<string, number> = {
+                "upskilling": 0,        // Upskilling
+                "career-change": 1,     // CareerChange
+                "personal-interest": 2, // PersonalInterest
+                "certification": 3      // Certification
+            };
+
             // Get the role label from the selected role ID
             const selectedRoleData = roles.find(r => r.id === selectedRole);
             const roleLabel = selectedRoleData?.label || "UI/UX Design";
@@ -241,12 +258,15 @@ export default function OnboardingFlow() {
                 return goal?.title || "";
             }).filter(Boolean);
 
+            const selectedDiscipline = roleToDisciplineMap[selectedRole] ?? 1;
+            const mappedGoals = selectedGoals.map((g) => goalToEnumMap[g]).filter((g) => g !== undefined);
+
             // Prepare profile data to save
             const profileData = {
                 bio: bio,
-                role: roleLabel,
-                roleId: selectedRole,
-                goals: selectedGoals,
+                role: selectedDiscipline, // Ensure it's an integer
+                discipline: selectedDiscipline, 
+                goals: mappedGoals, // Enums array!
                 goalTitles: goalTitles,
                 jobTitle: roleLabel,
                 onboardingCompleted: true,
@@ -275,7 +295,16 @@ export default function OnboardingFlow() {
 
             // Try to save to API if not in mock mode
             try {
-                await profileApi.update(profileData);
+                // Submit to specific onboarding endpoints using mapped enums
+                await onboardingApi.submitBio({ bio });
+                await onboardingApi.submitRole({ role: selectedDiscipline });
+                await onboardingApi.submitGoals({ goals: mappedGoals });
+                
+                await profileApi.update({
+                    bio: bio,
+                    discipline: selectedDiscipline,
+                    goals: mappedGoals
+                });
                 await onboardingApi.completeOnboarding();
                 console.log('✅ Onboarding data saved to API');
             } catch (apiError) {
@@ -410,7 +439,7 @@ function StepOne({ bio, setBio, profilePicture, setProfilePicture, profilePictur
                                 />
                             )}
                         </div>
-                        <label className="mt-4 flex items-center gap-2 text-green-600 text-sm font-medium hover:underline cursor-pointer">
+                        <label className="mt-4 flex items-center gap-2 text-primary-600 text-sm font-medium hover:underline cursor-pointer">
                             <HardDriveUpload size={18} />
                             Upload Photo
                             <input
@@ -432,7 +461,7 @@ function StepOne({ bio, setBio, profilePicture, setProfilePicture, profilePictur
                             onChange={(e) => setBio(e.target.value)}
                             maxLength={250}
                             placeholder="Tell us about your professional background and learning goals..."
-                            className="w-full h-28 border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                            className="w-full h-28 border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                             disabled={loading}
                         />
                         <div className="flex justify-between items-center mt-2">
@@ -565,7 +594,7 @@ function GoalCard({ title, description, icon: Icon, isSelected }: any) {
                 className={`h-12 w-12 flex items-center justify-center rounded-lg ${isSelected ? "bg-white/20" : "bg-[#E7E8E6]"
                     }`}
             >
-                <Icon className={`${isSelected ? "text-white" : "text-green-700"}`} size={24} />
+                <Icon className={`${isSelected ? "text-white" : "text-primary-700"}`} size={24} />
             </div>
             <div className="flex-1">
                 <p className={`text-lg font-bold ${isSelected ? "text-white" : "text-gray-900"}`}>
@@ -581,7 +610,7 @@ function GoalCard({ title, description, icon: Icon, isSelected }: any) {
                     : "border-gray-300 bg-transparent"
                     }`}
             >
-                {isSelected && <CheckIcon size={14} className="text-green-700" />}
+                {isSelected && <CheckIcon size={14} className="text-primary-700" />}
             </div>
         </div>
     );
@@ -602,7 +631,7 @@ function StepFour({ name, onComplete, onBack, loading }: any) {
                 <div className="max-w-2xl w-full">
                     <div className="bg-[#EAF3DE] rounded-2xl p-8 text-center mb-8">
                         <div className="flex flex-col items-center justify-center gap-4">
-                            <BadgeCheck className="w-20 h-20 text-green-700" />
+                            <BadgeCheck className="w-20 h-20 text-primary-700" />
                             <h2 className="text-2xl font-bold text-[#085041]">
                                 You're all set up, {name}!
                             </h2>
@@ -620,7 +649,7 @@ function StepFour({ name, onComplete, onBack, loading }: any) {
                                 className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1.5 text-[12px] font-semibold text-gray-500"
                             >
                                 <div className="w-[18px] h-[18px] rounded-full bg-[#EAF3DE] flex items-center justify-center">
-                                    <CheckIcon size={10} className="text-green-700" />
+                                    <CheckIcon size={10} className="text-primary-700" />
                                 </div>
                                 {step.label}
                             </div>

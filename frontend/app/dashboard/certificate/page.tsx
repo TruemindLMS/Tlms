@@ -95,8 +95,8 @@ export default function CertificatePage() {
 
                 <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
-                            <Clock className="text-green-600 dark:text-green-400" size={20} />
+                        <div className="bg-primary-100 dark:bg-primary-900/30 p-3 rounded-lg">
+                            <Clock className="text-primary-600 dark:text-primary-400" size={20} />
                         </div>
                         <span className="text-2xl font-bold text-gray-900 dark:text-white">36h</span>
                     </div>
@@ -149,7 +149,7 @@ export default function CertificatePage() {
                             </div>
                             <div className="absolute top-2 right-2">
                                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${course.level === 'Beginner'
-                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                    ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
                                     : course.level === 'Intermediate'
                                         ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                                         : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'

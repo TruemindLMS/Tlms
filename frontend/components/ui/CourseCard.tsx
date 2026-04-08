@@ -39,7 +39,7 @@ export default function CourseCard({
                             {showProgress && (
                                 <div className="flex items-center gap-2">
                                     <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                                        <div className="h-full bg-primary-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
                                     </div>
                                     <span className="text-xs font-medium text-gray-600">{progress}%</span>
                                 </div>
@@ -164,15 +164,15 @@ export default function CourseCard({
                         <div className="mb-3">
                             <div className="flex justify-between text-xs mb-1">
                                 <span className="text-gray-500">Progress</span>
-                                <span className="text-green-600 font-medium">{progress}%</span>
+                                <span className="text-primary-600 font-medium">{progress}%</span>
                             </div>
                             <div className="w-full bg-gray-100 rounded-full h-1.5">
-                                <div className="bg-green-500 h-1.5 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                                <div className="bg-primary-500 h-1.5 rounded-full transition-all" style={{ width: `${progress}%` }} />
                             </div>
                         </div>
                     )}
 
-                    <button className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center justify-center gap-2 group-hover:gap-3">
+                    <button className="w-full py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition flex items-center justify-center gap-2 group-hover:gap-3">
                         {isEnrolled ? 'Continue' : 'View Course'}
                         <ChevronRight size={16} className="group-hover:translate-x-1 transition" />
                     </button>

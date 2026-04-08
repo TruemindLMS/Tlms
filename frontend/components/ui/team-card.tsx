@@ -34,7 +34,7 @@ const TeamCard = ({ name, role, avatarUrl, email, isCurrentUser = false }: TeamC
           />
         </div>
         {/* Online indicator */}
-        <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-white" />
+        <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-primary-500 border-2 border-white" />
       </div>
 
       {/* Name & Role */}

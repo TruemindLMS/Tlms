@@ -16,7 +16,7 @@ export function AvatarUpload( {user} : {user : UserProps}) {
     <SectionCard>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
         <div className="flex items-center gap-2">
-          <div className="w-14 h-14 rounded-full bg-green-600 flex items-center justify-center ">
+          <div className="w-14 h-14 rounded-full bg-primary-600 flex items-center justify-center ">
             <span className="text-lg font-semibold text-white "> {user.avatarInitials} </span>
           </div>
           <div className="flex-1 min-w-0">
@@ -41,7 +41,7 @@ export function AvatarUpload( {user} : {user : UserProps}) {
           <button
             type="button"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-                    bg-green-500 hover:bg-green-600 text-sm text-white transition-colors duration-150"
+                    bg-primary-500 hover:bg-primary-600 text-sm text-white transition-colors duration-150"
           >
             <UploadIcon />
             Update
@@ -51,3 +51,4 @@ export function AvatarUpload( {user} : {user : UserProps}) {
     </SectionCard>
   );
 }
+

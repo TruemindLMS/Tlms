@@ -26,11 +26,11 @@ const colorMap = {
         trendText: 'text-blue-600'
     },
     green: {
-        bg: 'bg-green-50',
-        iconBg: 'bg-green-100',
-        iconColor: 'text-green-600',
-        trendBg: 'bg-green-100',
-        trendText: 'text-green-600'
+        bg: 'bg-primary-50',
+        iconBg: 'bg-primary-100',
+        iconColor: 'text-primary-600',
+        trendBg: 'bg-primary-100',
+        trendText: 'text-primary-600'
     },
     orange: {
         bg: 'bg-orange-50',
@@ -141,7 +141,7 @@ export default function StatsCard({
                     {renderIcon()}
                 </div>
                 {trend && (
-                    <span className={`text-xs font-medium ${trend.isPositive ? 'text-primary-600 bg-green-50' : 'text-red-600 bg-red-50'} px-2 py-1 rounded-full`}>
+                    <span className={`text-xs font-medium ${trend.isPositive ? 'text-primary-600 bg-primary-50' : 'text-red-600 bg-red-50'} px-2 py-1 rounded-full`}>
                         {trend.isPositive ? '+' : ''}{trend.value}%
                     </span>
                 )}

@@ -106,8 +106,8 @@ export default function CourseDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <Loader2 size={40} className="animate-spin text-green-600 mx-auto" />
+            <div className="min-h-screen flex items-center justify-center flex-col bg-cover bg-center bg-no-repeat ml-1 lg:ml-1 md:ml-5" style={{ backgroundImage: "url('/img/tback.png')" }}>
+                <Loader2 size={40} className="animate-spin text-primary-600 mx-auto" />
                 <p className="text-gray-500 mt-4">Loading course details...</p>
             </div>
         );
@@ -115,7 +115,7 @@ export default function CourseDetailPage() {
 
     if (error || !course) {
         return (
-            <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
+            <div className="min-h-screen bg-cover bg-center bg-no-repeat ml-1 lg:ml-1 md:ml-5" style={{ backgroundImage: "url('/img/tback.png')" }}>
                 <div className="max-w-7xl mx-auto px-6 py-12">
                     <div className="text-center py-12 bg-white rounded-2xl shadow-sm border">
                         <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -125,7 +125,7 @@ export default function CourseDetailPage() {
                         <p className="text-gray-500 mb-6">{error || "The course you're looking for doesn't exist."}</p>
                         <Link
                             href="/dashboard/courses"
-                            className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+                            className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition"
                         >
                             <ArrowLeft size={18} />
                             Back to Courses
@@ -150,7 +150,7 @@ export default function CourseDetailPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
+        <div className="min-h-screen bg-cover bg-center bg-no-repeat ml-1 lg:ml-1 md:ml-5" style={{ backgroundImage: "url('/img/tback.png')" }}>
             {/* Back Button */}
             <div className="max-w-7xl mx-auto px-6 pt-6">
                 <Link
@@ -163,7 +163,7 @@ export default function CourseDetailPage() {
             </div>
 
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-green-900 to-green-700 text-white mt-4 mx-6 rounded-2xl overflow-hidden">
+            <div className="bg-gradient-to-r from-primary-900 to-primary-700 text-white mt-4 mx-6 rounded-2xl overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
                     <div className="flex flex-col lg:flex-row gap-8">
                         <div className="flex-1">
@@ -210,7 +210,7 @@ export default function CourseDetailPage() {
                             {!isEnrolled ? (
                                 <button
                                     onClick={handleEnroll}
-                                    className="bg-white text-green-900 px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition flex items-center gap-2"
+                                    className="bg-white text-primary-900 px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition flex items-center gap-2"
                                 >
                                     Enroll Now
                                     <ChevronRight size={18} />
@@ -220,7 +220,7 @@ export default function CourseDetailPage() {
                                     <p className="text-sm mb-2">✓ You are enrolled in this course!</p>
                                     <button
                                         onClick={handleStartLearning}
-                                        className="bg-white text-green-900 px-6 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition flex items-center gap-2"
+                                        className="bg-white text-primary-900 px-6 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition flex items-center gap-2"
                                     >
                                         <Play size={16} />
                                         Start Learning
@@ -231,7 +231,7 @@ export default function CourseDetailPage() {
 
                         <div className="lg:w-80">
                             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                                <div className="aspect-video bg-gradient-to-br from-green-600 to-green-800 rounded-lg flex items-center justify-center">
+                                <div className="aspect-video bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center">
                                     {course.imageUrl ? (
                                         <img src={course.imageUrl} alt={course.title} className="w-full h-full object-cover rounded-lg" />
                                     ) : (
@@ -255,7 +255,7 @@ export default function CourseDetailPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {whatYouWillLearn.map((item, idx) => (
                                     <div key={idx} className="flex items-start gap-2">
-                                        <CheckCircle size={18} className="text-green-600 mt-0.5 flex-shrink-0" />
+                                        <CheckCircle size={18} className="text-primary-600 mt-0.5 flex-shrink-0" />
                                         <span className="text-gray-700">{item}</span>
                                     </div>
                                 ))}
@@ -316,19 +316,19 @@ export default function CourseDetailPage() {
                             <h3 className="font-semibold text-gray-900 text-lg mb-4">Course Includes</h3>
                             <div className="space-y-3 mb-6">
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Video size={18} className="text-green-600" />
+                                    <Video size={18} className="text-primary-600" />
                                     <span>{totalLessons} on-demand videos</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Download size={18} className="text-green-600" />
+                                    <Download size={18} className="text-primary-600" />
                                     <span>Downloadable resources</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Award size={18} className="text-green-600" />
+                                    <Award size={18} className="text-primary-600" />
                                     <span>Certificate of completion</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <Users size={18} className="text-green-600" />
+                                    <Users size={18} className="text-primary-600" />
                                     <span>Access on mobile and TV</span>
                                 </div>
                             </div>
@@ -347,7 +347,7 @@ export default function CourseDetailPage() {
                             {!isEnrolled && (
                                 <button
                                     onClick={handleEnroll}
-                                    className="w-full mt-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                                    className="w-full mt-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition"
                                 >
                                     Enroll Now
                                 </button>
