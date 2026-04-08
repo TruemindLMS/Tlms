@@ -251,6 +251,8 @@ function ActiveDashboard({ userName, userStats, onUpdateStats }: {
 
   const router = useRouter();
   const [enrolledCoursesList, setEnrolledCoursesList] = useState<any[]>([]);
+  const [scheduleData, setScheduleData] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
 
   const getCurrentUserId = () => {
     const user = getUser();
@@ -262,6 +264,9 @@ function ActiveDashboard({ userName, userStats, onUpdateStats }: {
     const enrolledCoursesKey = `enrolledCourses_${userId}`;
     const courses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
     setEnrolledCoursesList(courses);
+    
+    setScheduleData(JSON.parse(localStorage.getItem(`userSchedule_${userId}`) || '[]'));
+    setTasks(JSON.parse(localStorage.getItem(`userTasks_${userId}`) || '[]'));
 
     // Listen for stats updates from lesson player
     const handleStatsUpdate = () => {
@@ -289,19 +294,6 @@ function ActiveDashboard({ userName, userStats, onUpdateStats }: {
     window.addEventListener('statsUpdated', handleStatsUpdate);
     return () => window.removeEventListener('statsUpdated', handleStatsUpdate);
   }, []);
-
-  const scheduleData = [
-    { time: "09:00 AM", course: "UI/UX Design Fundamentals", type: "Live Session", duration: "1.5h" },
-    { time: "11:00 AM", course: "Advanced React Development", type: "Workshop", duration: "2h" },
-    { time: "02:00 PM", course: "Product Management", type: "Study Group", duration: "1.5h" },
-    { time: "04:00 PM", course: "Portfolio Review", type: "Mentoring", duration: "1h" },
-  ];
-
-  const tasks = [
-    { title: "Complete Module 1", description: "UI/UX Design Fundamentals", time: "Today" },
-    { title: "Submit Assignment", description: "React Project", time: "Tomorrow" },
-    { title: "Join Study Group", description: "Product Management", time: "Friday" },
-  ];
 
   const enrolledTrend = userStats.enrolled > 0 ? "+12.5%" : "0%";
   const pendingTrend = userStats.pending > 0 ? "+12.5%" : "0%";
@@ -444,7 +436,7 @@ function ActiveDashboard({ userName, userStats, onUpdateStats }: {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h3 className="font-semibold text-gray-900 text-lg mb-4">Today's Schedule</h3>
           <div className="space-y-4">
-            {scheduleData.map((item, index) => (
+            {scheduleData.length > 0 ? scheduleData.map((item, index) => (
               <div key={index} className="flex items-center justify-between pb-3 border-b border-gray-100 last:border-0">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -457,7 +449,12 @@ function ActiveDashboard({ userName, userStats, onUpdateStats }: {
                 </div>
                 <p className="text-sm text-gray-500">{item.time}</p>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-6 text-gray-400">
+                <Calendar size={32} className="mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No schedule assigned yet.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -529,7 +526,7 @@ function ActiveDashboard({ userName, userStats, onUpdateStats }: {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h3 className="font-semibold text-gray-900 text-lg mb-4">Task</h3>
           <div className="space-y-4">
-            {tasks.map((task, index) => (
+            {tasks.length > 0 ? tasks.map((task, index) => (
               <div key={index} className="flex items-center justify-between pb-3 border-b border-gray-100 last:border-0">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -542,7 +539,12 @@ function ActiveDashboard({ userName, userStats, onUpdateStats }: {
                 </div>
                 <p className="text-sm text-gray-500">{task.time}</p>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-6 text-gray-400">
+                <CheckCircle size={32} className="mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No tasks pending at the moment.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

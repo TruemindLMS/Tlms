@@ -232,15 +232,49 @@ export default function LessonPlayerPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column - Video and Content */}
                     <div className="lg:col-span-2">
-                        <div className="bg-black/90 backdrop-blur-sm rounded-xl overflow-hidden aspect-video flex items-center justify-center mb-6">
-                            <div className="text-center text-white">
-                                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 cursor-pointer hover:bg-white/30 transition"
-                                    onClick={() => setIsPlaying(!isPlaying)}>
-                                    {isPlaying ? <Pause size={40} /> : <Play size={40} className="ml-1" />}
+                        <div className="bg-black/90 backdrop-blur-sm rounded-xl overflow-hidden aspect-video flex items-center justify-center mb-6 relative">
+                            {currentLesson.videoUrl ? (
+                                (() => {
+                                    const url = currentLesson.videoUrl;
+                                    const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+                                    
+                                    if (isYouTube) {
+                                        let videoId = '';
+                                        if (url.includes('youtube.com/watch?v=')) {
+                                            videoId = url.split('v=')[1].split('&')[0];
+                                        } else if (url.includes('youtu.be/')) {
+                                            videoId = url.split('youtu.be/')[1].split('?')[0];
+                                        }
+                                        
+                                        return (
+                                            <iframe
+                                                src={`https://www.youtube.com/embed/${videoId}?autoplay=${isPlaying ? 1 : 0}`}
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                className="w-full h-full border-0 absolute inset-0"
+                                            />
+                                        );
+                                    } else {
+                                        return (
+                                            <video 
+                                                src={url} 
+                                                controls 
+                                                autoPlay={isPlaying}
+                                                className="w-full h-full bg-black absolute inset-0 object-contain"
+                                            />
+                                        );
+                                    }
+                                })()
+                            ) : (
+                                <div className="text-center text-white z-10 w-full h-full flex flex-col items-center justify-center">
+                                    <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 cursor-pointer hover:bg-white/30 transition"
+                                        onClick={() => setIsPlaying(!isPlaying)}>
+                                        {isPlaying ? <Pause size={40} /> : <Play size={40} className="ml-1" />}
+                                    </div>
+                                    <p className="text-gray-400 text-sm">{isPlaying ? 'Playing Preview' : 'Preview Not Available'}</p>
+                                    <p className="text-sm text-gray-500 mt-2">{currentLesson.title}</p>
                                 </div>
-                                <p className="text-gray-400 text-sm">Preview</p>
-                                <p className="text-sm text-gray-500 mt-2">{currentLesson.title}</p>
-                            </div>
+                            )}
                         </div>
 
                         <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6 mb-6">

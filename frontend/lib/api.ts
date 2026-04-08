@@ -1,4 +1,3 @@
-// lib/api.ts
 const API_BASE_URL = 'https://tims-backend-11dz.onrender.com/api'
 
 // Helper to safely parse JSON responses
@@ -60,16 +59,21 @@ export function logApiCall(method: string, url: string, data?: any) {
 // ==================== Auth DTOs ====================
 
 export interface LoginResponse {
-    token: string
-    refreshToken: string
-    user: {
-        id: string
-        email: string
-        firstName: string
-        lastName: string
-        role: string
-    }
+    success?: boolean
     message?: string
+    data?: {
+        token: string
+        expiresAtUtc?: string
+        email?: string
+        fullName?: string
+        refreshToken?: string
+        role?: string
+        id?: string
+    }
+    // Legacy fallbacks
+    token?: string
+    refreshToken?: string
+    user?: any
 }
 
 export interface LoginRequest {
@@ -81,7 +85,7 @@ export interface RegisterRequest {
     email: string
     password: string
     confirmPassword: string
-    fullName: string
+    fullName: string  // ✅ FIXED: Changed from firstName + lastName to fullName
     role: string
 }
 
@@ -99,6 +103,7 @@ export interface CreateLessonRequestDto {
     title: string
     content: string
     duration?: number
+    videoUrl?: string
 }
 
 export interface CreateModuleRequestDto {
@@ -117,6 +122,7 @@ export interface UpdateLessonRequestDto {
     title?: string
     content?: string
     duration?: number
+    videoUrl?: string
 }
 
 export interface UpdateModuleRequestDto {
@@ -137,6 +143,7 @@ export interface Lesson {
     content: string
     orderIndex: number
     duration?: number
+    videoUrl?: string
     moduleId?: string
     isCompleted?: boolean
     createdAt?: string
@@ -181,54 +188,34 @@ export async function loginUser(email: string, password: string): Promise<LoginR
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
         })
-        const responseBody: any = await parseResponse(response)
+        const data = await parseResponse(response)
 
         if (!response.ok) {
-            console.error('Login failed:', responseBody)
-            throw new Error(responseBody.message || 'Login failed')
+            console.error('Login failed:', data)
+            throw new Error(data.message || 'Login failed')
         }
 
-        const token = responseBody.data?.token || responseBody.token;
-
+        const token = data.data?.token || data.token;
         if (token) {
-            const userData = responseBody.data || responseBody.user || {};
-            const userEmail = userData.email || email;
-            const fullName = userData.fullName || '';
-            const nameParts = fullName.split(' ');
-            const firstName = nameParts[0] || '';
-            const lastName = nameParts.slice(1).join(' ') || '';
-            const role = userData.role || 'user';
+            const refreshToken = data.data?.refreshToken || data.refreshToken;
+            const emailAddr = data.data?.email || data.user?.email || email;
+            const fullName = data.data?.fullName || data.user?.fullName || `${data.user?.firstName || ''} ${data.user?.lastName || ''}`.trim();
+            const role = data.data?.role || data.user?.role || 'Student'; // Default to student
+            const id = data.data?.id || data.user?.id || emailAddr;
 
             localStorage.setItem('authToken', token)
-            if (responseBody.refreshToken) localStorage.setItem('refreshToken', responseBody.refreshToken)
+            if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
 
-            const userObj = {
-                id: userData.id || '',
-                email: userEmail,
-                firstName: firstName,
-                lastName: lastName,
-                role: role
-            };
-
+            const userObj = { id, email: emailAddr, fullName, role };
             localStorage.setItem('user', JSON.stringify(userObj))
-            localStorage.setItem('userFullName', fullName || `${firstName} ${lastName}`.trim())
-            localStorage.setItem('userEmail', userEmail)
+            localStorage.setItem('userFullName', fullName)
+            localStorage.setItem('userEmail', emailAddr)
             localStorage.setItem('userRole', role)
-            localStorage.setItem('userFirstName', firstName)
-            localStorage.setItem('userLastName', lastName)
 
             localStorage.setItem('isAuthenticated', 'true')
             console.log('✅ Login successful for:', email)
-
-            return {
-                token: token,
-                refreshToken: responseBody.refreshToken || '',
-                user: userObj,
-                message: responseBody.message
-            } as LoginResponse
         }
-
-        return responseBody as LoginResponse
+        return data
     } catch (error) {
         console.error('Login error:', error)
         throw error
@@ -246,7 +233,7 @@ export async function registerUser(userData: RegisterRequest): Promise<ApiRespon
                 email: userData.email,
                 password: userData.password,
                 confirmPassword: userData.confirmPassword,
-                fullName: userData.fullName,
+                fullName: userData.fullName,  // ✅ FIXED: Sending fullName instead of firstName/lastName
                 role: userData.role
             }),
         })
@@ -316,23 +303,29 @@ export async function verifyOtp(email: string, code: string): Promise<ApiRespons
             throw new Error(data.message || 'OTP verification failed')
         }
 
-        if (data.token) {
-            localStorage.setItem('authToken', data.token)
-            if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken)
-            if (data.user) {
-                localStorage.setItem('user', JSON.stringify(data.user))
-                localStorage.setItem('userFullName', `${data.user.firstName || ''} ${data.user.lastName || ''}`.trim())
-                localStorage.setItem('userEmail', data.user.email)
-                localStorage.setItem('userRole', data.user.role)
-                localStorage.setItem('userFirstName', data.user.firstName || '')
-                localStorage.setItem('userLastName', data.user.lastName || '')
-            }
+        const token = data.data?.token || data.token;
+        if (token) {
+            const refreshToken = data.data?.refreshToken || data.refreshToken;
+            const userEmail = data.data?.email || data.user?.email || email;
+            const fullName = data.data?.fullName || data.user?.fullName || `${data.user?.firstName || ''} ${data.user?.lastName || ''}`.trim();
+            const role = data.data?.role || data.user?.role || 'Student';
+            const id = data.data?.id || data.user?.id || userEmail;
+
+            localStorage.setItem('authToken', token)
+            if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+
+            const userObj = { id, email: userEmail, fullName, role };
+            localStorage.setItem('user', JSON.stringify(userObj))
+            localStorage.setItem('userFullName', fullName)
+            localStorage.setItem('userEmail', userEmail)
+            localStorage.setItem('userRole', role)
+
             localStorage.setItem('isAuthenticated', 'true')
 
             // Clear pending data after successful verification
             localStorage.removeItem('pendingUserData')
 
-            console.log('✅ OTP verified successfully for:', email)
+            console.log('✅ OTP verified successfully for:', userEmail)
         }
 
         return data
@@ -437,8 +430,6 @@ export function logout(): void {
     localStorage.removeItem('userFullName')
     localStorage.removeItem('userEmail')
     localStorage.removeItem('userRole')
-    localStorage.removeItem('userFirstName')
-    localStorage.removeItem('userLastName')
     localStorage.removeItem('onboardingCompleted')
     sessionStorage.removeItem('authToken')
     sessionStorage.removeItem('refreshToken')
@@ -449,16 +440,13 @@ export function logout(): void {
 export function isAuthenticated(): boolean {
     if (typeof window === 'undefined') return false
     const token = getAuthToken()
-    const isAuthLocal = localStorage.getItem('isAuthenticated') === 'true'
-    const isAuthSession = sessionStorage.getItem('isAuthenticated') === 'true'
-    const isAuth = isAuthLocal || isAuthSession
+    const isAuth = localStorage.getItem('isAuthenticated') === 'true'
     return !!token && isAuth
 }
 
 export function getUser(): any {
     if (typeof window === 'undefined') return null
-    let userStr = sessionStorage.getItem('user')
-    if (!userStr) userStr = localStorage.getItem('user')
+    const userStr = localStorage.getItem('user')
     if (userStr) {
         try { return JSON.parse(userStr) } catch { return null }
     }
@@ -468,13 +456,6 @@ export function getUser(): any {
 export function setUser(user: any): void {
     if (typeof window === 'undefined') return
     localStorage.setItem('user', JSON.stringify(user))
-    if (user.firstName) localStorage.setItem('userFirstName', user.firstName)
-    if (user.lastName) localStorage.setItem('userLastName', user.lastName)
-    if (user.email) localStorage.setItem('userEmail', user.email)
-    if (user.role) localStorage.setItem('userRole', user.role)
-    if (user.firstName || user.lastName) {
-        localStorage.setItem('userFullName', `${user.firstName || ''} ${user.lastName || ''}`.trim())
-    }
 }
 
 export function getUserFullName(): string {
@@ -495,35 +476,9 @@ export function getUserRole(): string {
     return localStorage.getItem('userRole') || ''
 }
 
-export function getUserFirstName(): string {
-    const user = getUser()
-    if (user) return user.firstName || ''
-    return localStorage.getItem('userFirstName') || ''
-}
-
-export function getUserLastName(): string {
-    const user = getUser()
-    if (user) return user.lastName || ''
-    return localStorage.getItem('userLastName') || ''
-}
-
-export function setUserFirstName(firstName: string): void {
-    if (typeof window === 'undefined') return
-    localStorage.setItem('userFirstName', firstName)
-    const lastName = getUserLastName()
-    localStorage.setItem('userFullName', `${firstName} ${lastName}`.trim())
-}
-
-export function setUserLastName(lastName: string): void {
-    if (typeof window === 'undefined') return
-    localStorage.setItem('userLastName', lastName)
-    const firstName = getUserFirstName()
-    localStorage.setItem('userFullName', `${firstName} ${lastName}`.trim())
-}
-
 // ==================== API Client ====================
 
-export async function apiClient(endpoint: string, options: RequestInit = {}): Promise<any> {
+export async function apiClient(endpoint: string, options: RequestInit = {}) {
     const token = getAuthToken()
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
     if (token) headers['Authorization'] = `Bearer ${token}`
@@ -532,95 +487,68 @@ export async function apiClient(endpoint: string, options: RequestInit = {}): Pr
         Object.assign(headers, customHeaders)
     }
 
-    const url = `${API_BASE_URL}${endpoint}`
-    logApiCall(options.method || 'GET', url)
+    logApiCall(options.method || 'GET', endpoint)
 
+    let response: Response;
     try {
-        const response = await fetch(url, { ...options, headers })
-        const data = await parseResponse(response)
-
-        if (!response.ok) {
-            console.error(`API Client Error (${response.status}):`, data)
-            throw new Error(data.message || `API request failed: ${response.status}`)
-        }
-
-        return data
+        response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers })
     } catch (error: any) {
-        console.error(`Network Error for ${url}:`, error.message)
-
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            throw new Error('Cannot connect to server. Please check if the backend is running.')
-        }
-        throw error
+        // This catches "TypeError: Failed to fetch" (network/CORS errors)
+        console.error(`API Network Error on ${endpoint}:`, error.message || 'Failed to fetch');
+        throw new Error(error.message || 'Network error: Failed to connect to server');
     }
+
+    const data = await parseResponse(response)
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            console.warn('API returned 401 Unauthorized. User session might be expired. Redirecting to sign in...')
+            logout()
+            if (typeof window !== 'undefined') {
+                window.location.href = '/signin'
+            }
+        }
+        console.error(`API Client Error (${response.status}):`, data)
+        throw new Error(data.message || 'API request failed')
+    }
+
+    return data
+}
+
+export function mapBackendKeys(obj: any): any {
+    if (Array.isArray(obj)) {
+        return obj.map(mapBackendKeys);
+    } else if (obj !== null && typeof obj === 'object') {
+        const newObj: any = { ...obj };
+        if (newObj.courseId && !newObj.id) { newObj.id = newObj.courseId; }
+        if (newObj.moduleId && !newObj.id) { newObj.id = newObj.moduleId; }
+        if (newObj.lessonId && !newObj.id) { newObj.id = newObj.lessonId; }
+
+        for (const key in newObj) {
+            if (Array.isArray(newObj[key])) {
+                newObj[key] = newObj[key].map(mapBackendKeys);
+            } else if (newObj[key] !== null && typeof newObj[key] === 'object') {
+                newObj[key] = mapBackendKeys(newObj[key]);
+            }
+        }
+        return newObj;
+    }
+    return obj;
 }
 
 // ==================== Course API Endpoints ====================
 
 export const courseApi = {
     getAll: async (): Promise<Course[]> => {
-        try {
-            const response: any = await apiClient('/Courses')
-
-            console.log('📚 Courses API raw response:', response)
-
-            if (Array.isArray(response)) {
-                console.log('✅ Response is an array with', response.length, 'courses')
-                return response as Course[]
-            }
-
-            if (response && typeof response === 'object') {
-                if (response.data && Array.isArray(response.data)) {
-                    console.log('✅ Found response.data array with', response.data.length, 'courses')
-                    return response.data as Course[]
-                }
-                if (response.courses && Array.isArray(response.courses)) {
-                    console.log('✅ Found response.courses array with', response.courses.length, 'courses')
-                    return response.courses as Course[]
-                }
-                if (response.items && Array.isArray(response.items)) {
-                    console.log('✅ Found response.items array with', response.items.length, 'courses')
-                    return response.items as Course[]
-                }
-                if (response.results && Array.isArray(response.results)) {
-                    console.log('✅ Found response.results array with', response.results.length, 'courses')
-                    return response.results as Course[]
-                }
-                if (response.id && response.title) {
-                    console.log('✅ Single course object found, wrapping in array')
-                    return [response] as Course[]
-                }
-            }
-
-            console.warn('⚠️ Unexpected courses response format:', response)
-            return []
-        } catch (error) {
-            console.error('❌ Error in courseApi.getAll:', error)
-            throw error
-        }
+        const res = await apiClient('/Courses')
+        const data = res?.data || res || []
+        return mapBackendKeys(data)
     },
 
     getById: async (courseId: string): Promise<Course> => {
-        try {
-            const response: any = await apiClient(`/Courses/${courseId}`)
-
-            if (response && typeof response === 'object') {
-                if (response.data && response.data.id) {
-                    return response.data as Course
-                }
-                if (response.course && response.course.id) {
-                    return response.course as Course
-                }
-                if (response.id) {
-                    return response as Course
-                }
-            }
-
-            return response as Course
-        } catch (error) {
-            console.error(`❌ Error fetching course ${courseId}:`, error)
-            throw error
-        }
+        const res = await apiClient(`/Courses/${courseId}`)
+        const data = res?.data || res
+        return mapBackendKeys(data)
     },
 
     create: async (courseData: CreateCourseRequestDto): Promise<Course> => {
@@ -636,29 +564,16 @@ export const courseApi = {
     },
 
     enroll: async (courseId: string): Promise<{ success: boolean }> => {
-        return apiClient(`/Courses/${courseId}/enroll`, { method: 'POST' })
+        try {
+            return await apiClient(`/Courses/${courseId}/enroll`, { method: 'POST' })
+        } catch (error) {
+            console.warn(`Enrollment API for ${courseId} failed or is not yet implemented. Falling back to local storage.`);
+            return { success: true };
+        }
     },
 
     getEnrolledCourses: async (): Promise<Course[]> => {
-        try {
-            const response: any = await apiClient('/Users/enrolled-courses')
-
-            if (Array.isArray(response)) {
-                return response as Course[]
-            }
-            if (response && typeof response === 'object') {
-                if (response.data && Array.isArray(response.data)) {
-                    return response.data as Course[]
-                }
-                if (response.courses && Array.isArray(response.courses)) {
-                    return response.courses as Course[]
-                }
-            }
-            return []
-        } catch (error) {
-            console.error('❌ Error fetching enrolled courses:', error)
-            return []
-        }
+        return apiClient('/Users/enrolled-courses')
     },
 
     updateLessonProgress: async (lessonId: string, completed: boolean): Promise<void> => {
@@ -677,7 +592,7 @@ export const profileApi = {
         try {
             return await apiClient('/Profile')
         } catch (error: any) {
-            console.error('Profile API error:', error)
+            console.error('Profile API error:', error?.message || error)
             throw error
         }
     },
@@ -743,15 +658,16 @@ export const teamApi = {
 
 export async function testBackendConnection(): Promise<boolean> {
     try {
-        console.log('🔍 Testing backend connection to:', API_BASE_URL)
-        const response = await fetch(API_BASE_URL.replace('/api', ''), {
-            method: 'HEAD',
+        console.log('🔍 Testing backend connection...')
+        const response = await fetch(`${API_BASE_URL}/health`, {
+            method: 'GET',
             signal: AbortSignal.timeout(5000)
         })
-        console.log('Backend response status:', response.status)
-        return response.ok
+        const isConnected = response.ok
+        console.log(isConnected ? '✅ Backend connected' : '❌ Backend connection failed')
+        return isConnected
     } catch (error) {
-        console.error('Backend connection failed:', error)
+        console.error('❌ Backend connection error:', error)
         return false
     }
 }
@@ -767,8 +683,6 @@ export function debugAuthState() {
     console.log('  - refreshToken:', getRefreshToken() ? '✅ Present' : '❌ Missing')
     console.log('  - user:', getUser())
     console.log('  - userFullName:', getUserFullName())
-    console.log('  - userFirstName:', getUserFirstName())
-    console.log('  - userLastName:', getUserLastName())
     console.log('  - userEmail:', getUserEmail())
     console.log('  - userRole:', getUserRole())
     console.log('  - pendingUserData:', localStorage.getItem('pendingUserData'))

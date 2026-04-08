@@ -462,23 +462,12 @@ function CourseCard({ course, isEnrolled, onEnroll, isEnrolling }: {
                         </button>
                     </Link>
                 ) : (
-                    <button
-                        onClick={onEnroll}
-                        disabled={isEnrolling}
-                        className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isEnrolling ? (
-                            <>
-                                <Loader2 size={16} className="animate-spin" />
-                                Enrolling...
-                            </>
-                        ) : (
-                            <>
-                                Enroll Now
-                                <ChevronRight size={16} />
-                            </>
-                        )}
-                    </button>
+                    <Link href={`/dashboard/courses/${course.id}`}>
+                        <button className="w-full py-2 bg-white text-green-700 border border-green-600 rounded-lg text-sm font-medium hover:bg-green-50 transition flex items-center justify-center gap-2">
+                            View Course Details
+                            <ChevronRight size={16} />
+                        </button>
+                    </Link>
                 )}
             </div>
         </div>

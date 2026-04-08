@@ -42,32 +42,40 @@ export default function LoginPage() {
 
       console.log('🟢 Login response:', response)
 
-      if (response.token) {
-        // Store session based on "Keep me signed in" preference
+      const token = response.data?.token || response.token;
+      const refreshToken = response.data?.refreshToken || response.refreshToken;
+      const responseUser = response.data || response.user;
+
+      if (token) {
         if (keepSignedIn) {
-          localStorage.setItem('authToken', response.token)
-          localStorage.setItem('refreshToken', response.refreshToken)
-          localStorage.setItem('user', JSON.stringify(response.user))
+          localStorage.setItem('authToken', token)
+          if (refreshToken) {
+            localStorage.setItem('refreshToken', refreshToken)
+          }
+          if (responseUser) localStorage.setItem('user', JSON.stringify(responseUser))
           localStorage.setItem('isAuthenticated', 'true')
           console.log('✅ Stored in localStorage (persistent)')
         } else {
-          sessionStorage.setItem('authToken', response.token)
-          sessionStorage.setItem('refreshToken', response.refreshToken)
-          sessionStorage.setItem('user', JSON.stringify(response.user))
+          sessionStorage.setItem('authToken', token)
+          if (refreshToken) {
+            sessionStorage.setItem('refreshToken', refreshToken)
+          }
+          if (responseUser) sessionStorage.setItem('user', JSON.stringify(responseUser))
           sessionStorage.setItem('isAuthenticated', 'true')
           console.log('✅ Stored in sessionStorage (temporary)')
         }
 
         // Store user details for display
-        const fullName = response.user?.firstName && response.user?.lastName
-          ? `${response.user.firstName} ${response.user.lastName}`
-          : response.user?.email || email
+        const emailAddr = responseUser?.email || email;
+        const fullName = responseUser?.fullName || (responseUser?.firstName && responseUser?.lastName
+          ? `${responseUser.firstName} ${responseUser.lastName}`
+          : emailAddr)
 
         localStorage.setItem('userFullName', fullName)
-        localStorage.setItem('userEmail', response.user?.email || email)
-        localStorage.setItem('userRole', response.user?.role || 'user')
-        localStorage.setItem('userFirstName', response.user?.firstName || '')
-        localStorage.setItem('userLastName', response.user?.lastName || '')
+        localStorage.setItem('userEmail', emailAddr)
+        localStorage.setItem('userRole', responseUser?.role || 'user')
+        localStorage.setItem('userFirstName', responseUser?.firstName || '')
+        localStorage.setItem('userLastName', responseUser?.lastName || '')
 
         setSuccessMessage('Login successful! Redirecting to dashboard...')
 
