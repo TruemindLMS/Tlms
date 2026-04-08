@@ -148,7 +148,7 @@ const ForgotPassword = () => {
 
                 {/* Success Icon */}
                 <div className="flex justify-center mb-6">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                    <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
                         <CheckCircle className="w-8 h-8 text-primary-500" />
                     </div>
                 </div>

@@ -172,9 +172,9 @@ export default function CoursesPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="flex items-center justify-center min-h-screen bg-cover ml-1 lg:ml-1 md:ml-5 bg-center bg-no-repeat" style={{ backgroundImage: "url('/img/tback.png')" }}>
                 <div className="text-center">
-                    <Loader2 size={40} className="animate-spin text-green-600 mx-auto mb-4" />
+                    <Loader2 size={40} className="animate-spin text-primary-600 mx-auto mb-4" />
                     <p className="text-gray-500">Loading courses...</p>
                 </div>
             </div>
@@ -186,7 +186,7 @@ export default function CoursesPage() {
             {/* Success Message */}
             {successMessage && (
                 <div className="fixed top-20 right-4 z-50 animate-slide-in">
-                    <div className="bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+                    <div className="bg-primary-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
                         <CheckCircle size={18} />
                         <span className="text-sm">{successMessage}</span>
                     </div>
@@ -216,7 +216,7 @@ export default function CoursesPage() {
                     <p className="text-xs text-gray-500">Total Courses</p>
                 </div>
                 <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                    <Users size={24} className="text-green-500 mb-2" />
+                    <Users size={24} className="text-primary-500 mb-2" />
                     <p className="text-2xl font-bold text-gray-900">{enrolledCourseIds.size}</p>
                     <p className="text-xs text-gray-500">Enrolled</p>
                 </div>
@@ -242,7 +242,7 @@ export default function CoursesPage() {
                             placeholder="Search courses by title or description..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                     </div>
                     <button
@@ -252,7 +252,7 @@ export default function CoursesPage() {
                         <Filter size={18} />
                         Filters
                         {(selectedCategory !== 'All' || selectedLevel !== 'All') && (
-                            <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">
+                            <span className="bg-primary-600 text-white text-xs px-2 py-0.5 rounded-full">
                                 {(selectedCategory !== 'All' ? 1 : 0) + (selectedLevel !== 'All' ? 1 : 0)}
                             </span>
                         )}
@@ -277,7 +277,7 @@ export default function CoursesPage() {
                                             key={cat}
                                             onClick={() => setSelectedCategory(cat)}
                                             className={`px-3 py-1 rounded-full text-sm transition-all ${selectedCategory === cat
-                                                ? 'bg-green-600 text-white'
+                                                ? 'bg-primary-600 text-white'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >
@@ -294,13 +294,13 @@ export default function CoursesPage() {
                                             key={level}
                                             onClick={() => setSelectedLevel(level)}
                                             className={`px-3 py-1 rounded-full text-sm transition-all ${selectedLevel === level
-                                                ? 'bg-green-600 text-white'
+                                                ? 'bg-primary-600 text-white'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                         >
                                             {level}
                                         </button>
-                                    ))}
+                                    ))}s
                                 </div>
                             </div>
                         </div>
@@ -315,7 +315,7 @@ export default function CoursesPage() {
                         key={category}
                         onClick={() => setSelectedCategory(category)}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${selectedCategory === category
-                            ? 'bg-green-600 text-white'
+                            ? 'bg-primary-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                     >
@@ -330,7 +330,7 @@ export default function CoursesPage() {
                     Showing {filteredCourses.length} of {courses.length} courses
                 </p>
                 {(selectedCategory !== 'All' || selectedLevel !== 'All' || searchQuery) && (
-                    <button onClick={clearFilters} className="text-sm text-green-600 hover:text-green-700">
+                    <button onClick={clearFilters} className="text-sm text-primary-600 hover:text-primary-700">
                         Clear all filters
                     </button>
                 )}
@@ -342,7 +342,7 @@ export default function CoursesPage() {
                     <p className="text-red-600 mb-4">{error}</p>
                     <button
                         onClick={fetchCourses}
-                        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+                        className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition"
                     >
                         Try Again
                     </button>
@@ -361,7 +361,7 @@ export default function CoursesPage() {
                     <BookOpen size={48} className="text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No matching courses</h3>
                     <p className="text-gray-500">Try adjusting your search or filters</p>
-                    <button onClick={clearFilters} className="mt-4 text-green-600 hover:text-green-700">
+                    <button onClick={clearFilters} className="mt-4 text-primary-600 hover:text-primary-700">
                         Clear all filters
                     </button>
                 </div>
@@ -392,7 +392,7 @@ function CourseCard({ course, isEnrolled, onEnroll, isEnrolling }: {
     return (
         <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all group h-full flex flex-col">
             <Link href={`/dashboard/courses/${course.id}`} className="block">
-                <div className="relative h-48 bg-gradient-to-r from-green-600 to-green-700">
+                <div className="relative h-48 bg-gradient-to-r from-primary-600 to-primary-700">
                     {course.imageUrl ? (
                         <Image src={course.imageUrl} alt={course.title} fill className="object-cover" />
                     ) : (
@@ -412,7 +412,7 @@ function CourseCard({ course, isEnrolled, onEnroll, isEnrolling }: {
                         </span>
                     )}
                     {isEnrolled && (
-                        <span className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                        <span className="absolute top-2 right-2 bg-primary-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
                             <CheckCircle size={12} />
                             Enrolled
                         </span>
@@ -422,7 +422,7 @@ function CourseCard({ course, isEnrolled, onEnroll, isEnrolling }: {
                 <div className="p-4 flex-1 flex flex-col">
                     <div className="flex items-center gap-2 mb-2">
                         {course.category && (
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                            <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full">
                                 {course.category}
                             </span>
                         )}
@@ -443,11 +443,11 @@ function CourseCard({ course, isEnrolled, onEnroll, isEnrolling }: {
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                             <Users size={14} />
-                            <span>{course.enrolledCount || 0} students</span>
+                            <span>{course.enrolledCount || 1000} students</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                             <BookOpen size={14} />
-                            <span>{course.modules?.length || 0} modules</span>
+                            <span>{course.modules?.length || 3} modules</span>
                         </div>
                     </div>
                 </div>
@@ -456,14 +456,14 @@ function CourseCard({ course, isEnrolled, onEnroll, isEnrolling }: {
             <div className="px-4 pb-4">
                 {isEnrolled ? (
                     <Link href={`/dashboard/courses/${course.id}`}>
-                        <button className="w-full py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center justify-center gap-2">
+                        <button className="w-full py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition flex items-center justify-center gap-2">
                             <Play size={16} />
                             Continue Learning
                         </button>
                     </Link>
                 ) : (
                     <Link href={`/dashboard/courses/${course.id}`}>
-                        <button className="w-full py-2 bg-white text-green-700 border border-green-600 rounded-lg text-sm font-medium hover:bg-green-50 transition flex items-center justify-center gap-2">
+                        <button className="w-full py-2 bg-white text-primary-700 border border-primary-600 rounded-lg text-sm font-medium hover:bg-primary-50 transition flex items-center justify-center gap-2">
                             View Course Details
                             <ChevronRight size={16} />
                         </button>

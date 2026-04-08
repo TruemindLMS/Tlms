@@ -478,7 +478,11 @@ export function getUserRole(): string {
 
 // ==================== API Client ====================
 
-export async function apiClient(endpoint: string, options: RequestInit = {}) {
+export interface ApiClientOptions extends RequestInit {
+    silent?: boolean;
+}
+
+export async function apiClient(endpoint: string, options: ApiClientOptions = {}) {
     const token = getAuthToken()
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
     if (token) headers['Authorization'] = `Bearer ${token}`
@@ -508,7 +512,9 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
                 window.location.href = '/signin'
             }
         }
-        console.error(`API Client Error (${response.status}):`, data)
+        if (!options.silent) {
+            console.error(`API Client Error (${response.status}):`, data)
+        }
         throw new Error(data.message || 'API request failed')
     }
 
@@ -573,7 +579,7 @@ export const courseApi = {
     },
 
     getEnrolledCourses: async (): Promise<Course[]> => {
-        return apiClient('/Users/enrolled-courses')
+        return apiClient('/Users/enrolled-courses', { silent: true })
     },
 
     updateLessonProgress: async (lessonId: string, completed: boolean): Promise<void> => {
@@ -581,7 +587,7 @@ export const courseApi = {
     },
 
     getCourseProgress: async (courseId: string): Promise<{ progress: number; completedLessons: string[] }> => {
-        return apiClient(`/Courses/${courseId}/progress`)
+        return apiClient(`/Courses/${courseId}/progress`, { silent: true })
     }
 }
 
@@ -624,10 +630,10 @@ export const onboardingApi = {
         })
         return parseResponse(response)
     },
-    submitRole: async (roleData: { role: string }) => {
+    submitRole: async (roleData: { role: number | string }) => {
         return apiClient('/Onboarding/role', { method: 'POST', body: JSON.stringify(roleData) })
     },
-    submitGoals: async (goalsData: { goals: string[] }) => {
+    submitGoals: async (goalsData: { goals: number[] | string[] }) => {
         return apiClient('/Onboarding/goals', { method: 'POST', body: JSON.stringify(goalsData) })
     },
     completeOnboarding: async () => {
@@ -640,6 +646,43 @@ export const onboardingApi = {
         localStorage.setItem('onboardingCompleted', 'skipped')
         return response
     },
+}
+
+// ==================== Cloudinary API ====================
+
+export const cloudinaryApi = {
+    uploadCourseVideo: async (file: File, title: string, description: string) => {
+        const formData = new FormData()
+        formData.append('File', file)
+        formData.append('Title', title)
+        formData.append('Description', description)
+        
+        const token = getAuthToken()
+        const headers: Record<string, string> = {}
+        if (token) headers['Authorization'] = `Bearer ${token}`
+
+        const response = await fetch(`${API_BASE_URL}/Cloudinary/upload-course-video`, {
+            method: 'POST',
+            headers,
+            body: formData
+        })
+        return parseResponse(response)
+    },
+    uploadProfileImage: async (file: File) => {
+        const formData = new FormData()
+        formData.append('File', file)
+        
+        const token = getAuthToken()
+        const headers: Record<string, string> = {}
+        if (token) headers['Authorization'] = `Bearer ${token}`
+
+        const response = await fetch(`${API_BASE_URL}/Cloudinary/upload-profile-image`, {
+            method: 'POST',
+            headers,
+            body: formData
+        })
+        return parseResponse(response)
+    }
 }
 
 // ==================== Team API ====================

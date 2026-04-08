@@ -30,7 +30,7 @@ const CircleIcon = ({ icon }: { icon: React.ReactNode }) => (
 
 const Achievement = ({ label, subText, icon }: { label: string; subText: string; icon: React.ReactNode }) => (
     <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-        <div className="text-green-600">{icon}</div>
+        <div className="text-primary-600">{icon}</div>
         <div>
             <p className="font-medium text-gray-900">{label}</p>
             <p className="text-xs text-gray-500">{subText}</p>
@@ -46,7 +46,7 @@ const TeamMember = ({ name, role, img, isActive = true }: { name: string; role: 
             <p className="text-xs text-gray-500">{role}</p>
         </div>
         {isActive && (
-            <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">Active</span>
+            <span className="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded-full">Active</span>
         )}
     </div>
 )
@@ -434,7 +434,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                         {notifications.length > 0 && (
                                             <button
                                                 onClick={markAllAsRead}
-                                                className="text-xs text-green-600 hover:text-green-700 transition"
+                                                className="text-xs text-primary-600 hover:text-primary-700 transition"
                                             >
                                                 Mark all as read
                                             </button>
@@ -500,10 +500,10 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                         width={32}
                                         height={32}
                                         alt="Profile"
-                                        className="rounded-full ring-2 ring-green-200 dark:ring-gray-700 object-cover w-8 h-8"
+                                        className="rounded-full ring-2 ring-primary-200 dark:ring-gray-700 object-cover w-8 h-8"
                                     />
                                 ) : (
-                                    <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center ring-2 ring-green-200">
+                                    <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center ring-2 ring-primary-200">
                                         <span className="text-white font-semibold text-xs">
                                             {userInitials || 'U'}
                                         </span>
@@ -541,10 +541,10 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                             alt="user"
                                             width={96}
                                             height={96}
-                                            className="rounded-full ring-4 ring-green-100 object-cover w-24 h-24"
+                                            className="rounded-full ring-4 ring-primary-100 object-cover w-24 h-24"
                                         />
                                     ) : (
-                                        <div className="w-24 h-24 rounded-full bg-green-600 flex items-center justify-center ring-4 ring-green-100">
+                                        <div className="w-24 h-24 rounded-full bg-primary-600 flex items-center justify-center ring-4 ring-primary-100">
                                             <span className="text-white font-bold text-3xl">
                                                 {userInitials || 'U'}
                                             </span>
@@ -571,7 +571,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                     <div className="text-center py-4 bg-gray-50 rounded-lg">
                                         <BookOpen size={32} className="text-gray-300 mx-auto mb-2" />
                                         <p className="text-sm text-gray-500">No courses enrolled yet</p>
-                                        <Link href="/dashboard/courses" className="text-xs text-green-600 hover:underline mt-1 inline-block">
+                                        <Link href="/dashboard/courses" className="text-xs text-primary-600 hover:underline mt-1 inline-block">
                                             Browse Courses →
                                         </Link>
                                     </div>
@@ -585,7 +585,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                                 </div>
                                                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                                                     <div
-                                                        className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all"
+                                                        className="h-full bg-gradient-to-r from-primary-400 to-primary-600 rounded-full transition-all"
                                                         style={{ width: `${item.progress}%` }}
                                                     />
                                                 </div>
@@ -610,7 +610,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                                 key={idx}
                                                 label={item.label}
                                                 subText={item.subText}
-                                                icon={item.icon === "🏆" ? <Trophy size={22} className="text-yellow-500" /> : <CheckCircle size={22} className="text-green-600" />}
+                                                icon={item.icon === "🏆" ? <Trophy size={22} className="text-yellow-500" /> : <CheckCircle size={22} className="text-primary-600" />}
                                             />
                                         ))}
                                     </div>
@@ -621,7 +621,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                 <div className="mb-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <p className="text-lg font-semibold text-gray-900">Team Members</p>
-                                        <CirclePlus size={20} className="text-green-600 cursor-pointer hover:text-green-700 transition-colors" />
+                                        <CirclePlus size={20} className="text-primary-600 cursor-pointer hover:text-primary-700 transition-colors" />
                                     </div>
                                     <div className="space-y-2">
                                         {teamMembers.map((member, index) => (
@@ -634,7 +634,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                             />
                                         ))}
                                     </div>
-                                    <button className="mt-4 w-full bg-green-50 hover:bg-green-100 py-2.5 rounded-lg text-sm font-medium text-green-700 transition-colors">
+                                    <button className="mt-4 w-full bg-primary-50 hover:bg-primary-100 py-2.5 rounded-lg text-sm font-medium text-primary-700 transition-colors">
                                         See All Team Members
                                     </button>
                                 </div>

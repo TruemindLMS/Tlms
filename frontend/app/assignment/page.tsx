@@ -58,7 +58,7 @@ export default function Assignmentpage() {
   // Card data with real counts
   const cardData = [
     { title: "Total Assignment", number: totalAssignments.toString(), color: "text-primary-600", icon: "📋" },
-    { title: "Submitted", number: submittedCount.toString(), color: "text-green-500", icon: "✅" },
+    { title: "Submitted", number: submittedCount.toString(), color: "text-primary-500", icon: "✅" },
     { title: "Pending", number: pendingCount.toString(), color: "text-yellow-500", icon: "⏳" },
     { title: "Overdue", number: overdueCount.toString(), color: "text-red-500", icon: "⚠️" },
   ];
@@ -202,7 +202,7 @@ export default function Assignmentpage() {
                 <div key={status} className="mb-8">
                   <h2 className={`font-semibold mb-4 text-lg ${status === "Overdue" ? "text-red-600" :
                     status === "Pending" ? "text-yellow-600" :
-                      "text-green-600"
+                      "text-primary-600"
                     }`}>
                     {status} ({filtered.length})
                   </h2>
@@ -222,7 +222,7 @@ export default function Assignmentpage() {
                               ? "bg-red-100 text-red-700"
                               : card.status === "Pending"
                                 ? "bg-yellow-100 text-yellow-700"
-                                : "bg-green-100 text-green-700"
+                                : "bg-primary-100 text-primary-700"
                               }`}
                           >
                             {card.status}
@@ -253,7 +253,7 @@ export default function Assignmentpage() {
                                 ? "bg-red-500"
                                 : card.status === "Pending"
                                   ? "bg-yellow-500"
-                                  : "bg-green-500"
+                                  : "bg-primary-500"
                                 }`}
                               style={{ width: `${card.value}%` }}
                             />
@@ -275,7 +275,7 @@ export default function Assignmentpage() {
 
                         {card.status === "Submitted" && (
                           <div className="mt-4 flex items-center justify-center gap-2">
-                            <span className="text-xs text-green-600">✓ Graded</span>
+                            <span className="text-xs text-primary-600">✓ Graded</span>
                             <span className="text-xs text-gray-400">•</span>
                             <span className="text-xs text-gray-500 cursor-pointer hover:text-primary-600">
                               View Feedback

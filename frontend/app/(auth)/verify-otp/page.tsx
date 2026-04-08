@@ -164,8 +164,8 @@ function VerifyOTPContent() {
         return (
             <div className="min-h-screen flex bg-[#004222] items-center justify-center p-4">
                 <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 text-center">
-                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <CheckCircle size={40} className="text-green-600" />
+                    <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <CheckCircle size={40} className="text-primary-600" />
                     </div>
                     <h2 className="text-2xl font-bold mb-2">Email Verified!</h2>
                     <p className="text-gray-600 mb-6">Your email has been confirmed.</p>
@@ -222,8 +222,8 @@ function VerifyOTPContent() {
                     )}
 
                     {resendMessage && (
-                        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <p className="text-green-600 text-sm text-center">{resendMessage}</p>
+                        <div className="mt-4 p-3 bg-primary-50 border border-primary-200 rounded-lg">
+                            <p className="text-primary-600 text-sm text-center">{resendMessage}</p>
                         </div>
                     )}
                 </div>

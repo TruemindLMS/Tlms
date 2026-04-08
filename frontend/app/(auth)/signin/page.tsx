@@ -214,7 +214,7 @@ export default function LoginPage() {
 
             {/* Success Message */}
             {successMessage && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+              <div className="mb-4 p-3 bg-primary-50 border border-primary-200 rounded-lg text-primary-700 text-sm">
                 {successMessage}
               </div>
             )}
@@ -230,7 +230,7 @@ export default function LoginPage() {
             {successMessage && (
               <a
                 href="/dashboard"
-                className="w-full mb-4 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium text-center"
+                className="w-full mb-4 bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium text-center"
               >
                 Click here to proceed to Dashboard
               </a>

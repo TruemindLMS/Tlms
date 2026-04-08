@@ -92,7 +92,7 @@ export default function ViralLinkFAQ() {
             <h1 className="text-3xl md:text-5xl font-semibold text-primary-900 leading-tight">
               Frequently Asked Questions
             </h1>
-            <p className="text-3xl md:text-[34px] hidden font-semibold text-green-700 leading-tight">
+            <p className="text-3xl md:text-[34px] hidden font-semibold text-primary-700 leading-tight">
               We’ve got answers
             </p>
           </div>
@@ -120,7 +120,7 @@ export default function ViralLinkFAQ() {
                 >
                   {/* Glow Shadow */}
                   {isOpen && (
-                    <div className="absolute inset-x-6 -bottom-3 h-8 bg-green-500/30 blur-2xl rounded-full" />
+                    <div className="absolute inset-x-6 -bottom-3 h-8 bg-primary-500/30 blur-2xl rounded-full" />
                   )}
 
                   {/* Card */}
@@ -141,7 +141,7 @@ export default function ViralLinkFAQ() {
                       </span>
 
                       {/* Icon */}
-                      <span className="text-3xl text-green-700 font-light">
+                      <span className="text-3xl text-primary-700 font-light">
                         {isOpen ? "−" : "+"}
                       </span>
                     </button>
@@ -169,3 +169,4 @@ export default function ViralLinkFAQ() {
       </ScrollAnimatel>    </div>
   );
 }
+

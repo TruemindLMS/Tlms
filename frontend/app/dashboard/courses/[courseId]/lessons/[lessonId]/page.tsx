@@ -80,16 +80,26 @@ export default function LessonPlayerPage() {
             }
             setCurrentLesson(foundLesson);
 
-            // Check if lesson is completed
-            const userId = getCurrentUserId();
-            const enrolledCoursesKey = `enrolledCourses_${userId}`;
-            const enrolledCourses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
-            const enrolledCourse = enrolledCourses.find((c: any) => c.id === courseId);
+            // Fetch actual progress from API
+            try {
+                const progressData = await courseApi.getCourseProgress(courseId);
+                if (progressData) {
+                    setCourseProgress(progressData.progress || 0);
+                    setIsCompleted((progressData.completedLessons || []).includes(lessonId));
+                }
+            } catch (err) {
+                console.warn("Failed to fetch backend progress, falling back to local storage.", err);
+                // Fallback
+                const userId = getCurrentUserId();
+                const enrolledCoursesKey = `enrolledCourses_${userId}`;
+                const enrolledCourses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
+                const enrolledCourse = enrolledCourses.find((c: any) => c.id === courseId);
 
-            if (enrolledCourse) {
-                setCourseProgress(enrolledCourse.progress || 0);
-                const completedLessons = JSON.parse(localStorage.getItem(`completedLessons_${userId}_${courseId}`) || '[]');
-                setIsCompleted(completedLessons.includes(lessonId));
+                if (enrolledCourse) {
+                    setCourseProgress(enrolledCourse.progress || 0);
+                    const completedLessons = JSON.parse(localStorage.getItem(`completedLessons_${userId}_${courseId}`) || '[]');
+                    setIsCompleted(completedLessons.includes(lessonId));
+                }
             }
         } catch (error) {
             console.error('Error fetching lesson:', error);
@@ -100,36 +110,46 @@ export default function LessonPlayerPage() {
 
     const handleMarkComplete = async () => {
         try {
-            const userId = getCurrentUserId();
-            const enrolledCoursesKey = `enrolledCourses_${userId}`;
-            const completedLessonsKey = `completedLessons_${userId}_${courseId}`;
-
-            const enrolledCourses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
-            const courseIndex = enrolledCourses.findIndex((c: any) => c.id === courseId);
-
-            if (courseIndex !== -1) {
-                const completedLessons = JSON.parse(localStorage.getItem(completedLessonsKey) || '[]');
-
-                if (!isCompleted) {
-                    completedLessons.push(lessonId);
-                    localStorage.setItem(completedLessonsKey, JSON.stringify(completedLessons));
-
-                    // Calculate new progress
-                    const totalLessons = course?.modules.reduce((acc, m) => acc + m.lessons.length, 0) || 1;
-                    const newProgress = Math.floor((completedLessons.length / totalLessons) * 100);
-
-                    enrolledCourses[courseIndex].progress = newProgress;
-                    localStorage.setItem(enrolledCoursesKey, JSON.stringify(enrolledCourses));
-
-                    setCourseProgress(newProgress);
-                    setIsCompleted(true);
-
-                    // Update user stats
-                    updateUserStats(enrolledCourses);
-
-                    // Also update API
+            if (!isCompleted) {
+                // Update via API first
+                try {
                     await courseApi.updateLessonProgress(lessonId, true);
+                    
+                    // Re-fetch progress to ensure accuracy
+                    const progressData = await courseApi.getCourseProgress(courseId);
+                    setCourseProgress(progressData.progress || 0);
+                    setIsCompleted(true);
+                    
+                    // Dispatch event
+                    window.dispatchEvent(new CustomEvent('statsUpdated', { detail: { lessonId, courseId } }));
+                } catch (apiError) {
+                    console.error("API progress update failed, falling back to local state.", apiError);
                 }
+
+                // Maintain local fallback
+                const userId = getCurrentUserId();
+                const enrolledCoursesKey = `enrolledCourses_${userId}`;
+                const completedLessonsKey = `completedLessons_${userId}_${courseId}`;
+
+                const enrolledCourses = JSON.parse(localStorage.getItem(enrolledCoursesKey) || '[]');
+                const courseIndex = enrolledCourses.findIndex((c: any) => c.id === courseId);
+
+                if (courseIndex !== -1) {
+                    const completedLessons = JSON.parse(localStorage.getItem(completedLessonsKey) || '[]');
+                    if (!completedLessons.includes(lessonId)) {
+                        completedLessons.push(lessonId);
+                        localStorage.setItem(completedLessonsKey, JSON.stringify(completedLessons));
+
+                        const totalLessons = course?.modules.reduce((acc, m) => acc + m.lessons.length, 0) || 1;
+                        const newProgress = Math.floor((completedLessons.length / totalLessons) * 100);
+
+                        enrolledCourses[courseIndex].progress = newProgress;
+                        localStorage.setItem(enrolledCoursesKey, JSON.stringify(enrolledCourses));
+                        setCourseProgress(newProgress);
+                        updateUserStats(enrolledCourses);
+                    }
+                }
+                setIsCompleted(true);
             }
         } catch (error) {
             console.error('Error updating progress:', error);
@@ -154,7 +174,7 @@ export default function LessonPlayerPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <Loader2 size={40} className="animate-spin text-green-600" />
+                <Loader2 size={40} className="animate-spin text-primary-600" />
             </div>
         );
     }
@@ -163,7 +183,7 @@ export default function LessonPlayerPage() {
         return (
             <div className="text-center py-12">
                 <h2 className="text-xl font-semibold">Lesson not found</h2>
-                <Link href={`/dashboard/courses/${courseId}`} className="text-green-600 mt-2 inline-block">
+                <Link href={`/dashboard/courses/${courseId}`} className="text-primary-600 mt-2 inline-block">
                     Back to Course
                 </Link>
             </div>
@@ -199,10 +219,10 @@ export default function LessonPlayerPage() {
                 <div className="max-w-7xl mx-auto px-6 py-2">
                     <div className="flex items-center justify-between text-sm mb-1">
                         <span className="text-gray-600">Course Progress</span>
-                        <span className="text-green-600 font-medium">{courseProgress}%</span>
+                        <span className="text-primary-600 font-medium">{courseProgress}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-600 h-2 rounded-full transition-all" style={{ width: `${courseProgress}%` }} />
+                        <div className="bg-primary-600 h-2 rounded-full transition-all" style={{ width: `${courseProgress}%` }} />
                     </div>
                 </div>
             </div>
@@ -216,7 +236,7 @@ export default function LessonPlayerPage() {
                                 key={tab}
                                 onClick={() => setActiveTab(tab.toLowerCase().replace(/ /g, '-'))}
                                 className={`py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.toLowerCase().replace(/ /g, '-')
-                                    ? 'border-green-600 text-green-600'
+                                    ? 'border-primary-600 text-primary-600'
                                     : 'border-transparent text-gray-500 hover:text-gray-700'
                                     }`}
                             >
@@ -290,14 +310,14 @@ export default function LessonPlayerPage() {
 
                         <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6 mb-6">
                             <div className="flex items-center gap-3 mb-3">
-                                <Award size={24} className="text-green-600" />
+                                <Award size={24} className="text-primary-600" />
                                 <h3 className="font-semibold text-gray-900">Certificates:</h3>
                             </div>
                             <p className="text-gray-600 text-sm mb-3">
                                 Get a certificate when you have completed an entire course
                             </p>
                             <div className="inline-block bg-white border border-gray-200 rounded-lg px-4 py-2">
-                                <span className="text-green-600 font-medium text-sm">Talent Flow Certificate</span>
+                                <span className="text-primary-600 font-medium text-sm">Talent Flow Certificate</span>
                             </div>
                         </div>
                     </div>
@@ -314,11 +334,11 @@ export default function LessonPlayerPage() {
                                         <Link
                                             key={lesson.id}
                                             href={`/dashboard/courses/${courseId}/lessons/${lesson.id}`}
-                                            className={`block p-4 cursor-pointer hover:bg-gray-50 transition ${lesson.id === lessonId ? 'bg-green-50' : ''}`}
+                                            className={`block p-4 cursor-pointer hover:bg-gray-50 transition ${lesson.id === lessonId ? 'bg-primary-50' : ''}`}
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
-                                                    <p className={`text-sm font-medium ${lesson.id === lessonId ? 'text-green-600' : 'text-gray-900'}`}>
+                                                    <p className={`text-sm font-medium ${lesson.id === lessonId ? 'text-primary-600' : 'text-gray-900'}`}>
                                                         {lesson.title}
                                                     </p>
                                                     {lesson.duration && (
@@ -326,10 +346,10 @@ export default function LessonPlayerPage() {
                                                     )}
                                                 </div>
                                                 {lesson.id === lessonId && (
-                                                    <Play size={16} className="text-green-600 flex-shrink-0 mt-1" />
+                                                    <Play size={16} className="text-primary-600 flex-shrink-0 mt-1" />
                                                 )}
                                                 {lesson.isCompleted && (
-                                                    <CheckCircle size={16} className="text-green-600 flex-shrink-0 mt-1" />
+                                                    <CheckCircle size={16} className="text-primary-600 flex-shrink-0 mt-1" />
                                                 )}
                                             </div>
                                         </Link>
@@ -356,7 +376,7 @@ export default function LessonPlayerPage() {
                             <button
                                 onClick={handleMarkComplete}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${isCompleted
-                                    ? 'bg-green-600 text-white'
+                                    ? 'bg-primary-600 text-white'
                                     : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
@@ -366,7 +386,7 @@ export default function LessonPlayerPage() {
                             {nextLesson && (
                                 <Link
                                     href={`/dashboard/courses/${courseId}/lessons/${nextLesson.lesson.id}`}
-                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition"
+                                    className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition"
                                 >
                                     Next Lesson
                                     <ChevronRight size={16} />

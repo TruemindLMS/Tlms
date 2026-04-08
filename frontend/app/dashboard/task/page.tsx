@@ -76,8 +76,8 @@ export default function Assignmentpage() {
                     status: "Submitted",
                     value: 100,
                     submittedDate: new Date().toLocaleDateString(),
-                    color: "text-green-700",
-                    bgColor: "bg-green-50"
+                    color: "text-primary-700",
+                    bgColor: "bg-primary-50"
                 }
                 : assignment
         ));
@@ -218,7 +218,7 @@ export default function Assignmentpage() {
                                             )}
 
                                             {card.status === "Submitted" && (
-                                                <div className="w-full mt-4 py-2 bg-green-50 text-primary-600 rounded-lg text-sm font-medium text-center">
+                                                <div className="w-full mt-4 py-2 bg-primary-50 text-primary-600 rounded-lg text-sm font-medium text-center">
                                                     ✓ Submitted Successfully
                                                 </div>
                                             )}
@@ -290,8 +290,8 @@ const AssignmentData: AssignmentType[] = [
         status: "Submitted",
         details: "Design - Figma Project",
         dueDate: "Mar 20, 2026",
-        color: "text-green-700",
-        bgColor: "bg-green-50",
+        color: "text-primary-700",
+        bgColor: "bg-primary-50",
         value: 100,
     },
     {
@@ -300,8 +300,8 @@ const AssignmentData: AssignmentType[] = [
         status: "Submitted",
         details: "Backend Development - SQL",
         dueDate: "Mar 22, 2026",
-        color: "text-green-700",
-        bgColor: "bg-green-50",
+        color: "text-primary-700",
+        bgColor: "bg-primary-50",
         value: 100,
     },
     {

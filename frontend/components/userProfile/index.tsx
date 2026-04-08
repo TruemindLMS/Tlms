@@ -204,8 +204,8 @@ const UserProfile = () => {
           <div className="flex flex-col md:flex-row gap-6">
             {/* Avatar */}
             <div className="flex flex-col items-center">
-              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 font-bold text-2xl">
+              <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center">
+                <span className="text-primary-600 font-bold text-2xl">
                   {getInitials(fullName)}
                 </span>
               </div>
@@ -302,7 +302,7 @@ const UserProfile = () => {
                     <div className="flex gap-2 mt-4">
                       <button
                         onClick={handleSaveProfile}
-                        className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-green-700 flex items-center"
+                        className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700 flex items-center"
                       >
                         <Save size={16} className="inline mr-1" />
                         Save
@@ -408,7 +408,7 @@ const UserProfile = () => {
           <Award className="text-yellow-500" size={24} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
+          <div className="text-center p-4 bg-gradient-to-br from-primary-50 to-emerald-50 rounded-lg">
             <Trophy size={32} className="text-primary-600 mx-auto mb-2" />
             <p className="font-medium text-sm">Course Complete</p>
             <p className="text-xs text-gray-500">Complete your first course</p>
