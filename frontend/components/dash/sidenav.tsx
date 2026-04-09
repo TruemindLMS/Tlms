@@ -149,7 +149,7 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                                             href={item.href}
                                             onClick={() => isMobile && setIsMobileOpen(false)}
                                             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative ${isActive
-                                                ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                                                ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
                                                 : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                                                 } ${collapsed && !isMobile ? 'justify-center' : ''}`}
                                         >
@@ -212,7 +212,7 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                                     }`}
                             >
                                 <HelpCircle size={20} />
-                                {(!collapsed || isMobile) && <span className="text-sm font-medium"></span>}
+                                {(!collapsed || isMobile) && <span className="text-sm font-medium hidden lg:block">Help</span>}
                                 {collapsed && !isMobile && (
                                     <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                                         Help
@@ -225,7 +225,7 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                                     }`}
                             >
                                 <Moon size={20} />
-                                {(!collapsed || isMobile) && <span className="text-sm font-medium"></span>}
+                                {(!collapsed || isMobile) && <span className="text-sm font-medium hidden lg:block">Dark Mode</span>}
                                 {collapsed && !isMobile && (
                                     <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                                         Dark Mode
@@ -239,7 +239,7 @@ export default function Sidebar({ onCollapse }: SidebarProps) {
                                         }`}
                                 >
                                     <LogOut size={20} />
-                                    {(!collapsed || isMobile) && <span className="text-sm font-medium"></span>}
+                                    {(!collapsed || isMobile) && <span className="text-sm font-medium hidden lg:block">Logout</span>}
                                     {collapsed && !isMobile && (
                                         <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-black text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                                             Logout

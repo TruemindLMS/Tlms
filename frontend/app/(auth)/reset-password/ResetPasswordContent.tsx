@@ -44,10 +44,10 @@ function ResetPasswordContent() {
 
     // Validate token on mount
     useEffect(() => {
-        if (!token) {
+        if (!token || !email) {
             setError("Invalid or missing reset token. Please request a new password reset link.");
         }
-    }, [token]);
+    }, [token, email]);
 
     // Auto redirect after success
     useEffect(() => {
@@ -104,11 +104,16 @@ function ResetPasswordContent() {
             return;
         }
 
+        if (!token || !email) {
+            setError("Invalid reset link. Missing token or email.");
+            return;
+        }
+
         setLoading(true);
 
         try {
             // Call the actual API
-            const response = await resetPassword(token, password);
+            const response = await resetPassword(email, token, password);
 
             if (response.success) {
                 setSuccess(true);
@@ -124,7 +129,7 @@ function ResetPasswordContent() {
     };
 
     // Show error if no token
-    if (!token && !success) {
+    if ((!token || !email) && !success) {
         return (
             <div className="min-h-screen bg-[#f6f8f7] flex items-center justify-center p-4">
                 <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">

@@ -211,8 +211,9 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                 if (user) {
                     const firstName = user.firstName || user.email?.split('@')[0] || 'User'
                     const lastName = user.lastName || ''
-                    setUserName(firstName)
-                    setUserFullName(fullName || `${firstName} ${lastName}`.trim())
+                    const finalFullName = fullName || user.fullName || `${firstName} ${lastName}`.trim() || firstName;
+                    setUserName(finalFullName)
+                    setUserFullName(finalFullName)
                     setUserEmail(email || user.email || '')
 
                     const initials = `${firstName.charAt(0)}${lastName.charAt(0) || firstName.charAt(1) || ''}`.toUpperCase()
@@ -224,9 +225,9 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
 
                     if (storedName) {
                         setUserFullName(storedName)
+                        setUserName(storedName)
                         const nameParts = storedName.split(' ')
                         const firstName = nameParts[0] || 'User'
-                        setUserName(firstName)
                         const initials = `${firstName.charAt(0)}${nameParts[1]?.charAt(0) || ''}`.toUpperCase()
                         setUserInitials(initials || firstName.charAt(0).toUpperCase())
                     }
@@ -552,7 +553,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                     )}
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 mt-3">
-                                    {greeting}, {userName}! 👋
+                                    {greeting}, {userFullName}! 👋
                                 </h3>
                                 <p className="text-sm text-gray-500 mb-4">
                                     {userEmail || 'Start your journey, achieve your target'}

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import ScrollAnimatel from '../cards/AnimatedCardl';
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   CheckCircle,
   Trophy,
@@ -18,7 +20,7 @@ import {
   TrendingUp,
   Loader2,
 } from "lucide-react";
-import { isAuthenticated, getUser, logoutUser, courseApi } from "@/lib/api";
+import { isAuthenticated, getUser, getUserFullName, logoutUser, courseApi } from "@/lib/api";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -58,7 +60,7 @@ export default function DashboardPage() {
     try {
       const user = getUser();
       const userId = getCurrentUserId();
-      setUserName(user?.firstName || user?.email?.split('@')[0] || "User");
+      setUserName(getUserFullName() || user?.firstName || user?.email?.split('@')[0] || "User");
 
       // Fetch actual enrolled courses from the backend
       let enrolledCoursesList: any[] = [];
@@ -192,9 +194,11 @@ export default function DashboardPage() {
 // FIRST TIME USER DASHBOARD - Always shown for new users
 function FirstTimeDashboard({ onStartCourse, userName }: { onStartCourse: () => void; userName: string }) {
   const courses = [
-    { title: "UI/UX Design", icon: "🎨", description: "Master user interface and user experience design" },
-    { title: "Product Management", icon: "📊", description: "Learn product strategy and management" },
-    { title: "Graphic Design", icon: "✏️", description: "Create stunning visual designs" },
+    { title: "ASP.NET Core", icon: "⚙️", description: "Build modern web APIs and server-side applications", img: "/img/asp.net.jpg" },
+    { title: "Graphic Design", icon: "✏️", description: "Create stunning visual designs", img: "/img/grah.jpg" },
+    { title: "Frontend Flow", icon: "💻", description: "Build modern web applications", img: "/img/frontend.jpg" },
+    { title: "UI/UX Design", icon: "🎨", description: "Master user interface and user experience design", img: "/img/figma-course.png" },
+    { title: "Data Analysis", icon: "📈", description: "Extract insights from raw data", img: "/img/learn.png" },
   ];
 
   return (
@@ -230,15 +234,20 @@ function FirstTimeDashboard({ onStartCourse, userName }: { onStartCourse: () => 
             Browse all courses <ChevronRight size={16} />
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:grid-cols-5 gap-4">
           {courses.map((course, index) => (
-            <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all">
-              <div className="text-4xl mb-3">{course.icon}</div>
-              <h4 className="font-semibold text-gray-900 mb-1">{course.title}</h4>
-              <p className="text-sm text-gray-500 mb-3">{course.description}</p>
-              <button onClick={onStartCourse} className="text-primary-700 text-sm font-medium hover:underline">
-                Learn More →
-              </button>
+            <div key={index} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all flex flex-col cursor-pointer pb-4" onClick={onStartCourse}>
+              <div className="relative h-32 w-full bg-gray-100">
+                <Image src={course.img} alt={course.title} fill className="object-cover" />
+                <div className="absolute top-2 right-2 bg-white/90 rounded-full w-8 h-8 flex items-center justify-center text-lg shadow-sm border border-white">{course.icon}</div>
+              </div>
+              <div className="px-4 pt-4 flex-1 flex flex-col">
+                <h4 className="font-semibold text-gray-900 mb-1 line-clamp-1">{course.title}</h4>
+                <p className="text-xs text-gray-500 mb-3 flex-1 line-clamp-2">{course.description}</p>
+                <button onClick={onStartCourse} className="text-primary-700 text-xs font-medium hover:underline mt-auto text-left">
+                  Learn More →
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -355,134 +364,140 @@ function ActiveDashboard({ userName, userStats, onUpdateStats }: {
   return (
     <main className="max-w-7xl mx-auto">
       {/* Greeting Section */}
-      <div className="mb-8">
-        <h1 className="text-lg font-semibold text-gray-500">
-          {new Date().getHours() < 12 ? "GOOD MORNING" : new Date().getHours() < 17 ? "GOOD AFTERNOON" : "GOOD EVENING"}
-        </h1>
-        <p className="text-gray-900 font-bold text-2xl">Welcome Back, {userName.toUpperCase()}</p>
-      </div>
+      <ScrollAnimatel delay={130} direction="left">
+        <div className="mb-8">
+          <h1 className="text-lg font-semibold text-gray-500">
+            {new Date().getHours() < 12 ? "GOOD MORNING" : new Date().getHours() < 17 ? "GOOD AFTERNOON" : "GOOD EVENING"}
+          </h1>
+          <p className="text-gray-900 font-bold text-2xl">Welcome Back, {userName.toUpperCase()}</p>
+        </div>
+      </ScrollAnimatel>
 
       {/* Stats Cards - Individual user data */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        {/* Course Takers (Enrolled) */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-              <BookOpen size={20} className="text-blue-600" />
+      <ScrollAnimatel delay={150} direction="down">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          {/* Course Takers (Enrolled) */}
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <BookOpen size={20} className="text-blue-600" />
+              </div>
+              {userStats.enrolled > 0 && (
+                <span className="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded-full">
+                  {enrolledTrend}
+                </span>
+              )}
             </div>
+            <p className="text-3xl font-bold text-gray-900">{userStats.enrolled}</p>
+            <p className="text-sm text-gray-500 mt-1">Course Takers</p>
             {userStats.enrolled > 0 && (
-              <span className="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded-full">
-                {enrolledTrend}
-              </span>
+              <p className="text-xs text-gray-400 mt-1">Courses you've enrolled in</p>
             )}
           </div>
-          <p className="text-3xl font-bold text-gray-900">{userStats.enrolled}</p>
-          <p className="text-sm text-gray-500 mt-1">Course Takers</p>
-          {userStats.enrolled > 0 && (
-            <p className="text-xs text-gray-400 mt-1">Courses you've enrolled in</p>
-          )}
-        </div>
 
-        {/* Pending courses */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
-              <Clock size={20} className="text-orange-600" />
+          {/* Pending courses */}
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                <Clock size={20} className="text-orange-600" />
+              </div>
+              {userStats.pending > 0 && (
+                <span className="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded-full">
+                  {pendingTrend}
+                </span>
+              )}
             </div>
+            <p className="text-3xl font-bold text-gray-900">{userStats.pending}</p>
+            <p className="text-sm text-gray-500 mt-1">Pending courses</p>
             {userStats.pending > 0 && (
-              <span className="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded-full">
-                {pendingTrend}
-              </span>
+              <p className="text-xs text-gray-400 mt-1">Courses in progress</p>
             )}
           </div>
-          <p className="text-3xl font-bold text-gray-900">{userStats.pending}</p>
-          <p className="text-sm text-gray-500 mt-1">Pending courses</p>
-          {userStats.pending > 0 && (
-            <p className="text-xs text-gray-400 mt-1">Courses in progress</p>
-          )}
-        </div>
 
-        {/* Completed courses */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
-              <CheckCircle size={20} className="text-primary-600" />
+          {/* Completed courses */}
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
+                <CheckCircle size={20} className="text-primary-600" />
+              </div>
+              {userStats.completed > 0 && (
+                <span className="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded-full">
+                  {completedTrend}
+                </span>
+              )}
             </div>
+            <p className="text-3xl font-bold text-gray-900">{userStats.completed}</p>
+            <p className="text-sm text-gray-500 mt-1">Completed courses</p>
             {userStats.completed > 0 && (
-              <span className="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded-full">
-                {completedTrend}
-              </span>
+              <p className="text-xs text-gray-400 mt-1">Courses you've finished</p>
             )}
           </div>
-          <p className="text-3xl font-bold text-gray-900">{userStats.completed}</p>
-          <p className="text-sm text-gray-500 mt-1">Completed courses</p>
-          {userStats.completed > 0 && (
-            <p className="text-xs text-gray-400 mt-1">Courses you've finished</p>
-          )}
-        </div>
 
-        {/* Total Certifications */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-              <Award size={20} className="text-purple-600" />
+          {/* Total Certifications */}
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <Award size={20} className="text-purple-600" />
+              </div>
             </div>
+            <p className="text-3xl font-bold text-gray-900">{userStats.certifications}</p>
+            <p className="text-sm text-gray-500 mt-1">Total Certifications</p>
           </div>
-          <p className="text-3xl font-bold text-gray-900">{userStats.certifications}</p>
-          <p className="text-sm text-gray-500 mt-1">Total Certifications</p>
         </div>
-      </div>
+      </ScrollAnimatel>
 
       {/* Learning Progress and Today's Schedule Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Learning Progress */}
-        <div className="bg-white col-span-2 rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900 text-lg">Learning Progress</h3>
-            <span className="text-xs text-gray-400">
-              {userStats.progress === 0 ? "Not started yet" : userStats.progress < 50 ? "Keep going!" : "Great progress!"}
-            </span>
-          </div>
-          <div className="text-center">
-            <p className="text-5xl font-bold text-gray-900 mb-2">{userStats.progress}%</p>
-            <div className="w-full bg-gray-100 rounded-full h-3 mt-4">
-              <div
-                className="bg-primary-500 h-3 rounded-full transition-all duration-500"
-                style={{ width: `${userStats.progress}%` }}
-              />
+      <ScrollAnimatel delay={190} direction="up">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Learning Progress */}
+          <div className="bg-white col-span-2 rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900 text-lg">Learning Progress</h3>
+              <span className="text-xs text-gray-400">
+                {userStats.progress === 0 ? "Not started yet" : userStats.progress < 50 ? "Keep going!" : "Great progress!"}
+              </span>
             </div>
-            {userStats.progress === 0 && (
-              <p className="text-sm text-gray-40 mt-4">Start a course to see your progress</p>
-            )}
+            <div className="text-center">
+              <p className="text-5xl font-bold text-gray-900 mb-2">{userStats.progress}%</p>
+              <div className="w-full bg-gray-100 rounded-full h-3 mt-4">
+                <div
+                  className="bg-primary-500 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${userStats.progress}%` }}
+                />
+              </div>
+              {userStats.progress === 0 && (
+                <p className="text-sm text-gray-40 mt-4">Start a course to see your progress</p>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Today's Schedule */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h3 className="font-semibold text-gray-900 text-lg mb-4">Today's Schedule</h3>
-          <div className="space-y-4">
-            {scheduleData.length > 0 ? scheduleData.map((item, index) => (
-              <div key={index} className="flex items-center justify-between pb-3 border-b border-gray-100 last:border-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
+          {/* Today's Schedule */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-900 text-lg mb-4">Today's Schedule</h3>
+            <div className="space-y-4">
+              {scheduleData.length > 0 ? scheduleData.map((item, index) => (
+                <div key={index} className="flex items-center justify-between pb-3 border-b border-gray-100 last:border-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{item.course}</p>
+                      <p className="text-xs text-gray-500">{item.type}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{item.course}</p>
-                    <p className="text-xs text-gray-500">{item.type}</p>
-                  </div>
+                  <p className="text-sm text-gray-500">{item.time}</p>
                 </div>
-                <p className="text-sm text-gray-500">{item.time}</p>
-              </div>
-            )) : (
-              <div className="text-center py-6 text-gray-400">
-                <Calendar size={32} className="mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No schedule assigned yet.</p>
-              </div>
-            )}
+              )) : (
+                <div className="text-center py-6 text-gray-400">
+                  <Calendar size={32} className="mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No schedule assigned yet.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </ScrollAnimatel>
 
       {/* Active Courses and Task Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

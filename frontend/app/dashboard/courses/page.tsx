@@ -443,7 +443,7 @@ function CourseCard({ course, isEnrolled, onEnroll, isEnrolling }: {
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                             <Users size={14} />
-                            <span>{course.enrolledCount || 1000} students</span>
+                            <span>{course.enrolledCount || 100} students</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                             <BookOpen size={14} />

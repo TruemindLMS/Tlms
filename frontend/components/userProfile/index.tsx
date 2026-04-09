@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Settings, Loader2, User, Mail, Briefcase, Award, Calendar,
-  TrendingUp, BookOpen, CheckCircle, Trophy, Star, Edit2, Save, X
+  TrendingUp, BookOpen, CheckCircle, Trophy, Star, Edit2, Save, X, MapPin
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import SectionCard from "@/components/userSettings/components/sectioncard";
+import FormField from "@/components/userSettings/components/form-field";
 import { profileApi, getUser, getUserFullName, getUserEmail, getUserRole, isAuthenticated, courseApi } from "@/lib/api";
 
 const UserProfile = () => {
@@ -150,13 +152,32 @@ const UserProfile = () => {
         gender: Number(editedGender)
       };
       await profileApi.update(updateData);
-      setProfile({ ...profile, ...updateData });
-      setIsEditing(false);
+      setProfile((prev: any) => ({ ...prev, ...updateData }));
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Failed to save profile. Please try again.');
     }
   };
+
+  useEffect(() => {
+    if (!profile) return;
+    
+    const dobProfileStr = profile?.dateOfBirth ? profile.dateOfBirth.split('T')[0] : "";
+    if (
+      editedBio === (profile?.bio || "") &&
+      editedAddress === (profile?.address || "") &&
+      editedLocation === (profile?.location || "") &&
+      editedPostalCode === (profile?.postalCode || "") &&
+      editedDateOfBirth === dobProfileStr &&
+      editedGender === (profile?.gender ?? 0)
+    ) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      handleSaveProfile();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [editedBio, editedAddress, editedLocation, editedPostalCode, editedDateOfBirth, editedGender]);
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -198,170 +219,92 @@ const UserProfile = () => {
         <p className="text-gray-500">Manage your personal information</p>
       </div>
 
-      {/* Profile Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-        <div className="p-6 md:p-8">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Avatar */}
-            <div className="flex flex-col items-center">
-              <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center">
-                <span className="text-primary-600 font-bold text-2xl">
-                  {getInitials(fullName)}
-                </span>
+      {/* Profile Info Form like UI */}
+      <div className="flex flex-col gap-6 mb-6">
+        <SectionCard>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+            <div className="flex items-center gap-2">
+              <div className="w-14 h-14 rounded-full bg-primary-600 flex items-center justify-center ">
+                <span className="text-lg font-semibold text-white ">{getInitials(fullName)}</span>
               </div>
-            </div>
-
-            {/* Info */}
-            <div className="flex-1">
-              <div className="flex justify-between items-start flex-wrap gap-4">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{fullName}</h2>
-                  <p className="text-gray-500">{role}</p>
-                  <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
-                    <Mail size={14} />
-                    <span>{email}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
-                >
-                  <Edit2 size={16} />
-                  Edit Profile
-                </button>
-              </div>
-
-              {/* Bio Section */}
-              <div className="mt-4 pt-4 border-t">
-                <h3 className="font-medium text-gray-900 mb-4">Profile Information</h3>
-                {isEditing ? (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">About Me</label>
-                      <textarea
-                        value={editedBio}
-                        onChange={(e) => setEditedBio(e.target.value)}
-                        className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        rows={3}
-                        placeholder="Tell us about yourself..."
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                        <input
-                          type="text"
-                          value={editedAddress}
-                          onChange={(e) => setEditedAddress(e.target.value)}
-                          className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          placeholder="Your address"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                        <input
-                          type="text"
-                          value={editedLocation}
-                          onChange={(e) => setEditedLocation(e.target.value)}
-                          className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          placeholder="City, State"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
-                        <input
-                          type="text"
-                          value={editedPostalCode}
-                          onChange={(e) => setEditedPostalCode(e.target.value)}
-                          className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          placeholder="Postal code"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                        <input
-                          type="date"
-                          value={editedDateOfBirth}
-                          onChange={(e) => setEditedDateOfBirth(e.target.value)}
-                          className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                        <select
-                          value={editedGender}
-                          onChange={(e) => setEditedGender(Number(e.target.value))}
-                          className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        >
-                          <option value={0}>Male</option>
-                          <option value={1}>Female</option>
-                          <option value={2}>Other</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      <button
-                        onClick={handleSaveProfile}
-                        className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700 flex items-center"
-                      >
-                        <Save size={16} className="inline mr-1" />
-                        Save
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsEditing(false);
-                          setEditedBio(bio);
-                          setEditedAddress(profile?.address || "");
-                          setEditedPostalCode(profile?.postalCode || "");
-                          setEditedLocation(profile?.location || "");
-                          setEditedDateOfBirth(profile?.dateOfBirth ? profile.dateOfBirth.split('T')[0] : "");
-                          setEditedGender(profile?.gender ?? 0);
-                        }}
-                        className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 flex items-center"
-                      >
-                        <X size={16} className="inline mr-1" />
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">About Me</h4>
-                      <p className="text-gray-900 mt-1">{bio}</p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Address</h4>
-                        <p className="text-gray-900 mt-1">{profile?.address || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Location</h4>
-                        <p className="text-gray-900 mt-1">{profile?.location || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Postal Code</h4>
-                        <p className="text-gray-900 mt-1">{profile?.postalCode || "Not provided"}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Date of Birth</h4>
-                        <p className="text-gray-900 mt-1">
-                          {profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : "Not provided"}
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">Gender</h4>
-                        <p className="text-gray-900 mt-1">
-                          {profile?.gender === 0 ? "Male" : profile?.gender === 1 ? "Female" : profile?.gender === 2 ? "Other" : "Not provided"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-semibold truncate">{fullName}</p>
+                <p className="text-sm truncate">{email}</p>
               </div>
             </div>
           </div>
-        </div>
+        </SectionCard>
+
+        <SectionCard title="Personal Information" icon={User}>
+          <div className="grid gap-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <FormField 
+                label="Full Name" 
+                placeholder="Full Name"
+                value={fullName} 
+                className="w-full text-[#6B7280] font-medium h-10 rounded-sm border-none bg-gray-100 outline-none focus:ring-0"
+                disabled 
+              />
+              <FormField 
+                label="Email" 
+                placeholder="Email"
+                value={email} 
+                className="w-full text-[#6B7280] font-medium h-10 rounded-sm border-none bg-gray-100 outline-none focus:ring-0"
+                disabled 
+              />
+            </div>
+            <FormField 
+              label="Bio" 
+              placeholder="Tell us about yourself..."
+              value={editedBio} 
+              onChange={(e) => setEditedBio(e.target.value)} 
+            />
+            <div className="flex flex-col sm:flex-row gap-4">
+              <FormField 
+                label="Date of Birth" 
+                placeholder="Date of Birth"
+                type="date" 
+                value={editedDateOfBirth} 
+                onChange={(e) => setEditedDateOfBirth(e.target.value)} 
+              />
+              <div className="flex flex-col gap-2 w-full">
+                <label className="text-base lg:text-xl text-[#1C2A39] font-normal">Gender</label>
+                <select 
+                  value={editedGender} 
+                  onChange={(e) => setEditedGender(Number(e.target.value))} 
+                  className="w-full text-[#6B7280] px-3 font-medium h-10 rounded-sm border-none bg-[#F3F4F6] outline-none focus:ring-0"
+                >
+                  <option value={0}>Male</option>
+                  <option value={1}>Female</option>
+                  <option value={2}>Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Address" icon={MapPin}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <FormField 
+               label="Address" 
+               placeholder="Your address"
+               value={editedAddress} 
+               onChange={(e) => setEditedAddress(e.target.value)} 
+             />
+             <FormField 
+               label="Location (City/State)" 
+               placeholder="City, State"
+               value={editedLocation} 
+               onChange={(e) => setEditedLocation(e.target.value)} 
+             />
+             <FormField 
+               label="Postal Code" 
+               placeholder="Postal code"
+               value={editedPostalCode} 
+               onChange={(e) => setEditedPostalCode(e.target.value)} 
+             />
+          </div>
+        </SectionCard>
       </div>
 
       {/* Stats Cards - Synced with dashboard */}
