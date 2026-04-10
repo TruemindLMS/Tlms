@@ -553,7 +553,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                     )}
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 mt-3">
-                                    {greeting}, {userFullName}! 👋
+                                    {greeting}, {userFullName}!
                                 </h3>
                                 <p className="text-sm text-gray-500 mb-4">
                                     {userEmail || 'Start your journey, achieve your target'}

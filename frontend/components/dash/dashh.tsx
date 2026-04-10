@@ -197,8 +197,8 @@ function FirstTimeDashboard({ onStartCourse, userName }: { onStartCourse: () => 
     { title: "ASP.NET Core", icon: "⚙️", description: "Build modern web APIs and server-side applications", img: "/img/asp.net.jpg" },
     { title: "Graphic Design", icon: "✏️", description: "Create stunning visual designs", img: "/img/grah.jpg" },
     { title: "Frontend Flow", icon: "💻", description: "Build modern web applications", img: "/img/frontend.jpg" },
-    { title: "UI/UX Design", icon: "🎨", description: "Master user interface and user experience design", img: "/img/figma-course.png" },
-    { title: "Data Analysis", icon: "📈", description: "Extract insights from raw data", img: "/img/learn.png" },
+    { title: "UI/UX Design", icon: "🎨", description: "Master user interface and user experience design", img: "/img/grah.jpg" },
+    { title: "Data Analysis", icon: "📈", description: "Extract insights from raw data", img: "/img/grah.jpg" },
   ];
 
   return (

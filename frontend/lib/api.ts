@@ -177,6 +177,52 @@ export interface Course {
     updatedAt?: string
 }
 
+
+export interface Assignment {
+    id: string
+    title: string
+    description: string
+    courseId?: string
+    lessonId?: string
+    courseTitle?: string
+    dueDateUtc: string
+    dueDate?: string // For backward compatibility
+    status?: 'Pending' | 'Submitted' | 'Overdue' | 'Graded'
+    submittedDateUtc?: string
+    submittedDate?: string // For backward compatibility
+    grade?: number
+    feedback?: string
+    attachments?: string[]
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface CreateAssignmentRequest {
+    courseId: string
+    lessonId?: string
+    title: string
+    description: string
+    dueDateUtc: string
+}
+
+export interface SubmitAssignmentRequest {
+    textResponse?: string
+    file?: File
+    linkUrl?: string
+}
+
+export interface AssignmentSummary {
+    totalAssignments: number
+    submittedAssignments: number
+    pendingAssignments: number
+    overdueAssignments: number
+    upcomingDeadlines?: Array<{
+        assignmentId: string
+        title: string
+        dueDateUtc: string
+    }>
+}
+
 // ==================== Auth API ====================
 
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
@@ -632,6 +678,321 @@ export const profileApi = {
     update: async (profileData: any) => {
         return apiClient('/Profile', { method: 'PUT', body: JSON.stringify(profileData) })
     },
+}
+
+// ==================== Certificate API ====================
+
+export interface CertificateResponse {
+    success?: boolean
+    message?: string
+    certificateId?: string
+    certificateUrl?: string
+}
+
+export const certificateApi = {
+    /**
+     * Generate a certificate for a completed course
+     * Triggers a backend process to email the certificate
+     * @param courseId - The ID of the completed course
+     */
+    generate: async (courseId: string): Promise<CertificateResponse> => {
+        try {
+            logApiCall('POST', `/Certificates/generate?courseId=${courseId}`)
+
+            const response = await fetch(`${API_BASE_URL}/Certificates/generate?courseId=${courseId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(getAuthToken() ? { 'Authorization': `Bearer ${getAuthToken()}` } : {})
+                },
+            })
+
+            const data = await parseResponse(response)
+
+            if (!response.ok) {
+                console.error('Certificate generation failed:', data)
+                throw new Error(data.message || 'Failed to generate certificate')
+            }
+
+            console.log('✅ Certificate generation triggered for course:', courseId)
+            return data
+        } catch (error) {
+            console.error('Certificate generation error:', error)
+            throw error
+        }
+    }
+}
+
+// ==================== Assignment API ====================
+
+
+export const assignmentApi = {
+    /**
+     * Get all assignments for the current user
+     * Uses /Assignments/user endpoint
+     */
+    getAll: async (): Promise<Assignment[]> => {
+        const token = getAuthToken();
+
+        if (!token) {
+            console.warn('No auth token found, cannot fetch assignments');
+            return [];
+        }
+
+        try {
+            logApiCall('GET', '/Assignments/user');
+
+            const response = await fetch(`${API_BASE_URL}/Assignments/user`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+
+            const data = await parseResponse(response);
+
+            if (!response.ok) {
+                console.error('Failed to fetch assignments:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data
+                });
+
+                if (response.status === 404) {
+                    console.warn('Assignments/user endpoint not found (404).');
+                    return [];
+                }
+
+                throw new Error(data.message || data.title || `Failed to fetch assignments (${response.status})`);
+            }
+
+            const assignments = data.data || data;
+
+            if (!Array.isArray(assignments)) {
+                console.warn('Assignments response is not an array:', assignments);
+                return [];
+            }
+
+            console.log(`✅ Fetched ${assignments.length} assignments`);
+            return assignments;
+
+        } catch (error: any) {
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                console.error('Network error fetching assignments:', error);
+                return [];
+            }
+
+            console.error('Get assignments error:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Get assignments summary (stats)
+     * Uses /Assignments/summary endpoint
+     */
+    getSummary: async (): Promise<AssignmentSummary> => {
+        const token = getAuthToken();
+
+        if (!token) {
+            console.warn('No auth token found, cannot fetch assignment summary');
+            return {
+                totalAssignments: 0,
+                submittedAssignments: 0,
+                pendingAssignments: 0,
+                overdueAssignments: 0
+            };
+        }
+
+        try {
+            logApiCall('GET', '/Assignments/summary');
+
+            const response = await fetch(`${API_BASE_URL}/Assignments/summary`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+
+            const data = await parseResponse(response);
+
+            if (!response.ok) {
+                console.error('Failed to fetch assignment summary:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data
+                });
+
+                if (response.status === 404) {
+                    console.warn('Assignments/summary endpoint not found (404).');
+                    return {
+                        totalAssignments: 0,
+                        submittedAssignments: 0,
+                        pendingAssignments: 0,
+                        overdueAssignments: 0
+                    };
+                }
+
+                throw new Error(data.message || data.title || 'Failed to fetch assignment summary');
+            }
+
+            console.log('✅ Fetched assignment summary');
+            return data.data || data;
+
+        } catch (error: any) {
+            console.error('Get assignment summary error:', error);
+            return {
+                totalAssignments: 0,
+                submittedAssignments: 0,
+                pendingAssignments: 0,
+                overdueAssignments: 0
+            };
+        }
+    },
+
+    /**
+     * Create a new assignment (Mentors only)
+     * @param assignmentData - The assignment data to create
+     */
+    create: async (assignmentData: CreateAssignmentRequest): Promise<Assignment> => {
+        const token = getAuthToken();
+
+        if (!token) {
+            throw new Error('Authentication required to create assignments');
+        }
+
+        try {
+            logApiCall('POST', '/Assignments', assignmentData);
+
+            const response = await fetch(`${API_BASE_URL}/Assignments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(assignmentData)
+            });
+
+            const data = await parseResponse(response);
+
+            if (!response.ok) {
+                console.error('Failed to create assignment:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data
+                });
+                throw new Error(data.message || data.title || 'Failed to create assignment');
+            }
+
+            console.log('✅ Assignment created successfully');
+            return data.data || data;
+
+        } catch (error) {
+            console.error('Create assignment error:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Submit an assignment (Interns only)
+     * @param assignmentId - The ID of the assignment to submit
+     * @param submissionData - The submission data
+     */
+    submit: async (assignmentId: string, submissionData: SubmitAssignmentRequest): Promise<any> => {
+        const token = getAuthToken();
+
+        if (!token) {
+            throw new Error('Authentication required to submit assignments');
+        }
+
+        try {
+            logApiCall('POST', `/Assignments/${assignmentId}/submit`, submissionData);
+
+            const formData = new FormData();
+
+            if (submissionData.textResponse) {
+                formData.append('TextResponse', submissionData.textResponse);
+            }
+
+            if (submissionData.file) {
+                formData.append('File', submissionData.file);
+            }
+
+            if (submissionData.linkUrl) {
+                formData.append('LinkUrl', submissionData.linkUrl);
+            }
+
+            const response = await fetch(`${API_BASE_URL}/Assignments/${assignmentId}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                    // Don't set Content-Type for FormData
+                },
+                body: formData
+            });
+
+            const data = await parseResponse(response);
+
+            if (!response.ok) {
+                console.error('Failed to submit assignment:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data
+                });
+                throw new Error(data.message || data.title || 'Failed to submit assignment');
+            }
+
+            console.log('✅ Assignment submitted successfully');
+            return data;
+
+        } catch (error) {
+            console.error('Submit assignment error:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Get a specific assignment by ID
+     * @param assignmentId - The ID of the assignment
+     */
+    getById: async (assignmentId: string): Promise<Assignment> => {
+        const token = getAuthToken();
+
+        if (!token) {
+            throw new Error('Authentication required to fetch assignment');
+        }
+
+        try {
+            logApiCall('GET', `/Assignments/${assignmentId}`);
+
+            const response = await fetch(`${API_BASE_URL}/Assignments/${assignmentId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+
+            const data = await parseResponse(response);
+
+            if (!response.ok) {
+                console.error('Failed to fetch assignment:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data
+                });
+                throw new Error(data.message || data.title || 'Failed to fetch assignment');
+            }
+
+            return data.data || data;
+
+        } catch (error) {
+            console.error('Get assignment error:', error);
+            throw error;
+        }
+    }
 }
 
 // ==================== Onboarding API ====================

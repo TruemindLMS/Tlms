@@ -77,9 +77,8 @@ export default function LoginPage() {
         localStorage.setItem('userFirstName', responseUser?.firstName || '')
         localStorage.setItem('userLastName', responseUser?.lastName || '')
 
-        setSuccessMessage('Login successful! Redirecting to dashboard...')
+        setSuccessMessage('Login successful! Redirecting to your dashboard...')
 
-        // Force redirect to dashboard using multiple methods
         console.log('🔴 Redirecting to /dashboard')
 
         try {
@@ -230,7 +229,7 @@ export default function LoginPage() {
             {successMessage && (
               <a
                 href="/dashboard"
-                className="w-full mb-4 bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium text-center"
+                className="w-full mb-4 hidden bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium text-center"
               >
                 Click here to proceed to Dashboard
               </a>
