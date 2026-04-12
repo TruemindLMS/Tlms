@@ -85,7 +85,7 @@ export interface RegisterRequest {
     email: string
     password: string
     confirmPassword: string
-    fullName: string  // ✅ FIXED: Changed from firstName + lastName to fullName
+    fullName: string
     role: string
 }
 
@@ -177,7 +177,6 @@ export interface Course {
     updatedAt?: string
 }
 
-
 export interface Assignment {
     id: string
     title: string
@@ -242,11 +241,11 @@ export async function loginUser(email: string, password: string): Promise<LoginR
         }
 
         const token = data.data?.token || data.token;
-        if (token) {
+        if (token && typeof window !== 'undefined') {
             const refreshToken = data.data?.refreshToken || data.refreshToken;
             const emailAddr = data.data?.email || data.user?.email || email;
             const fullName = data.data?.fullName || data.user?.fullName || `${data.user?.firstName || ''} ${data.user?.lastName || ''}`.trim();
-            const role = data.data?.role || data.user?.role || 'Student'; // Default to student
+            const role = data.data?.role || data.user?.role || 'Student';
             const id = data.data?.id || data.user?.id || emailAddr;
 
             localStorage.setItem('authToken', token)
@@ -279,7 +278,7 @@ export async function registerUser(userData: RegisterRequest): Promise<ApiRespon
                 email: userData.email,
                 password: userData.password,
                 confirmPassword: userData.confirmPassword,
-                fullName: userData.fullName,  // ✅ FIXED: Sending fullName instead of firstName/lastName
+                fullName: userData.fullName,
                 role: userData.role
             }),
         })
@@ -295,11 +294,13 @@ export async function registerUser(userData: RegisterRequest): Promise<ApiRespon
         }
 
         // Store pending user data for OTP verification
-        localStorage.setItem('pendingUserData', JSON.stringify({
-            fullName: userData.fullName,
-            email: userData.email,
-            role: userData.role
-        }))
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('pendingUserData', JSON.stringify({
+                fullName: userData.fullName,
+                email: userData.email,
+                role: userData.role
+            }))
+        }
 
         console.log('✅ Registration successful for:', userData.email)
         return data
@@ -350,7 +351,7 @@ export async function verifyOtp(email: string, code: string): Promise<ApiRespons
         }
 
         const token = data.data?.token || data.token;
-        if (token) {
+        if (token && typeof window !== 'undefined') {
             const refreshToken = data.data?.refreshToken || data.refreshToken;
             const userEmail = data.data?.email || data.user?.email || email;
             const fullName = data.data?.fullName || data.user?.fullName || `${data.user?.firstName || ''} ${data.user?.lastName || ''}`.trim();
@@ -429,7 +430,6 @@ export async function resetPassword(email: string, token: string, newPassword: s
     }
 }
 
-
 export async function logoutUser(): Promise<void> {
     try {
         const token = getAuthToken()
@@ -506,6 +506,8 @@ export function setUser(user: any): void {
 }
 
 export function getUserFullName(): string {
+    if (typeof window === 'undefined') return ''
+
     const user = getUser();
     if (user) {
         const name = user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim();
@@ -515,12 +517,16 @@ export function getUserFullName(): string {
 }
 
 export function getUserEmail(): string {
+    if (typeof window === 'undefined') return ''
+
     const user = getUser()
     if (user) return user.email || ''
     return localStorage.getItem('userEmail') || ''
 }
 
 export function getUserRole(): string {
+    if (typeof window === 'undefined') return ''
+
     const user = getUser()
     if (user) return user.role || ''
     return localStorage.getItem('userRole') || ''
@@ -548,7 +554,6 @@ export async function apiClient(endpoint: string, options: ApiClientOptions = {}
     try {
         response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers })
     } catch (error: any) {
-        // This catches "TypeError: Failed to fetch" (network/CORS errors)
         console.error(`API Network Error on ${endpoint}:`, error.message || 'Failed to fetch');
         throw new Error(error.message || 'Network error: Failed to connect to server');
     }
@@ -669,32 +674,24 @@ export const courseApi = {
 // ==================== Profile API ====================
 
 export const profileApi = {
-  get: async () => {
-    try {
-      return await apiClient("/Profile");
-    } catch (error: any) {
-      console.error("Profile API error:", error?.message || error);
-      throw error;
-    }
-  },
-//   update: async (profileData: any) => {
-//     return apiClient("/Profile", {
-//       method: "PUT",
-//       body: JSON.stringify(profileData),
-//     });
-//   },
-  update: async (profileData: FormData | object) => {
-    const isFormData = profileData instanceof FormData;
+    get: async () => {
+        try {
+            return await apiClient("/Profile");
+        } catch (error: any) {
+            console.error("Profile API error:", error?.message || error);
+            throw error;
+        }
+    },
+    update: async (profileData: FormData | object) => {
+        const isFormData = profileData instanceof FormData;
 
-    return apiClient("/Profile", {
-      method: "PUT",
-      
-      headers: isFormData ? undefined : { "Content-Type": "application/json" },
-      body: isFormData ? profileData : JSON.stringify(profileData),
-    });
-  },
+        return apiClient("/Profile", {
+            method: "PUT",
+            headers: isFormData ? undefined : { "Content-Type": "application/json" },
+            body: isFormData ? profileData : JSON.stringify(profileData),
+        });
+    },
 };
-
 
 // ==================== Certificate API ====================
 
@@ -740,7 +737,6 @@ export const certificateApi = {
 }
 
 // ==================== Assignment API ====================
-
 
 export const assignmentApi = {
     /**
@@ -1042,12 +1038,16 @@ export const onboardingApi = {
     },
     completeOnboarding: async () => {
         const response = await apiClient('/Onboarding/complete', { method: 'POST' })
-        localStorage.setItem('onboardingCompleted', 'true')
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('onboardingCompleted', 'true')
+        }
         return response
     },
     skipOnboarding: async () => {
         const response = await apiClient('/Onboarding/skip', { method: 'POST' })
-        localStorage.setItem('onboardingCompleted', 'skipped')
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('onboardingCompleted', 'skipped')
+        }
         return response
     },
 }

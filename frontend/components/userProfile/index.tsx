@@ -25,12 +25,12 @@ const UserProfile = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setIsSaving] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [visibletext, setVisibleText] = useState("");
-
 
   const [editedGender, setEditedGender] = useState(0);
   const [visible, setVisible] = useState('');
@@ -48,16 +48,20 @@ const UserProfile = () => {
 
   const user = getUser();
 
+  // Set isClient to true after mounting
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   useEffect(() => {
     if (!isAuthenticated()) {
       router.push("/signin");
       return;
     }
     fetchProfileAndStats();
-
   }, []);
 
-  const handleImageChange = async(e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -65,39 +69,41 @@ const UserProfile = () => {
     const previewUrl = URL.createObjectURL(file);
     setPhotoUrl(previewUrl);
 
-     try {
-       setIsSaving(true);
-       const formData = new FormData();
-       formData.append("PhotoFile", file);
-       formData.append("PhotoUrl", URL.createObjectURL(file));
+    try {
+      setIsSaving(true);
+      const formData = new FormData();
+      formData.append("PhotoFile", file);
+      formData.append("PhotoUrl", URL.createObjectURL(file));
 
-       formData.append("Address", editedAddress || "");
-       formData.append("PostalCode", String(editedPostalCode || ""));
-       formData.append("Location", editedLocation || "");
-       formData.append(
-         "DateOfBirth",
-         editedDateOfBirth ? new Date(editedDateOfBirth).toISOString() : "",
-       );
-       formData.append("Gender", String(Number(editedGender)));
+      formData.append("Address", editedAddress || "");
+      formData.append("PostalCode", String(editedPostalCode || ""));
+      formData.append("Location", editedLocation || "");
+      formData.append(
+        "DateOfBirth",
+        editedDateOfBirth ? new Date(editedDateOfBirth).toISOString() : "",
+      );
+      formData.append("Gender", String(Number(editedGender)));
 
-       const updated = await profileApi.update(formData);
-       setProfile(updated);
+      const updated = await profileApi.update(formData);
+      setProfile(updated);
 
-       const savedUrl = updated?.photoUrl || updated?.data?.photoUrl;
-       if (savedUrl) {
-         setPhotoUrl(savedUrl); 
-         localStorage.setItem("userProfilePicture", savedUrl); 
-       }
+      const savedUrl = updated?.photoUrl || updated?.data?.photoUrl;
+      if (savedUrl) {
+        setPhotoUrl(savedUrl);
+        if (isClient) {
+          localStorage.setItem("userProfilePicture", savedUrl);
+        }
+      }
 
-       setVisibleText("Profile photo updated!");
-       setTimeout(() => setVisibleText(""), 3000);
-     } catch (error: any) {
-       console.error("Photo upload failed:", error.message);
-       setVisibleText("Failed to update photo.");
-       setTimeout(() => setVisibleText(""), 3000);
-     } finally {
-       setIsSaving(false);
-     }
+      setVisibleText("Profile photo updated!");
+      setTimeout(() => setVisibleText(""), 3000);
+    } catch (error: any) {
+      console.error("Photo upload failed:", error.message);
+      setVisibleText("Failed to update photo.");
+      setTimeout(() => setVisibleText(""), 3000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const fetchProfileAndStats = async () => {
@@ -105,12 +111,13 @@ const UserProfile = () => {
     setError(null);
 
     try {
-   
-
-      const savedProfilePic = localStorage.getItem("userProfilePicture");
-      if (savedProfilePic) {
-        setProfilePicture(savedProfilePic);
-        setPhotoUrl(savedProfilePic);
+      // Only access localStorage on the client
+      if (isClient) {
+        const savedProfilePic = localStorage.getItem("userProfilePicture");
+        if (savedProfilePic) {
+          setProfilePicture(savedProfilePic);
+          setPhotoUrl(savedProfilePic);
+        }
       }
 
       // Fetch profile data from API
@@ -118,9 +125,11 @@ const UserProfile = () => {
       const profileData = profileResponse?.data || profileResponse;
 
       if (profileData?.photoUrl) {
-      setPhotoUrl(profileData.photoUrl) 
-      localStorage.setItem("userProfilePicture", profileData.photoUrl)
-    }
+        setPhotoUrl(profileData.photoUrl);
+        if (isClient) {
+          localStorage.setItem("userProfilePicture", profileData.photoUrl);
+        }
+      }
 
       setProfile(profileData);
       setEditedAddress(profileData?.address || "");
@@ -130,7 +139,7 @@ const UserProfile = () => {
         profileData?.dateOfBirth ? profileData.dateOfBirth.split("T")[0] : "",
       );
       setEditedGender(profileData?.gender ?? 0);
-     
+
     } catch (error: any) {
       console.error("Error fetching profile:", error?.message || error);
       setError("Unable to load profile data. Showing cached data.");
@@ -155,15 +164,15 @@ const UserProfile = () => {
       setIsSaving(true);
       const formData = new FormData();
 
+      formData.append("Address", editedAddress || "");
+      formData.append("PostalCode", String(editedPostalCode || ""));
+      formData.append("Location", editedLocation || "");
+      formData.append(
+        "DateOfBirth",
+        editedDateOfBirth ? new Date(editedDateOfBirth).toISOString() : "",
+      );
+      formData.append("Gender", String(Number(editedGender)));
 
-    formData.append("Address", editedAddress || "");
-    formData.append("PostalCode", String(editedPostalCode || ""));
-    formData.append("Location", editedLocation || "");
-    formData.append(
-      "DateOfBirth",
-      editedDateOfBirth ? new Date(editedDateOfBirth).toISOString() : "",
-    );
-    formData.append("Gender", String(Number(editedGender)));
       const updated = await profileApi.update(formData);
       setProfile(updated);
       setIsEditing(false);
@@ -205,18 +214,14 @@ const UserProfile = () => {
     }
 
     try {
+      setLoading(true);
       const response = await forgotPassword(userEmail);
       if (response.success) {
         setVisible("Check your email for the reset Link");
-        useEffect(() => {
-          if (!visible) return;
-
-          const timer = setTimeout(() => {
-            setVisible("");
-          }, 10000);
-
-          return () => clearTimeout(timer); 
-        }, [visible]);
+        // Fixed: Use setTimeout instead of nested useEffect
+        setTimeout(() => {
+          setVisible("");
+        }, 10000);
       } else {
         setError(
           response.message || "Failed to send reset link. Please try again.",
