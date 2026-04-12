@@ -2,12 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Settings,
-  Loader2,
-  User,
-  MapPin,
-} from "lucide-react";
+import { Settings, Loader2, User, MapPin } from "lucide-react";
 import Image from "next/image";
 import SectionCard from "@/components/userSettings/components/sectioncard";
 import FormField from "@/components/userSettings/components/form-field";
@@ -33,7 +28,7 @@ const UserProfile = () => {
   const [visibletext, setVisibleText] = useState("");
 
   const [editedGender, setEditedGender] = useState(0);
-  const [visible, setVisible] = useState('');
+  const [visible, setVisible] = useState("");
   const [profile, setProfile] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -139,7 +134,6 @@ const UserProfile = () => {
         profileData?.dateOfBirth ? profileData.dateOfBirth.split("T")[0] : "",
       );
       setEditedGender(profileData?.gender ?? 0);
-
     } catch (error: any) {
       console.error("Error fetching profile:", error?.message || error);
       setError("Unable to load profile data. Showing cached data.");
@@ -324,13 +318,19 @@ const UserProfile = () => {
                 className="w-full text-[#6B7280] font-medium h-10 rounded-sm border-none bg-gray-100 outline-none focus:ring-0"
                 disabled
               />
-              <FormField
-                label="Email"
-                placeholder="Email"
-                value={email}
-                className="w-full text-[#6B7280] font-medium h-10 rounded-sm border-none bg-gray-100 outline-none focus:ring-0"
-                disabled
-              />
+              <div className="w-full relative">
+                <FormField
+                  label="Email"
+                  placeholder="Email"
+                  value={email}
+                  className="w-full text-[#6B7280] font-medium h-10 rounded-sm border-none bg-gray-100 outline-none focus:ring-0"
+                  disabled
+                />
+                <div className="absolute flex items-center gap-2 bottom-2 right-1">
+                  <img src="/img/check.png" alt="check icon" className="w-5" />
+                  <p className="text-lg font-medium text-primary-500 hidden lg:block">verifed</p>
+                </div>
+              </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <FormField
