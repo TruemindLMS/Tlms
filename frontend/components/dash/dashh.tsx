@@ -197,13 +197,13 @@ function FirstTimeDashboard({ onStartCourse, userName }: { onStartCourse: () => 
     { title: "ASP.NET Core", icon: "⚙️", description: "Build modern web APIs and server-side applications", img: "/img/asp.net.jpg" },
     { title: "Graphic Design", icon: "✏️", description: "Create stunning visual designs", img: "/img/grah.jpg" },
     { title: "Frontend Flow", icon: "💻", description: "Build modern web applications", img: "/img/frontend.jpg" },
-    { title: "UI/UX Design", icon: "🎨", description: "Master user interface and user experience design", img: "/img/figma-course.png" },
-    { title: "Data Analysis", icon: "📈", description: "Extract insights from raw data", img: "/img/learn.png" },
+    { title: "UI/UX Design", icon: "🎨", description: "Master user interface and user experience design", img: "/img/grah.jpg" },
+    { title: "Data Analysis", icon: "📈", description: "Extract insights from raw data", img: "/img/grah.jpg" },
   ];
 
   return (
     <main className="p-1 lg:p-6 md:max-w-7xl mx-auto">
-      <div className="relative bg-gradient-to-r from-primary-900 to-primary-700 text-white rounded-2xl p-6 lg:p-8 mb-8 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl p-6 lg:p-8 mb-8 overflow-hidden">
         <div className="relative z-10">
           <p className="text-sm mb-2 opacity-80">Welcome, {userName}! 👋</p>
           <h2 className="text-2xl lg:text-3xl font-bold mb-4 leading-snug">

@@ -5,8 +5,11 @@ import { Metadata } from "next"
 
 
 export const metadata: Metadata = {
-    title: "team-india ",
+    title: "team-india lms ",
     description: " innovation",
+    icons: {
+        icon: "/img/logo.png",
+    },
 
 }
 

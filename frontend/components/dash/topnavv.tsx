@@ -553,7 +553,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
                                     )}
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 mt-3">
-                                    {greeting}, {userFullName}! 👋
+                                    {greeting}, {userFullName}!
                                 </h3>
                                 <p className="text-sm text-gray-500 mb-4">
                                     {userEmail || 'Start your journey, achieve your target'}
@@ -643,7 +643,7 @@ export default function Topnavv({ onMenuClick, sidebarCollapsed = false }: Topna
 
                             <div className="pt-4 border-t border-gray-200">
                                 <Link
-                                    href="/dashboard/profile"
+                                    href="/dashboard/userprofile"
                                     className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                                     onClick={handleCloseProfile}
                                 >

@@ -47,6 +47,11 @@ export default function LoginPage() {
       const responseUser = response.data || response.user;
 
       if (token) {
+        // Determine user role
+        const userRole = responseUser?.role || responseUser?.userRole || 'Student'
+        const isAdmin = userRole === 'Admin' || userRole === 'admin' || userRole === 'Administrator'
+
+        // Store auth data
         if (keepSignedIn) {
           localStorage.setItem('authToken', token)
           if (refreshToken) {
@@ -73,27 +78,36 @@ export default function LoginPage() {
 
         localStorage.setItem('userFullName', fullName)
         localStorage.setItem('userEmail', emailAddr)
-        localStorage.setItem('userRole', responseUser?.role || 'user')
+        localStorage.setItem('userRole', userRole)
         localStorage.setItem('userFirstName', responseUser?.firstName || '')
         localStorage.setItem('userLastName', responseUser?.lastName || '')
+        localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false')
 
-        setSuccessMessage('Login successful! Redirecting to dashboard...')
+        // Redirect based on role
+        const redirectPath = isAdmin ? '/admindashboard' : '/dashboard'
+        const redirectMessage = isAdmin
+          ? 'Admin login successful! Redirecting to admin dashboard...'
+          : 'Login successful! Redirecting to your dashboard...'
 
-        // Force redirect to dashboard using multiple methods
-        console.log('🔴 Redirecting to /dashboard')
+        setSuccessMessage(redirectMessage)
+
+        console.log(`🟢 User role: ${userRole}, isAdmin: ${isAdmin}`)
+        console.log(`🔴 Redirecting to ${redirectPath}`)
 
         try {
-          router.push('/dashboard')
+          router.push(redirectPath)
           setTimeout(() => {
-            window.location.href = '/dashboard'
+            window.location.href = redirectPath
           }, 500)
         } catch (navError) {
           console.error('Navigation error:', navError)
+          // Fallback redirect
+          window.location.href = redirectPath
         }
 
       } else {
         console.error('Missing token in response:', response);
-        setError(`Details: ${JSON.stringify(response)}`);
+        setError(`Authentication failed. Please try again.`)
         setLoading(false);
       }
     } catch (err: any) {
@@ -224,16 +238,6 @@ export default function LoginPage() {
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                 {error}
               </div>
-            )}
-
-            {/* Success manual redirect button fallback */}
-            {successMessage && (
-              <a
-                href="/dashboard"
-                className="w-full mb-4 bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium text-center"
-              >
-                Click here to proceed to Dashboard
-              </a>
             )}
 
             {/* Form */}

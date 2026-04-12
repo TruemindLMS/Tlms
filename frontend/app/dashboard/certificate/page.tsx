@@ -1,6 +1,6 @@
 'use client'
 
-import { BookOpen, Clock, Play, Star, Users, ChevronRight } from 'lucide-react'
+import { BookOpen, Clock, Star, Users, CheckCircle } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -74,23 +74,23 @@ export default function CertificatePage() {
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    My Certificates 📚
+                    Certificate & Progress
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                    Here are the certificates you have earned
+                    Track your learning journey and earned certificates
                 </p>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex-col items-center justify-between mb-4">
                         <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
                             <BookOpen className="text-blue-600 dark:text-blue-400" size={20} />
                         </div>
                         <span className="text-2xl font-bold text-gray-900 dark:text-white">4</span>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Active Courses</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">Courses <br /> Enrolled</p>
                 </div>
 
                 <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
@@ -124,93 +124,202 @@ export default function CertificatePage() {
                 </div>
             </div>
 
-            {/* Course Categories */}
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-                {['All', 'Cybersecurity', 'Development', 'Design', 'Data Science'].map((category) => (
-                    <button
-                        key={category}
-                        className="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors whitespace-nowrap"
-                    >
-                        {category}
-                    </button>
-                ))}
+            <div className="mb-8 flex">
+                <BookOpen className="text-green-600 dark:text-green-400" size={15} />
+                <h1 className=" md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    Course Progress (5 Courses)
+                </h1>
             </div>
 
             {/* Courses Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {courses.map((course) => (
-                    <div
-                        key={course.id}
-                        className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all group"
-                    >
-                        <div className="relative h-48 overflow-hidden">
-                            <div className="w-full h-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
-                                <BookOpen size={48} className="text-white opacity-50" />
-                            </div>
-                            <div className="absolute top-2 right-2">
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${course.level === 'Beginner'
-                                    ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                                    : course.level === 'Intermediate'
-                                        ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                    }`}>
-                                    {course.level}
-                                </span>
+
+            <div className="w-full flex-col rounded-2xl space-y-5  p-2">
+
+                <div className='w-full max-w-7xl bg-white rounded-2xl p-4 shadow-sm'>
+                    <div className='flex items-start justify-between'>
+
+                        <div className='flex items-start gap-3'>
+                            <CheckCircle className='text-green-600 mt-1' size={15} />
+                            <div>
+                                <h2 className='text-base font-semibold text-gray-800 '>UI/UX Design Fundamentals </h2>
+                                <p className='text-sm text-gray-500 '>Tunde Adebayo</p>
                             </div>
                         </div>
-
-                        <div className="p-5">
-                            <div className="mb-3">
-                                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">
-                                    {course.category}
-                                </span>
-                                <h3 className="font-semibold text-gray-900 dark:text-white text-lg mt-1 line-clamp-1">
-                                    {course.title}
-                                </h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    {course.instructor}
-                                </p>
-                            </div>
-
-                            <div className="flex items-center gap-4 mb-3 text-sm">
-                                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                                    <Clock size={14} />
-                                    <span>{course.duration}</span>
-                                </div>
-                                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                                    <Star size={14} className="text-yellow-400 fill-yellow-400" />
-                                    <span>{course.rating}</span>
-                                </div>
-                                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                                    <Users size={14} />
-                                    <span>{course.students}</span>
-                                </div>
-                            </div>
-
-                            <div className="mb-4">
-                                <div className="flex items-center justify-between text-sm mb-1">
-                                    <span className="text-gray-600 dark:text-gray-400">Progress</span>
-                                    <span className="font-medium text-gray-900 dark:text-white">{course.progress}%</span>
-                                </div>
-                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                    <div
-                                        className="bg-primary-600 h-2 rounded-full transition-all"
-                                        style={{ width: `${course.progress}%` }}
-                                    />
-                                </div>
-                            </div>
-
-                            <Link
-                                href={`/dash${course.id}`}
-                                className="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-primary-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                            >
-                                Continue Learning
-                                <ChevronRight size={16} />
-                            </Link>
-                        </div>
+                        <div className='text-sm font-medium text-gray-800 rounded-full flex justify-around  w-20 h-6 bg-green-600'>Certified</div>
                     </div>
-                ))}
+
+                    {/* Progress Info */}
+                    <div className="flex justify-between items-center mt-6 mb-2 text-sm text-gray-500">
+                        <span>12/12 Lessons</span>
+                        <span className="text-green-700 font-medium">100%</span>
+                    </div>
+
+
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-green-700 rounded-full"
+                            style={{ width: `${100}%` }}
+                        />
+
+                    </div>
+                </div>
+
+                {/* Additional courses can be added here following the same structure */}
+                <div className='w-full max-w-7xl bg-white rounded-2xl p-6 shadow-sm'>
+                    <div className='flex items-start justify-between'>
+
+                        <div className='flex items-start gap-3'>
+                            <CheckCircle className='text-green-600 mt-1' size={15} />
+                            <div>
+                                <h2 className='text-base font-semibold text-gray-800 '>Design Systems & Component Libraries </h2>
+                                <p className='text-sm text-gray-500 '>Tunde Adebayo</p>
+                            </div>
+                        </div>
+                        <div className='text-sm font-medium text-gray-800 rounded-full flex justify-around  w-20 h-6 bg-green-600'>Certified</div>
+                    </div>
+
+                    {/* Progress Info */}
+                    <div className="flex justify-between items-center mt-6 mb-2 text-sm text-gray-500">
+                        <span>8/8Lessons</span>
+                        <span className="text-green-700 font-medium">100%</span>
+                    </div>
+
+
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-green-700 rounded-full"
+                            style={{ width: `${100}%` }}
+                        />
+
+                    </div>
+                </div>
+
+                {/* Additional courses can be added here following the same structure */}
+                <div className='w-full max-w-7xl bg-white rounded-2xl p-6 shadow-sm'>
+                    <div className='flex items-start justify-between'>
+
+                        <div className='flex items-start gap-3'>
+                            <BookOpen className='text-green-600 mt-1' size={15} />
+                            <div>
+                                <h2 className='text-base font-semibold text-gray-800 '>User Research & Testing  </h2>
+                                <p className='text-sm text-gray-500 '>Amaka Obi </p>
+                            </div>
+                        </div>
+                        <div className='text-sm font-medium text-gray-800 rounded-full flex justify-around  w-20 h-6 bg-green-600'>Certified</div>
+                    </div>
+
+                    {/* Progress Info */}
+                    <div className="flex justify-between items-center mt-6 mb-2 text-sm text-gray-500">
+                        <span>7/10 Lessons</span>
+                        <span className="text-green-700 font-medium">72%</span>
+                    </div>
+
+
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-green-700 rounded-full"
+                            style={{ width: `${72}%` }}
+                        />
+
+                    </div>
+
+                    <div className='flex gap-1'>
+                        <Clock className='text-gray-300 text-xs mt-1' size={10} />
+                        <p className='text-xs text-gray-500'>3 lessons left</p>
+                    </div>
+
+                </div>
+
+
+                {/* Additional courses can be added here following the same structure */}
+                <div className='w-full max-w-7xl bg-white rounded-2xl p-6 shadow-sm'>
+                    <div className='flex items-start justify-between'>
+
+                        <div className='flex items-start gap-3'>
+                            <BookOpen className='text-green-600 mt-1' size={15} />
+                            <div>
+                                <h2 className='text-base font-semibold text-gray-800 '>Prototyping with Figma  </h2>
+                                <p className='text-sm text-gray-500 '>Tunde Adebayo</p>
+                            </div>
+                        </div>
+                        <div className='text-sm font-medium text-gray-800 rounded-full flex justify-around  w-20 h-6 bg-green-600'>Certified</div>
+                    </div>
+
+                    {/* Progress Info */}
+                    <div className="flex justify-between items-center mt-6 mb-2 text-sm text-gray-500">
+                        <span>7/15 Lessons</span>
+                        <span className="text-green-700 font-medium">45%</span>
+                    </div>
+
+
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-green-700 rounded-full"
+                            style={{ width: `${45}%` }}
+                        />
+
+                    </div>
+
+                    <div className='flex gap-2'>
+                        <Clock className='text-gray-300 text-xs mt-1' size={10} />
+                        <p className='text-xs text-gray-500'>8 lessons left</p>
+                    </div>
+
+                </div>
+
+                {/* Additional courses can be added here following the same structure */}
+                <div className='w-full max-w-7xl bg-white rounded-2xl p-4 shadow-sm'>
+                    <div className='flex items-start justify-between'>
+
+                        <div className='flex items-start gap-3'>
+                            <BookOpen className='text-green-600 mt-1' size={15} />
+                            <div>
+                                <h2 className='text-base font-semibold text-gray-800 '>Interaction Design Principles </h2>
+                                <p className='text-sm text-gray-500 '>Amaka Obi </p>
+                            </div>
+                        </div>
+                        <div className='text-sm font-medium text-gray-800 rounded-full flex justify-around  w-20 h-6 bg-green-600'>Certified</div>
+                    </div>
+
+                    {/* Progress Info */}
+                    <div className="flex justify-between items-center mt-6 mb-2 text-sm text-gray-500">
+                        <span>2/15 Lessons</span>
+                        <span className="text-green-700 font-medium">13%</span>
+                    </div>
+
+
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-green-700 rounded-full"
+                            style={{ width: `${13}%` }} />
+
+                    </div>
+
+                    <div className='flex gap-2'>
+                        <Clock className='text-gray-300 text-xs mt-1' size={10} />
+                        <p className='text-xs text-gray-500'>13 lessons left</p>
+                    </div>
+
+
+                </div>
+
+
+
+
             </div>
+
+
+
         </div>
     )
 }

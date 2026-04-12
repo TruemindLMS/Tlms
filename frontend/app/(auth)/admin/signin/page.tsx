@@ -1,14 +1,139 @@
+// app/(auth)/admin/signin/page.tsx
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Eye, EyeOff, ArrowRight, Shield, Lock, Mail } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight, Shield, Lock, Mail, Loader2 } from 'lucide-react'
+import { loginUser } from '@/lib/api'
+
+// Function to decode JWT token and extract claims
+function decodeJWT(token: string): any {
+    try {
+        const base64Url = token.split('.')[1]
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        }).join(''))
+        return JSON.parse(jsonPayload)
+    } catch (error) {
+        console.error('Failed to decode JWT:', error)
+        return null
+    }
+}
 
 export default function AdminSigninPage() {
+    const router = useRouter()
     const [showPassword, setShowPassword] = useState(false)
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+    const [email, setEmail] = useState('admin@talentflow.com')
+    const [password, setPassword] = useState('TalentFlow@2026!')
     const [keepSignedIn, setKeepSignedIn] = useState(false)
+    const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
+    const [successMessage, setSuccessMessage] = useState('')
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setError('')
+        setSuccessMessage('')
+
+        if (!email || !password) {
+            setError('Please fill in all fields')
+            return
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address')
+            return
+        }
+
+        setLoading(true)
+
+        try {
+            console.log('🟡 Admin login attempt for:', email)
+
+            const response = await loginUser(email, password)
+            console.log('🟢 Admin login response:', response)
+
+            // Extract token from response - handling both response.data and direct response
+            const token = response?.data?.token || (response as any)?.token
+            const refreshToken = response?.data?.refreshToken || (response as any)?.refreshToken
+            const responseData = response?.data || response
+
+            if (!token) {
+                setError('Authentication failed. No token received.')
+                setLoading(false)
+                return
+            }
+
+            // Decode the JWT token to get the role
+            const decodedToken = decodeJWT(token)
+            console.log('🔍 Decoded token:', decodedToken)
+
+            // Extract role from decoded token
+            let userRole = 'Student'
+            if (decodedToken) {
+                // Check for role in different possible claim locations
+                userRole = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+                    decodedToken['role'] ||
+                    decodedToken['Role'] ||
+                    'Student'
+            }
+
+            console.log(`🟢 User role from token: "${userRole}"`)
+
+            // Check if user has admin role (case-insensitive)
+            const isAdmin = userRole?.toLowerCase() === 'admin' ||
+                userRole?.toLowerCase() === 'administrator'
+
+            console.log(`🟢 Is Admin? ${isAdmin} (Role: ${userRole})`)
+
+            if (!isAdmin) {
+                setError(`Access Denied: This portal is for administrators only. Your role is "${userRole}". Please contact support if you believe this is an error.`)
+                setLoading(false)
+                return
+            }
+
+            // Store authentication data
+            if (keepSignedIn) {
+                localStorage.setItem('authToken', token)
+                if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+                if (responseData) localStorage.setItem('user', JSON.stringify(responseData))
+                localStorage.setItem('isAuthenticated', 'true')
+                console.log('✅ Stored in localStorage (persistent)')
+            } else {
+                sessionStorage.setItem('authToken', token)
+                if (refreshToken) sessionStorage.setItem('refreshToken', refreshToken)
+                if (responseData) sessionStorage.setItem('user', JSON.stringify(responseData))
+                sessionStorage.setItem('isAuthenticated', 'true')
+                console.log('✅ Stored in sessionStorage (temporary)')
+            }
+
+            // Store user details - safely access properties
+            const emailAddr = (responseData as any)?.email || email
+            const fullName = (responseData as any)?.fullName || emailAddr
+
+            localStorage.setItem('userFullName', fullName)
+            localStorage.setItem('userEmail', emailAddr)
+            localStorage.setItem('userRole', userRole)
+            localStorage.setItem('isAdmin', 'true')
+
+            setSuccessMessage('Admin login successful! Redirecting to admin dashboard...')
+
+            console.log('🔴 Redirecting to /admindashboard')
+
+            // Redirect to admin dashboard
+            setTimeout(() => {
+                window.location.href = '/admindashboard'
+            }, 500)
+
+        } catch (err: any) {
+            console.error('🔴 Admin login error:', err)
+            setError(err.message || 'Failed to sign in. Please check your credentials.')
+            setLoading(false)
+        }
+    }
 
     return (
         <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 to-gray-800">
@@ -71,7 +196,7 @@ export default function AdminSigninPage() {
                 </div>
 
                 {/* Right Side - Admin Sign In Form */}
-                <div className="w-full lg:w-1/2 min-h-[60vh] lg:min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 md:px-8 lg:px-12">
+                <div className="w-full lg:w-1/2 min-h-[60vh] lg:min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 md:px-8 lg:px-12 overflow-auto">
                     <div className="w-full max-w-md mx-auto">
                         {/* Admin Badge */}
                         <div className="flex justify-center mb-6">
@@ -91,8 +216,22 @@ export default function AdminSigninPage() {
                             </p>
                         </div>
 
+                        {/* Success Message */}
+                        {successMessage && (
+                            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm text-center">
+                                {successMessage}
+                            </div>
+                        )}
+
+                        {/* Error Message */}
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                                {error}
+                            </div>
+                        )}
+
                         {/* Admin Login Form */}
-                        <form className="space-y-4 md:space-y-5" onSubmit={(e) => e.preventDefault()}>
+                        <form className="space-y-4 md:space-y-5" onSubmit={handleSubmit}>
                             {/* Email Field */}
                             <div>
                                 <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1 md:mb-2">
@@ -106,6 +245,8 @@ export default function AdminSigninPage() {
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="admin@talentflow.com"
                                         className="w-full pl-10 pr-3 md:pr-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                        disabled={loading}
+                                        required
                                     />
                                 </div>
                             </div>
@@ -123,6 +264,8 @@ export default function AdminSigninPage() {
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter your password"
                                         className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                        disabled={loading}
+                                        required
                                     />
                                     <button
                                         type="button"
@@ -142,27 +285,38 @@ export default function AdminSigninPage() {
                                         checked={keepSignedIn}
                                         onChange={(e) => setKeepSignedIn(e.target.checked)}
                                         className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                        disabled={loading}
                                     />
                                     <span className="text-sm text-gray-600">
                                         Keep me signed in
                                     </span>
                                 </label>
 
-                                <button
-                                    type="button"
+                                <Link
+                                    href="/forgotpassword"
                                     className="text-sm text-purple-600 hover:underline"
                                 >
                                     Forgot password?
-                                </button>
+                                </Link>
                             </div>
 
                             {/* Sign In Button */}
                             <button
                                 type="submit"
-                                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6"
+                                disabled={loading}
+                                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Access Dashboard
-                                <ArrowRight size={18} />
+                                {loading ? (
+                                    <>
+                                        <Loader2 size={18} className="animate-spin" />
+                                        Verifying...
+                                    </>
+                                ) : (
+                                    <>
+                                        Access Dashboard
+                                        <ArrowRight size={18} />
+                                    </>
+                                )}
                             </button>
                         </form>
 

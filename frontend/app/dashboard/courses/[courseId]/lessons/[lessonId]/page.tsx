@@ -114,12 +114,12 @@ export default function LessonPlayerPage() {
                 // Update via API first
                 try {
                     await courseApi.updateLessonProgress(lessonId, true);
-                    
+
                     // Re-fetch progress to ensure accuracy
                     const progressData = await courseApi.getCourseProgress(courseId);
                     setCourseProgress(progressData.progress || 0);
                     setIsCompleted(true);
-                    
+
                     // Dispatch event
                     window.dispatchEvent(new CustomEvent('statsUpdated', { detail: { lessonId, courseId } }));
                 } catch (apiError) {
@@ -257,7 +257,7 @@ export default function LessonPlayerPage() {
                                 (() => {
                                     const url = currentLesson.videoUrl;
                                     const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
-                                    
+
                                     if (isYouTube) {
                                         let videoId = '';
                                         if (url.includes('youtube.com/watch?v=')) {
@@ -265,7 +265,7 @@ export default function LessonPlayerPage() {
                                         } else if (url.includes('youtu.be/')) {
                                             videoId = url.split('youtu.be/')[1].split('?')[0];
                                         }
-                                        
+
                                         return (
                                             <iframe
                                                 src={`https://www.youtube.com/embed/${videoId}?autoplay=${isPlaying ? 1 : 0}`}
@@ -276,9 +276,9 @@ export default function LessonPlayerPage() {
                                         );
                                     } else {
                                         return (
-                                            <video 
-                                                src={url} 
-                                                controls 
+                                            <video
+                                                src={url}
+                                                controls
                                                 autoPlay={isPlaying}
                                                 className="w-full h-full bg-black absolute inset-0 object-contain"
                                             />
@@ -334,11 +334,11 @@ export default function LessonPlayerPage() {
                                         <Link
                                             key={lesson.id}
                                             href={`/dashboard/courses/${courseId}/lessons/${lesson.id}`}
-                                            className={`block p-4 cursor-pointer hover:bg-gray-50 transition ${lesson.id === lessonId ? 'bg-primary-50' : ''}`}
+                                            className={`block p-4 cursor-pointer hover:bg-gray-50 transition ${lesson.id === lessonId ? 'bg-green-50' : ''}`}
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
-                                                    <p className={`text-sm font-medium ${lesson.id === lessonId ? 'text-primary-600' : 'text-gray-900'}`}>
+                                                    <p className={`text-sm font-medium ${lesson.id === lessonId ? 'text-green-600' : 'text-gray-900'}`}>
                                                         {lesson.title}
                                                     </p>
                                                     {lesson.duration && (
@@ -346,10 +346,10 @@ export default function LessonPlayerPage() {
                                                     )}
                                                 </div>
                                                 {lesson.id === lessonId && (
-                                                    <Play size={16} className="text-primary-600 flex-shrink-0 mt-1" />
+                                                    <Play size={16} className="text-green-600 flex-shrink-0 mt-1" />
                                                 )}
                                                 {lesson.isCompleted && (
-                                                    <CheckCircle size={16} className="text-primary-600 flex-shrink-0 mt-1" />
+                                                    <CheckCircle size={16} className="text-green-600 flex-shrink-0 mt-1" />
                                                 )}
                                             </div>
                                         </Link>
@@ -376,7 +376,7 @@ export default function LessonPlayerPage() {
                             <button
                                 onClick={handleMarkComplete}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${isCompleted
-                                    ? 'bg-primary-600 text-white'
+                                    ? 'bg-green-600 text-white'
                                     : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
@@ -386,7 +386,7 @@ export default function LessonPlayerPage() {
                             {nextLesson && (
                                 <Link
                                     href={`/dashboard/courses/${courseId}/lessons/${nextLesson.lesson.id}`}
-                                    className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition"
+                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition"
                                 >
                                     Next Lesson
                                     <ChevronRight size={16} />
