@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://tims-backend-11dz.onrender.com/api'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Helper to safely parse JSON responses
 async function parseResponse(response: Response) {
@@ -249,10 +249,13 @@ export async function loginUser(email: string, password: string): Promise<LoginR
             const role = data.data?.role || data.user?.role || 'Student'; // Default to student
             const id = data.data?.id || data.user?.id || emailAddr;
 
+            const userObj = { id, email: emailAddr, fullName, role };
             localStorage.setItem('authToken', token)
+            document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
+            document.cookie = `user=${JSON.stringify(userObj)}; path=/; SameSite=Lax`;
+
             if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
 
-            const userObj = { id, email: emailAddr, fullName, role };
             localStorage.setItem('user', JSON.stringify(userObj))
             localStorage.setItem('userFullName', fullName)
             localStorage.setItem('userEmail', emailAddr)
@@ -358,9 +361,13 @@ export async function verifyOtp(email: string, code: string): Promise<ApiRespons
             const id = data.data?.id || data.user?.id || userEmail;
 
             localStorage.setItem('authToken', token)
-            if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
 
             const userObj = { id, email: userEmail, fullName, role };
+            document.cookie = `authToken=${token}; path=/; SameSite=Lax`;
+            document.cookie = `user=${JSON.stringify(userObj)}; path=/; SameSite=Lax`;
+
+            if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+
             localStorage.setItem('user', JSON.stringify(userObj))
             localStorage.setItem('userFullName', fullName)
             localStorage.setItem('userEmail', userEmail)
@@ -440,6 +447,8 @@ export async function logoutUser(): Promise<void> {
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             })
         }
+        document.cookie = 'authToken=; path=/; max-age=0';
+        document.cookie = 'user=; path=/; max-age=0';
     } catch (error) {
         console.error('Logout error:', error)
     } finally {
