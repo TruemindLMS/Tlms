@@ -29,7 +29,7 @@ export default function DashboardLayout({
             <Topnavv onMenuClick={() => setMobileSidebarOpen(!mobileSidebarOpen)} sidebarCollapsed={sidebarCollapsed} />
 
             {/* Main Content */}
-            <main className={`pt-16 transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
+            <main className={`pt-16 transition-all duration-300 bg-gray-100 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
                 }`}>
                 <div className="p-4 md:p-6">
                     {children}

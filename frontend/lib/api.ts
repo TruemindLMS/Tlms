@@ -161,20 +161,24 @@ export interface Module {
 }
 
 export interface Course {
-    id: string
-    title: string
-    description: string
-    modules: Module[]
-    category?: string
-    level?: string
-    price?: number
-    duration?: string
-    imageUrl?: string
-    enrolledCount?: number
-    rating?: number
-    instructor?: string
-    createdAt?: string
-    updatedAt?: string
+  id: string;
+  title: string;
+  description: string;
+  modules: Module[];
+  completed?: boolean;
+  enrolled?: boolean;
+  inProgress?: boolean;
+  overallProgress?: number;
+  category?: string;
+  level?: string;
+  price?: number;
+  duration?: string;
+  imageUrl?: string;
+  enrolledCount?: number;
+  rating?: number;
+  instructor?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Assignment {
