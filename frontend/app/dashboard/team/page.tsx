@@ -146,7 +146,7 @@ const generateAllTeams = (): ExistingTeam[] => {
   return teamNames.map((name, index) => ({
     id: String(index + 1),
     name: `Team ${name}`,
-    memberCount: name === 'India' ? 12 : 8,
+    memberCount: name === 'India' ? 19 : 0,
     description: `${name} we the best`,
     isFavorite: name === 'India',
     isOpenGroup: name === 'India',
