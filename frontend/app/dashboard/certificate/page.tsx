@@ -34,7 +34,7 @@ interface Certificate {
     courseId: number;
 }
 
-// Mock course data for when backend is unavailable
+// Mock course data for when backend is unavailable (fallback only)
 const MOCK_ENROLLED_COURSES: CourseWithProgress[] = [
     {
         id: 1,
@@ -103,7 +103,6 @@ export default function CertificatePage() {
     const [certifications, setCertifications] = useState(0);
     const [loading, setLoading] = useState(true);
     const [earnedCertificates, setEarnedCertificates] = useState<Certificate[]>([]);
-    const [useMockData, setUseMockData] = useState(false);
 
     // Get current user ID
     const getCurrentUserId = () => {
@@ -193,7 +192,6 @@ export default function CertificatePage() {
         const fetchData = async () => {
             setLoading(true);
             let coursesList: CourseWithProgress[] = [];
-            let useMock = false;
 
             try {
                 // Try to fetch enrolled courses from the backend
@@ -224,26 +222,22 @@ export default function CertificatePage() {
                     localStorage.setItem(`enrolledCourses_${userId}`, JSON.stringify(coursesList));
                 } else {
                     // No courses from backend, check localStorage
-                    useMock = true;
                     const cached = localStorage.getItem(`enrolledCourses_${userId}`);
                     if (cached) {
                         coursesList = JSON.parse(cached);
                     } else {
-                        // Use mock data for demo
+                        // Use mock data as last resort fallback
                         coursesList = MOCK_ENROLLED_COURSES;
-                        setUseMockData(true);
                     }
                 }
             } catch (err) {
-                console.warn("Failed to fetch backend enrolled courses, using mock data.");
-                useMock = true;
-                // Try localStorage first, then mock data
+                console.warn("Failed to fetch backend enrolled courses, falling back to local storage.");
+                // Try localStorage first, then mock data as last resort
                 const cached = localStorage.getItem(`enrolledCourses_${userId}`);
                 if (cached) {
                     coursesList = JSON.parse(cached);
                 } else {
                     coursesList = MOCK_ENROLLED_COURSES;
-                    setUseMockData(true);
                 }
             }
 
@@ -308,7 +302,7 @@ export default function CertificatePage() {
 
     if (loading) {
         return (
-            <div className="ml-20 flex items-center justify-center min-h-screen">
+            <div className="bg-cover ml-5 lg:ml-1 md:ml-5 bg-center bg-no-repeat pr-8 min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 size={40} className="animate-spin text-green-600 mx-auto mb-4" />
                     <p className="text-gray-500">Loading your certificates...</p>
@@ -327,11 +321,6 @@ export default function CertificatePage() {
                 <p className="text-gray-600 dark:text-gray-400">
                     Track your learning journey and earned certificates
                 </p>
-                {useMockData && (
-                    <div className="mt-2 text-sm text-amber-600 bg-amber-50 inline-block px-3 py-1 rounded-full">
-                        ℹ️ Using demo data (backend connection unavailable)
-                    </div>
-                )}
             </div>
 
             {/* Stats Cards - Synced with dashboard */}
